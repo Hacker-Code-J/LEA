@@ -86,11 +86,11 @@ The constant $\delta[i]\in\F_{2^{32}}$ ($i\in\set{1,\dots,7}$) is as follows:
 \begin{algorithm}[H]
 	\caption{Encryption Key Schedule (LEA-128)}
 	\DontPrintSemicolon
-	\KwIn{User-key \( \uk = (\uk_0, \dots, \uk_{15}) \) \( (\uk_i \in \binaryfield^8) \)\tcp*{$\uk\in\binaryfield^{128}$ is 16-byte}}
+	\KwIn{User-key \( \uk = (\uk_0, \dots, \uk_{3}) \) \( (\uk_i \in \binaryfield^{32}) \)\tcp*{$\uk\in\binaryfield^{128}$ is 16-byte}}
 	\KwOut{Encryption Round-keys \( \{\rk^{\enc}_i\}_{i=0}^{23} \) \( (\rk^{\enc}_i \in \binaryfield^{192}) \)\;
 	\Comment{$\set{\rk^{\enc}_i}_{i=0}^{23}\in\binaryfield^{4608}$ is 576-byte}}
 	\BlankLine
-	$T\gets\uk$\tcp*{$T\in\binaryfield^{128}$}
+	$T\gets\uk$\tcp*{$T\in\binaryfield^{128=32*4}$}
 	\For{\( i = 0 \) \KwTo \( 23 \)}{
 		$T[0]\gets\RotL(T[0]\boxplus\RotL(\delta[i\bmod 4],i+0),1)$\tcp*{$T[i]\in\binaryfield^{32}$}
 		$T[1]\gets\RotL(T[1]\boxplus\RotL(\delta[i\bmod 4],i+1),3)$\;

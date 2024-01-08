@@ -39,5 +39,7 @@ clean:
 dir:
 	@mkdir -p $(OBJDIR) $(BINDIR)
 
+rebuild: clean all
+
 # Phony targets
 .PHONY: all clean directories
