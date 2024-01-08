@@ -1,8 +1,13 @@
 /**
  * @file main.c
- * @brief Main driver program for demonstrating the LEA algorithm.
+ * @brief Main entry point for the LEA encryption algorithm demonstration.
  *
- * This file serves as a demonstration and testing platform for the LEA encryption and decryption functionality.
- * It can be used to run predefined examples or to test the algorithm with user-provided input.
+ * This file contains the main function to demonstrate the usage of the LEA
+ * encryption algorithm. It may include example usage or benchmarking.
  */
 
+#include "lea.h"
+
+int main() {
+    // Demonstration or benchmarking code...
+}

@@ -1,7 +1,11 @@
 /**
  * @file lea_utils.c
- * @brief Utility functions for the LEA implementation.
+ * @brief Utility functions for the LEA encryption algorithm.
  *
- * This file includes utility functions that support the LEA algorithm, such as byte conversion,
- * padding, and validation checks. These utilities are used across various parts of the LEA implementation.
+ * Contains implementation of various utility functions such as byte manipulation
+ * required by the LEA encryption and decryption processes.
  */
+
+#include "lea.h"
+
+// Utility function implementations...

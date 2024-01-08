@@ -1,8 +1,12 @@
 /**
  * @file lea_test.c
- * @brief Test suite for the LEA implementation.
+ * @brief Test suite for the LEA encryption algorithm.
  *
- * Contains comprehensive test cases to validate the LEA encryption and decryption implementation.
- * Tests include scenarios for various key sizes, block sizes, and edge cases to ensure algorithm correctness.
+ * Implements various tests to ensure the correct functionality of the LEA
+ * encryption algorithm. This includes unit tests for individual components
+ * and integration tests.
  */
 
+#include "lea.h"
+
+// Test functions...
