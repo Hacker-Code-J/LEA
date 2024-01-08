@@ -1,0 +1,69 @@
+\section*{List of Symbols}
+
+%The Lightweight Encryption Algorithm (LEA) is a block cipher developed in South Korea that is specifically designed for efficient implementation in both software and hardware. It's well-suited for resource-constrained environments due to its simplicity and low resource requirements. Here's a detailed breakdown of its technical aspects:
+%
+%Block and Key Size: LEA operates on a block size of 128 bits and supports key sizes of 128, 192, and 256 bits.
+%
+%Structure: The algorithm uses a generalized Feistel structure. It consists of a series of simple operations, such as XOR, addition modulo 
+%2
+%32
+%2 
+%32
+%, and left/right rotations.
+%
+%Rounds: The number of rounds in LEA depends on the key size. For 128-bit keys, it uses 24 rounds; for 192-bit keys, 28 rounds; and for 256-bit keys, 32 rounds.
+%
+%Key Schedule: LEA employs a non-linear key schedule algorithm to generate round keys. The round keys are derived from the original key using simple arithmetic and bitwise operations.
+%
+%Round Function: Each round of LEA involves a few basic operations. The plaintext block is divided into four 32-bit words. These words are then processed through a mix of addition, XOR, and rotation operations, which vary slightly per round.
+%
+%Efficiency: The algorithm's simplicity allows for fast execution in software, particularly on platforms with limited processing power. It is also amenable to compact and efficient hardware implementations.
+%
+%Security: LEA has been analyzed for cryptographic security and has shown resilience against various forms of cryptanalysis, including differential and linear cryptanalysis.
+%
+%\[
+%\begin{aligned}
+%	&\textbf{LEA Round Function:} \\
+%	&R_{i+1,1} = (R_{i,1} \oplus T_{i,1}) \lll 9; \\
+%	&R_{i+1,2} = R_{i,2} \oplus T_{i,2}; \\
+%	&R_{i+1,3} = R_{i,3} \lll 5; \\
+%	&R_{i+1,4} = R_{i,4} \oplus T_{i,3}; \\
+%	&\text{where } \lll \text{ denotes left rotation, } \oplus \text{ is XOR, and } T_{i,j} \text{ are the round-dependent keys.}
+%\end{aligned}
+%\]
+%
+%\begin{tikzpicture}[
+%	node distance=1.5cm,
+%	roundnode/.style={circle, draw=black, fill=gray!10, thick, minimum size=7mm},
+%	squarednode/.style={rectangle, draw=black, thick, minimum size=5mm},
+%	]
+%	
+%	% Nodes
+%	\node[squarednode]      (R1)                              {R1};
+%	\node[squarednode]      (R2)       [below=of R1]          {R2};
+%	\node[squarednode]      (R3)       [below=of R2]          {R3};
+%	\node[squarednode]      (R4)       [below=of R3]          {R4};
+%	\node[roundnode]        (XOR1)     [right=of R1]          {XOR};
+%	\node[roundnode]        (XOR2)     [right=of R4]          {XOR};
+%	\node[squarednode]      (T1)       [above=of XOR1]        {T1};
+%	\node[squarednode]      (T2)       [right=of R2]          {T2};
+%	\node[squarednode]      (T3)       [below=of XOR2]        {T3};
+%	\node[squarednode]      (Out1)     [right=of XOR1]        {Out1};
+%	\node[squarednode]      (Out2)     [right=of T2]          {Out2};
+%	\node[squarednode]      (Out3)     [right=of R3]          {Out3};
+%	\node[squarednode]      (Out4)     [right=of XOR2]        {Out4};
+%	
+%	% Lines
+%	\draw[->] (R1.east) -- (XOR1.west);
+%	\draw[->] (R2.east) -- (T2.west);
+%	\draw[->] (R3.east) -- (Out3.west);
+%	\draw[->] (R4.east) -- (XOR2.west);
+%	\draw[->] (T1.south) -- (XOR1.north);
+%	\draw[->] (T3.north) -- (XOR2.south);
+%	\draw[->] (XOR1.east) -- (Out1.west);
+%	\draw[->] (T2.east) -- (Out2.west);
+%	\draw[->] (XOR2.east) -- (Out4.west);
+%	
+%\end{tikzpicture}
+
+\newpage

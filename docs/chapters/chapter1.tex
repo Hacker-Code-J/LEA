@@ -1,0 +1,87 @@
+\chapter{Block Cipher LEA}
+\section{Specification}
+
+\begin{table}[h]
+	\centering
+	\caption{Specification Comparison between AES and LEA Block Ciphers}
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}lcc}
+		\toprule
+		Specification & \textcolor{red}{\bf AES} & \textcolor{blue}{\bf LEA} \\
+		\midrule
+		Block Size (bits) & 128 & 128 \\
+		Key Size (bits) & 128/192/256 & 128/192/256 \\
+		Structure & \textcolor{red}{S}ubstitution-\textcolor{red}{P}ermutation \textcolor{red}{N}etwork & \textcolor{blue}{G}eneralized \textcolor{blue}{F}eistel \textcolor{blue}{N}etwork \\
+		Rounds & 10/12/14 (depends on key size) & 24/28/32 (depends on key size) \\
+		Designed By & Joan Daemen, Vincent Rijmen  & Deukjo Hong et al. \\
+		Design Year & 1998 & 2013 \\
+		\bottomrule
+	\end{tabular*}
+\end{table}
+
+\begin{table}[h!]\centering\renewcommand{\arraystretch}{1.25} % Increase row height by 1.5 times
+	\caption{Parameters of the Block Cipher LEA (1-word = 32-bit)}
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}c||cccccc}
+		\toprule[1.2pt]
+		\multirow{3}{*}{Algorithms} & Block & Key & Number of & Round-Key & Number of & Total Size of\\
+		& Size & Length & Rounds &  Length & Round-Keys & Round-Keys \\
+		& ($N_b$-byte) & ($N_k$-byte) & ($N_r$)& (byte) & ($N_r+1$)& ($N_b(N_r+1)$)\\
+		\hline\hline
+		LEA-128 & 16(4-word) & 16(4-word) & 24 & 24 & 11 & 44 (176-byte) \\
+		LEA-192 & 16(4-word) & 24(6-word) & 28 & 24 & 13 & 52 (208-byte) \\
+		LEA-256 & 16(4-word) & 32(8-word) & 32 & 24 & 15 & 60 (240-byte) \\
+		\bottomrule[1.2pt]
+	\end{tabular*}
+\end{table}
+
+\section{Key Schedule}
+
+$$
+\text{KeySchedule}^{\enc}_{128}:\binaryfield^{128=8\cdot 16}\to\binaryfield^{4608=192\cdot 24}
+$$
+
+$$
+\text{KeySchedule}^{\enc}_{192}:\binaryfield^{192=8\cdot 24}\to\binaryfield^{5376=192\cdot 28}
+$$
+
+$$
+\text{KeySchedule}^{\enc}_{256}:\binaryfield^{256=8\cdot 32}\to\binaryfield^{6144=192\cdot 24}
+$$
+
+\subsection{Round Constant}
+The constant $\delta[i]\in\F_{2^{32}}$ ($i\in\set{1,\dots,7}$) is as follows:
+\begin{table}[h!]\centering\renewcommand{\arraystretch}{1.5} % Increase row height by 1.5 times
+	\begin{tabular}{c|lc}
+		$i$ & $\delta[i]$ & value\\
+		\midrule
+		0 & $\delta[0]$ & \texttt{0xc3efe9db}\\
+		1 & $\delta[1]$ & \texttt{0x44626b02}\\
+		2 & $\delta[2]$ & \texttt{0x79e27c8a}\\
+		3 & $\delta[3]$ & \texttt{0x78df30ec}\\
+		4 & $\delta[4]$ & \texttt{0x715ea49e}\\
+		5 & $\delta[5]$ & \texttt{0xc785da0a}\\
+		6 & $\delta[6]$ & \texttt{0xe04ef22a}\\
+		7 & $\delta[7]$ & \texttt{0xe5c40957}
+	\end{tabular}
+\end{table}
+
+\begin{algorithm}[H]
+	\caption{Key Schedule (LEA-128)}
+	
+	\KwIn{User-key \( \uk = (\uk_0, \dots, \uk_{15}) \) \( (\uk_i \in \binaryfield^8) \)\tcp*{$\uk\in\binaryfield^{128}$ is 16-byte}}
+	\KwOut{Round-keys \( \{\rk_i\}_{i=0}^{23} \) \( (\rk_i \in \binaryfield^{192}) \)\tcp*{$\set{\rk_i}_{i=0}^{23}\in\binaryfield^{4608}$ is 576-byte}}
+	\BlankLine
+	\( rk_0 \leftarrow uk_0\parallel uk_1\parallel uk_2 \parallel uk_3 \)\;
+	\( rk_1 \leftarrow uk_4\parallel uk_5\parallel uk_6 \parallel uk_7 \)\;
+	\( rk_2 \leftarrow uk_8\parallel uk_9\parallel uk_{10} \parallel uk_{11} \)\;
+	\( rk_3 \leftarrow uk_{12}\parallel uk_{13}\parallel uk_{14} \parallel uk_{15} \)\;
+	\For{\( i = 4 \) \KwTo \( 43 \)}{
+		\( t \leftarrow rk_{i-1} \)\;
+		\If{\( i \bmod 4 = 0 \)}{
+			\Comment{$\text{SubWord}\circ\text{RotWord}:\binaryfield^{32}\to\binaryfield^{32}$}
+			\( t \leftarrow \text{RotWord}(t) \)\;
+			\( t \leftarrow \text{SubWord}(t) \)\;
+			\( t \leftarrow t \oplus (\texttt{rCon}_{i/4}\parallel\texttt{0x00}\parallel\texttt{0x00}\parallel\texttt{0x00}) \)\;
+		}
+		\( rk_i \leftarrow rk_{i-4} \oplus_{32} t \)\;
+	}
+\end{algorithm}
