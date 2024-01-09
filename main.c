@@ -11,28 +11,34 @@
 #include "lea.h"
 
 int main(void) {
-    printf("%08x\n", 0xc3d2e1f0 + 0xc3efe9db);
-    const char* inputString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0";
-
     u32 key[4];
-    stringToWordArray(inputString, key);
+    const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0";
+    stringToWordArray(keyString, key);
     
     // Print the plaintext
-    printf("Key: ");
-    for (int i = 0; i < sizeof(key)/sizeof(u32); i++) {
-        // if (!(i % 2)) printf(":");
-        printf("%08x:", key[i]);
-    }
-    printf("\n");
+    printf("Key: \n");
+    printLittleEndian(key, 4);
 
-    u32 roundkey[144]; // 192 * 24 = 4608 = 32 * 144
-    leaEncKeySchedule(key, roundkey, LEA_VERSION);
-    printf("\nRoundKey: \n");
+    u32 enc_roundkey[144]; // 192 * 24 = 4608 = 32 * 144
+    leaEncKeySchedule(key, enc_roundkey);
+    printf("\nEncryption RoundKey: \n");
     for (int i = 0, j = 0;
          i < 144;
          i++) {
-        if((i % 6) == 0) printf("\nRound[%02d] | ", j++);
-        printf("%08x:", roundkey[i]);
+        if((i % 6) == 0) printf("\nEnc_Round[%02d] | ", j++);
+        printf("%08x:", enc_roundkey[i]);
     }
     printf("\n");
+
+    u32 plain[4];
+    u32 cipher[4];
+
+    const char* plainString = "101112131415161718191a1b1c1d1e1f";
+    stringToWordArray(plainString, plain);
+
+    leaEncrypt(plain, enc_roundkey, cipher);
+
+    printf("\nCipherText: \n");
+    printLittleEndian(cipher, 4);
+
 }

@@ -20,6 +20,7 @@
     },
     "peacock.color": "#61dafb",
     "files.associations": {
-        "lea.h": "c"
+        "lea.h": "c",
+        "stdio.h": "c"
     }
 }

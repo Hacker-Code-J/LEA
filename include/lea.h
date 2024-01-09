@@ -12,7 +12,14 @@
 #include <stdint.h>
 
 #define LEA_VERSION 128
+
+#if LEA_VERSION == 192
+#define Nr 28
+#elif LEA_VERSION == 256
+#define Nr 32
+#else
 #define Nr 24
+#endif
 
 typedef uint8_t u8;
 typedef uint32_t u32;
@@ -31,16 +38,18 @@ extern const u32 delta[8];
  * @param key The encryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaEncKeySchedule(const u32* key, u32* roundKeys, const int keySize);
-void leaDecSchedule(const u8* key, u32* roundKeys);
-void leaEncrypt(const u8* input, const u32* roundKeys, u8* output);
-void leaDecrypt(const u8* input, u32* output);
+void leaEncKeySchedule(const u32* key, u32* roundKeys);
+void leaDecSchedule(const u32* key, u32* roundKeys);
+void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst);
+void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst);
 
 /* LEA_UTILS */
 
 void RANDOM_KEY_GENERATION(u32* key);
 void stringToByteArray(const char* hexString, u8* byteArray);
 void stringToWordArray(const char* hexString, u32* wordArray);
-char* string_to_hex(const char* input);
+
+void printBigEndian(u32* array, size_t size);
+void printLittleEndian(u32* array, size_t size);
 
 #endif // _LEA_H

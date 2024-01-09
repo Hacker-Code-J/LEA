@@ -41,6 +41,43 @@ void stringToWordArray(const char* hexString, u32* wordArray) {
     }
 }
 
+void printBigEndian(u32* array, size_t size) {
+    // printf("0x");
+    for (size_t i = 0; i < size; i++) {
+        u32 value = array[i];
+        for (int j = 3; j >= 0; j--) {
+            printf("%02x:", (value >> (j * 8)) & 0xFF);
+        }
+    }
+    printf("\n");
+}
+
+void printLittleEndian(u32* array, size_t size) {
+    // printf("0x");
+    for (size_t i = 0; i < size; i++) {
+        u32 value = array[i];
+        for (int j = 0; j < 4; j++) {
+            printf("%02x:", (value >> (j * 8)) & 0xFF);
+        }
+    }
+    printf("\n");
+}
+
+// void stringToWordArray(const char* hexString, u32* wordArray) {
+//     size_t length = strlen(hexString);
+
+//     for (size_t i = 0; i < length; i += 8) {
+//         u32 temp;
+//         sscanf(&hexString[i], "%8x", &temp);
+
+//         // Reorder the bytes
+//         wordArray[i / 8] = ((temp & 0x000000FF) << 0x18) |
+//                            ((temp & 0x0000FF00) << 0x08) |
+//                            ((temp & 0x00FF0000) >> 0x08) |
+//                            ((temp & 0xFF000000) >> 0x18);
+//     }
+// }
+
 // Converts a word array back to a hexadecimal string.
 // void wordArrayToString(const u32* wordArray, char* hexString, size_t wordCount) {
 //     for (size_t i = 0; i < wordCount; ++i) {
