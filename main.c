@@ -7,6 +7,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "lea.h"
 
@@ -34,11 +36,36 @@ int main(void) {
     u32 cipher[4];
 
     const char* plainString = "101112131415161718191a1b1c1d1e1f";
+    printf("\nPlain-Text: \n");
+    printf("%s\n", plainString);
     stringToWordArray(plainString, plain);
 
     leaEncrypt(plain, enc_roundkey, cipher);
 
-    printf("\nCipherText: \n");
+    printf("\nCipher-Text: \n");
     printLittleEndian(cipher, 4);
+
+    u32 encrypted[4];
+    u32 decrypted[4];
+
+    memcpy(encrypted, cipher, 16);
+    printf("\nEncrypted Text: \n");
+    printLittleEndian(encrypted, 4);
+
+    u32 dec_roundkey[144]; // 192 * 24 = 4608 = 32 * 144
+    leaDecKeySchedule(key, dec_roundkey);
+    printf("\nDecryption RoundKey: \n");
+    for (int i = 0, j = 0;
+         i < 144;
+         i++) {
+        if((i % 6) == 0) printf("\nDec_Round[%02d] | ", j++);
+        printf("%08x:", dec_roundkey[i]);
+    }
+    printf("\n");
+
+    leaDecrypt(encrypted, dec_roundkey, decrypted);
+
+    printf("\nDecrypted Text: \n");
+    printLittleEndian(decrypted, 4);
 
 }

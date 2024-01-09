@@ -39,7 +39,7 @@ extern const u32 delta[8];
  * @param roundKeys The array to store the generated round keys.
  */
 void leaEncKeySchedule(const u32* key, u32* roundKeys);
-void leaDecSchedule(const u32* key, u32* roundKeys);
+void leaDecKeySchedule(const u32* key, u32* roundKeys);
 void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst);
 void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst);
 
