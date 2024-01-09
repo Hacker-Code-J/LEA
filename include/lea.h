@@ -31,7 +31,7 @@ extern const u32 delta[8];
  * @param key The encryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaEncKeySchedule(const u32* key, u32* roundKeys);
+void leaEncKeySchedule(const u32* key, u32* roundKeys, const int keySize);
 void leaDecSchedule(const u8* key, u32* roundKeys);
 void leaEncrypt(const u8* input, const u32* roundKeys, u8* output);
 void leaDecrypt(const u8* input, u32* output);
@@ -39,6 +39,7 @@ void leaDecrypt(const u8* input, u32* output);
 /* LEA_UTILS */
 
 void RANDOM_KEY_GENERATION(u32* key);
+void stringToByteArray(const char* hexString, u8* byteArray);
 void stringToWordArray(const char* hexString, u32* wordArray);
 char* string_to_hex(const char* input);
 

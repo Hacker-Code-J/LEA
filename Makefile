@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -O3 -I./include
+CFLAGS=-Wall -g -O3 -I./include
 LDFLAGS=
 OBJDIR=./obj
 BINDIR=./bin
@@ -11,6 +11,7 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/main.o
 
 # Executable
 TARGET=$(BINDIR)/lea_alg
+# TARGET=lea_test
 
 # Default target
 all: dir $(TARGET)
@@ -34,6 +35,7 @@ $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
 # Clean up
 clean:
 	rm -f $(OBJS) $(TARGET)
+	rm -f lea_test
 
 # Create necessary directories
 dir:

@@ -1,10 +1,10 @@
-\chapter{Block Cipher LEA-128}
+\chapter{Block Cipher LEA}
 \section{Specification}
 
 \begin{table}[h]
 	\centering
 	\caption{Specification Comparison between AES and LEA Block Ciphers}
-	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}lcc}
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}l||cc}
 		\toprule
 		Specification & \textcolor{red}{\bf AES} & \textcolor{blue}{\bf LEA} \\
 		\midrule
@@ -12,7 +12,6 @@
 		Key Size (bits) & 128/192/256 & 128/192/256 \\
 		Structure & \textcolor{red}{S}ubstitution-\textcolor{red}{P}ermutation \textcolor{red}{N}etwork & \textcolor{blue}{G}eneralized \textcolor{blue}{F}eistel \textcolor{blue}{N}etwork \\
 		Rounds & 10/12/14 (depends on key size) & 24/28/32 (depends on key size) \\
-		Designed By & Joan Daemen, Vincent Rijmen  & Deukjo Hong et al. \\
 		Design Year & 1998 & 2013 \\
 		\bottomrule
 	\end{tabular*}
@@ -32,6 +31,76 @@
 		\bottomrule[1.2pt]
 	\end{tabular*}
 \end{table}
+
+\section{State Representation}
+
+Let $\state[0],\state[1], \dots$ be representation of arrays of bytes.
+Note that \[
+\state[i]:=\set{input_{8i},input_{8i+1},\dots,input_{8i+7}}\in\F_{2^8}
+\] for $input_{i}\in\F_2$. For example, $\state[0]=\set{input_0,input_1,\dots,input_7}$.
+
+The 128-bit plaintext $P$ of LEA is represented as an array of four 32-bit words $P[0],P[1],P[2]$ and $P[3]$. Then \[
+P[i] = \state[4i+3]\adjacent\state[4i+2]\adjacent\state[4i+1]\adjacent\state[4i]\quad\text{for}\quad 0\leq i\leq 3.
+\] Here, $P[i]\in\F_{2^{32=8\cdot 4}}$The key $K$ of LEA is also represented as the same way.
+
+\newpage
+\begin{table}[h!]\centering\renewcommand{\arraystretch}{1.25} % Increase row height by 1.5 times
+	\caption{Representations for words, bytes, and bits}
+	\begin{tabular}{@{\extracolsep{\fill}}>{\bfseries}l||c|c|c|c|c|c|c|c|c|c|c|c}
+		\toprule[1.2pt]
+		Input Bit Sequence & \cellcolor{red!20}24 & \cellcolor{red!20}$\cdots$ & \cellcolor{red!20}31 & \cellcolor{green!20}16 & \cellcolor{green!20}$\cdots$ & \cellcolor{green!20}23 & \cellcolor{blue!20}8 & \cellcolor{blue!20}$\cdots$ & \cellcolor{blue!20}15 & \cellcolor{orange!20}0 & \cellcolor{orange!20}$\cdots$ & \cellcolor{orange!20}7\\
+		\hline
+		Word Number & \multicolumn{12}{c}{0}\\
+		\hline
+		Byte Number & \multicolumn{3}{c|}{3} & \multicolumn{3}{c|}{2} & \multicolumn{3}{c|}{1} & \multicolumn{3}{c}{0}\\
+		\hline
+		Bit Numbers in Word & 31 & \multicolumn{10}{|c|}{$\cdots$} & 1\\
+		\bottomrule[1.2pt]
+	\end{tabular}
+\end{table}
+
+\begin{example}
+\ \begin{table}[h!]\centering\renewcommand{\arraystretch}{1.25} % Increase row height by 1.5 times
+	\begin{tabular}{@{\extracolsep{\fill}}>{\bfseries}l||c|c|c|c|c|c|c|c|c|c|c|c}
+		\toprule[1.2pt]
+		128-bit Input String & \multicolumn{12}{c}{\texttt{0x0f1e2d3c4b5a69788796a5b4c3d2e1f0}} \\
+		\hline
+		\multirow{2}{*}{Split into Words} & \multicolumn{3}{c|}{0x0f1e2d3c} & \multicolumn{3}{c|}{0x4b5a6978} & \multicolumn{3}{c|}{0x8796a5b4} & \multicolumn{3}{c}{0xc3d2e1f0} \\
+		& \multicolumn{3}{c|}{$P[0]$} & \multicolumn{3}{c|}{$P[1]$} & \multicolumn{3}{c|}{$P[2]$} & \multicolumn{3}{c}{$P[3]$}\\
+		\hline
+		$P[0]$ (Word) & \multicolumn{12}{c}{0x0f1e2d3c} \\
+		\hline
+		$P[0]$ (Bit) & \multicolumn{12}{c}{0b 0000:1111:0001:1110:0010:1101:0011:1010} \\
+		\hline
+		\multirow{2}{*}{Split into Bytes} & \multicolumn{3}{c|}{0x0f} & \multicolumn{3}{c|}{0x1e} & \multicolumn{3}{c|}{0x2d} & \multicolumn{3}{c}{0x3c} \\
+		& \multicolumn{3}{c|}{$\state[3]$} & \multicolumn{3}{c|}{$\state[2]$} & \multicolumn{3}{c|}{$\state[1]$} & \multicolumn{3}{c}{$\state[0]$}\\
+		\hline
+		$\state[0]$ (Byte) & \multicolumn{12}{c}{0x3c} \\
+		\hline
+		\multirow{2}{*}{Split into Bits} & \multicolumn{3}{c|}{1111:0000} & \multicolumn{3}{c|}{-} & \multicolumn{3}{c|}{-} & \multicolumn{3}{c}{-} \\
+		& \cellcolor{red!20}24 & \cellcolor{red!20}$\cdots$ & \cellcolor{red!20}31 & \cellcolor{green!20}16 & \cellcolor{green!20}$\cdots$ & \cellcolor{green!20}23 & \cellcolor{blue!20}8 & \cellcolor{blue!20}$\cdots$ & \cellcolor{blue!20}15 & \cellcolor{orange!20}0 & \cellcolor{orange!20}$\cdots$ & \cellcolor{orange!20}7\\
+		\bottomrule[1.2pt]
+	\end{tabular}
+\end{table}
+\end{example}
+
+\begin{lstlisting}[style=C]
+const char* inputString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0";
+u32 key[4];
+stringToWordArray(inputString, key);
+
+/*
+(gdb) x/32xb key
+0x7fffffffd9c0:	0x3c	0x2d	0x1e	0x0f
+				0x78	0x69	0x5a	0x4b
+0x7fffffffd9c8:	0xb4	0xa5	0x96	0x87
+				0xf0	0xe1	0xd2	0xc3
+0x7fffffffd9d0:	0x01	0x00	0x00	0x00
+				0x00	0x00	0x00	0x00
+0x7fffffffd9d8:	0xf6	0x75	0xae	0x03
+				0x01	0x00	0x00	0x00
+*/
+\end{lstlisting}
 
 \section{Key Schedule}
 
@@ -86,17 +155,20 @@ The constant $\delta[i]\in\F_{2^{32}}$ ($i\in\set{1,\dots,7}$) is as follows:
 \begin{algorithm}[H]
 	\caption{Encryption Key Schedule (LEA-128)}
 	\DontPrintSemicolon
-	\KwIn{User-key \( \uk = (\uk_0, \dots, \uk_{3}) \) \( (\uk_i \in \binaryfield^{32}) \)\tcp*{$\uk\in\binaryfield^{128}$ is 16-byte}}
-	\KwOut{Encryption Round-keys \( \{\rk^{\enc}_i\}_{i=0}^{23} \) \( (\rk^{\enc}_i \in \binaryfield^{192}) \)\;
-	\Comment{$\set{\rk^{\enc}_i}_{i=0}^{23}\in\binaryfield^{4608}$ is 576-byte}}
+	\KwIn{User-key \( \uk = \uk[0]\adjacent\uk[1]\adjacent\uk[2]\adjacent\uk[3] \) \( (\uk[i] \in \binaryfield^{32}) \)}
+	\KwOut{Encryption Round-keys \( \{\rk^{\enc}_i\}_{i=0}^{23} \) \( (\rk^{\enc}_i \in \binaryfield^{192}) \)}
+	\Comment{$\uk\in\binaryfield^{128}$ is 16-byte and $\set{\rk^{\enc}_i}_{i=0}^{23}\in\binaryfield^{4608}$ is 576-byte}
 	\BlankLine
-	$T\gets\uk$\tcp*{$T\in\binaryfield^{128=32*4}$}
+	\For{\( i = 0 \) \KwTo \( 3 \)}{
+		$T[i]=\uk[i]$\tcp*{$T=T[0]\adjacent\cdots\adjacent T[3]\in\binaryfield^{128=32*4}$}
+	}
+%	$T=T[3]\adjacent T[2]\adjacent T[1]\adjacent T[0]\gets\uk$\tcp*{$T\in\binaryfield^{128=32*4}$}
 	\For{\( i = 0 \) \KwTo \( 23 \)}{
 		$T[0]\gets\RotL(T[0]\boxplus\RotL(\delta[i\bmod 4],i+0),1)$\tcp*{$T[i]\in\binaryfield^{32}$}
 		$T[1]\gets\RotL(T[1]\boxplus\RotL(\delta[i\bmod 4],i+1),3)$\;
 		$T[2]\gets\RotL(T[2]\boxplus\RotL(\delta[i\bmod 4],i+2),6)$\;
 		$T[3]\gets\RotL(T[3]\boxplus\RotL(\delta[i\bmod 4],i+3),11)$\;
-		$\rk^{\enc}_i\gets T[1]\adjacent T[3]\adjacent T[1]\adjacent T[2]\adjacent T[1]\adjacent T[0]$\tcp*{$\rk^{\enc}_i\in\binaryfield^{196=32*6}$}
+		$\rk^{\enc}_i\gets T[0]\adjacent T[1]\adjacent T[2]\adjacent T[1]\adjacent T[3]\adjacent T[1]$\tcp*{$\rk^{\enc}_i\in\binaryfield^{196=32*6}$}
 	}
 	\Return $\set{\rk^{\enc}_i}_{i=0}^{23}$\;
 \end{algorithm}
