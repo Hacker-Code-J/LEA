@@ -43,14 +43,14 @@ int main(void) {
     leaEncrypt(plain, enc_roundkey, cipher);
 
     printf("\nCipher-Text: \n");
-    printLittleEndian(cipher, 4);
+    printLittleEndian(cipher, sizeof(u32));
 
     u32 encrypted[4];
     u32 decrypted[4];
 
     memcpy(encrypted, cipher, 16);
     printf("\nEncrypted Text: \n");
-    printLittleEndian(encrypted, 4);
+    printLittleEndian(encrypted, sizeof(u32));
 
     u32 dec_roundkey[144]; // 192 * 24 = 4608 = 32 * 144
     leaDecKeySchedule(key, dec_roundkey);
@@ -66,6 +66,6 @@ int main(void) {
     leaDecrypt(encrypted, dec_roundkey, decrypted);
 
     printf("\nDecrypted Text: \n");
-    printLittleEndian(decrypted, 4);
+    printLittleEndian(decrypted, sizeof(u32));
 
 }
