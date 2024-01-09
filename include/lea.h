@@ -15,10 +15,13 @@
 
 #if LEA_VERSION == 192
 #define Nr 28
+#define TOTAL_RK 168
 #elif LEA_VERSION == 256
 #define Nr 32
+#define TOTAL_RK 192
 #else
 #define Nr 24
+#define TOTAL_RK 144
 #endif
 
 typedef uint8_t u8;

@@ -21,7 +21,10 @@ int main(void) {
     printf("Key: \n");
     printLittleEndian(key, 4);
 
-    u32 enc_roundkey[144]; // 192 * 24 = 4608 = 32 * 144
+    // 192 * 24 = 4608 = 32 * 144
+    // 192 * 28 = 5376 = 32 * 168
+    // 192 * 32 = 6144 = 32 * 192
+    u32 enc_roundkey[TOTAL_RK];
     leaEncKeySchedule(key, enc_roundkey);
     printf("\nEncryption RoundKey: \n");
     for (int i = 0, j = 0;
@@ -52,7 +55,10 @@ int main(void) {
     printf("\nEncrypted Text: \n");
     printLittleEndian(encrypted, sizeof(u32));
 
-    u32 dec_roundkey[144]; // 192 * 24 = 4608 = 32 * 144
+    // 192 * 24 = 4608 = 32 * 144
+    // 192 * 28 = 5376 = 32 * 168
+    // 192 * 32 = 6144 = 32 * 192
+    u32 dec_roundkey[TOTAL_RK];
     leaDecKeySchedule(key, dec_roundkey);
     printf("\nDecryption RoundKey: \n");
     for (int i = 0, j = 0;

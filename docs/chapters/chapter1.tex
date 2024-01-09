@@ -19,15 +19,15 @@
 
 \begin{table}[h!]\centering\renewcommand{\arraystretch}{1.25} % Increase row height by 1.5 times
 	\caption{Parameters of the Block Cipher LEA (1-word = 32-bit)}
-	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}c||cccccc}
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}>{\bfseries}c||ccccc}
 		\toprule[1.2pt]
-		\multirow{3}{*}{Algorithms} & Block & Key & Number of & Round-Key & Number of & Total Size of\\
-		& Size & Length & Rounds &  Length & Round-Keys & Round-Keys \\
-		& ($N_b$-byte) & ($N_k$-byte) & ($N_r$)& (byte) & ($N_r+1$)& ($N_b(N_r+1)$)\\
+		\multirow{3}{*}{Algorithms} & Block & Key & Number of & Round-Key & Total Size of\\
+		& Size & Length & Rounds &  Length & Round-Keys \\
+		& ($N_b$-byte) & ($N_k$-byte) & ($N_r$)& (byte) & ($(N_r*192)$-bit)\\
 		\hline\hline
-		LEA-128 & 16(4-word) & 16(4-word) & 24 & 24 & 11 & 44 (176-byte) \\
-		LEA-192 & 16(4-word) & 24(6-word) & 28 & 24 & 13 & 52 (208-byte) \\
-		LEA-256 & 16(4-word) & 32(8-word) & 32 & 24 & 15 & 60 (240-byte) \\
+		LEA-128 & 16(4-word) & 16(4-word) & 24 & 24 & 4608 (144-word) \\
+		LEA-192 & 16(4-word) & 24(6-word) & 28 & 24 & 5376 (168-word) \\
+		LEA-256 & 16(4-word) & 32(8-word) & 32 & 24 & 6144 (192-word) \\
 		\bottomrule[1.2pt]
 	\end{tabular*}
 \end{table}
