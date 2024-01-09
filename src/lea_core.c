@@ -112,7 +112,6 @@ void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst) {
     dst[3] = t[3];
 }
 
-
 void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst) {
     u32 t[4];
 
