@@ -52,15 +52,15 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
     u32 T[8];
 
     // Initialize T array from key
-    memcpy(T, key, sizeof(u32) * 8);
-    // T[0] = key[0];
-    // T[1] = key[1];
-    // T[2] = key[2];
-    // T[3] = key[3];
-    // T[4] = key[4];
-    // T[5] = key[5];
-    // T[6] = key[6];
-    // T[7] = key[7];
+    // memcpy(T, key, sizeof(u32) * 8);
+    T[0] = key[0];
+    T[1] = key[1];
+    T[2] = key[2];
+    T[3] = key[3];
+    T[4] = key[4];
+    T[5] = key[5];
+    T[6] = key[6];
+    T[7] = key[7];
 
     for (int i = 0; i < Nr; i++) {
         T[(i * 6 + 0) % 8] =
@@ -157,15 +157,15 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
     u32 T[8];
 
     // Initialize T array from key
-    memcpy(T, key, sizeof(u32) * 8);
-    // T[0] = key[0];
-    // T[1] = key[1];
-    // T[2] = key[2];
-    // T[3] = key[3];
-    // T[4] = key[4];
-    // T[5] = key[5];
-    // T[6] = key[6];
-    // T[7] = key[7];
+    // memcpy(T, key, sizeof(u32) * 8);
+    T[0] = key[0];
+    T[1] = key[1];
+    T[2] = key[2];
+    T[3] = key[3];
+    T[4] = key[4];
+    T[5] = key[5];
+    T[6] = key[6];
+    T[7] = key[7];
 
     for (int i = 0; i < Nr; i++) {
         T[(i * 6 + 0) % 8] =

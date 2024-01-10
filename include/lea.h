@@ -11,15 +11,18 @@
 
 #include <stdint.h>
 
-#define LEA_VERSION 128
+#define LEA_VERSION 256
 
 #if LEA_VERSION == 192
+#define KEY_SIZE 6
 #define Nr 28
 #define TOTAL_RK 168
 #elif LEA_VERSION == 256
+#define KEY_SIZE 8
 #define Nr 32
 #define TOTAL_RK 192
 #else
+#define KEY_SIZE 4
 #define Nr 24
 #define TOTAL_RK 144
 #endif
