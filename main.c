@@ -21,7 +21,7 @@ int main(void) {
     
     // Print the plaintext
     printf("Key: \n");
-    printLittleEndian(key, sizeof(u32));
+    printLittleEndian(key, KEY_SIZE);
 
     // 192 * 24 = 4608 = 32 * 144
     // 192 * 28 = 5376 = 32 * 168

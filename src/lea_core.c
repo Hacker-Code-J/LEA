@@ -66,7 +66,7 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
         T[(i * 6 + 0) % 8] =
             ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
         T[(i * 6 + 1) % 8] = 
-            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 6], i + 1),  3);
+            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
         T[(i * 6 + 2) % 8] = 
             ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
         T[(i * 6 + 3) % 8] = 
@@ -171,7 +171,7 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
         T[(i * 6 + 0) % 8] =
             ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
         T[(i * 6 + 1) % 8] = 
-            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 6], i + 1),  3);
+            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
         T[(i * 6 + 2) % 8] = 
             ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
         T[(i * 6 + 3) % 8] = 
