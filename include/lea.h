@@ -6,10 +6,10 @@
  * encryption and decryption functionalities, as well as key scheduling.
  */
 
+#include <stdint.h>
+
 #ifndef _LEA_H
 #define _LEA_H
-
-#include <stdint.h>
 
 #define LEA_VERSION 256
 

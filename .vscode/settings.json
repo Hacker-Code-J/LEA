@@ -21,7 +21,8 @@
   "peacock.color": "#61dafb",
   "files.associations": {
     "lea.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "stdint.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",
