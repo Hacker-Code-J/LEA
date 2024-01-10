@@ -1,0 +1,87 @@
+\chapter{Modes of Operation}
+
+\begin{table}[h!]\centering\renewcommand{\arraystretch}{1.05} % Increase row height by 1.5 times
+	\caption{Comparison of Modes}
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c||ccccccc}
+		\toprule[1.2pt]
+		Mode & Integrity & Authentication & $\EncryptBlk$ & $\DecryptBlk$ & Padding & IV & $\abs{P}\overset{?}{=}\abs{C}$ \\
+		\midrule
+		$\ECB$ & \yes & \no & \yes & \yes & \yes & \no & $\abs{P}<\abs{C}$ \\
+		$\CBC$ & \yes & \no & \yes & \yes & \yes & \yes & $\abs{P}<\abs{C}$ \\
+		$\OFB$ & \yes & \no & \yes & \no & \no & \yes & $\abs{P}=\abs{C}$ \\
+		$\CFB$ & \yes & \no & \yes & \no & \no & \yes & $\abs{P}=\abs{C}$ \\
+		$\CTR$ & \yes & \no & \yes & \no & \no & \yes & $\abs{P}=\abs{C}$ \\
+		$\CBCCS$ & \yes & \no & \yes & \yes & \no & \yes & $\abs{P}=\abs{C}$ \\
+		\bottomrule[1.2pt]
+	\end{tabular*}
+\end{table}
+
+\section{Padding}
+Block ciphers require input lengths to be a multiple of the block size. Padding is used to extend the last block of plaintext to the required length. Without proper padding, the encryption process may be insecure or infeasible.\\
+\\
+There are several padding schemes used in practice, such as:
+\begin{table}[ht]
+	\centering\renewcommand{\arraystretch}{1.05}
+	\caption{Padding Standards in Block Ciphers}
+	\begin{tabular*}{\textwidth}{>{\bfseries}l||l}
+		\toprule
+		\textbf{Standard Name} & \textbf{Padding Method} \\
+		\midrule
+		\multirow{2}{*}{PKCS\#7} & Pad with bytes all the same value as the number of padding bytes \\
+		& \texttt{\dots dd | dd dd dd dd dd dd dd dd dd dd dd dd \textcolor{red}{04} \textcolor{red}{04} \textcolor{red}{04} \textcolor{red}{04}} | \\
+		\hline
+		\multirow{2}{*}{ANSI X9.23} & Pad with zeros, last byte is the number of padding bytes \\
+		& \texttt{\dots dd | dd dd dd dd dd dd dd dd dd dd dd \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{05}} | \\
+		\hline
+		\multirow{2}{*}{ISO/IEC 7816-4} & First byte is '80' (hex), followed by zeros \\
+		& \texttt{\dots dd | dd dd dd dd dd dd dd dd dd dd \textcolor{red}{80} \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{00} \textcolor{red}{00}} | \\
+		\hline
+		\multirow{2}{*}{ISO 10126} & Pad with random bytes, last byte is the number of padding bytes \\
+		& \texttt{\dots dd | dd dd dd dd dd dd dd dd dd dd \textcolor{red}{2e} \textcolor{red}{49} \textcolor{red}{1b} \textcolor{red}{c1} \textcolor{red}{aa} \textcolor{red}{06}} | \\
+		\bottomrule
+	\end{tabular*}
+	\label{tab:padding_standards}
+\end{table}
+
+\newpage
+\subsection{PKCS\#7}
+
+\begin{lstlisting}[style=C]
+void PKCS7_PAD(u32* block, size_t block_len, size_t input_len) {
+	if (block_len < input_len) {
+		fprintf(stderr,
+			"Block length must be greater than input length.\n");
+		return;
+	}
+	
+	u8 padding_value = block_len - input_len;
+	for (size_t i = input_len; i < block_len; ++i) {
+		block[i] = padding_value;
+	}
+}
+\end{lstlisting}
+
+\newpage
+\section{$\ECB$ (Electronic CodeBook)}
+\begin{algorithm}[H]
+	\caption{Electronic CodeBook}
+	\begin{multicols}{2}
+		\KwIn{$K$ and $P=P_1\parallel\cdots\parallel P_N$ ($P_i\in\binaryfield^{n}$)}
+		\KwOut{$C=C_1\parallel\cdots\parallel C_N$ ($C_i\in\binaryfield^n$)}
+		\BlankLine
+		\For{$i\gets 1$ \KwTo $N$}{
+			$C_i\gets\EncryptBlk(K, P_i)$\;
+		}
+		\Return $C=C_1\parallel\cdots\parallel C_N$\;
+		\columnbreak % Move to the next column
+		\setcounter{AlgoLine}{0}  % Reset line numbering
+		\KwIn{$K$ and $C=C_1\parallel\cdots\parallel C_N$ ($C_i\in\binaryfield^n$)}
+		\KwOut{$P=P_1\parallel\cdots\parallel P_N$ ($P_i\in\binaryfield^{n}$)}
+		\BlankLine
+		\For{$i\gets 1$ \KwTo $N$}{
+			$P_i\gets\DecryptBlk(K, C_i)$\;
+		}
+		\Return $C=C_1\parallel\cdots\parallel C_N$\;
+	\end{multicols}
+	\BlankLine
+\end{algorithm}

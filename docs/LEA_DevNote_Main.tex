@@ -127,9 +127,9 @@
 	keywordstyle=[7]{\bfseries\color{Turquoise}},
 	otherkeywords={bool},
 	morekeywords=[2]{;},
-	morekeywords=[3]{u8,u32,u64},
+	morekeywords=[3]{u8,u32,u64, size\_t},
 	morekeywords=[4]{
-		rCon, SubWord, RotWord, MUL\_GF256
+		rCon, SubWord, RotWord, MUL\_GF256, PKCS7\_PAD
 	},
 	morekeywords=[5]{
 		KeyExpansion, AddRoundKey,
@@ -233,7 +233,7 @@
 \newcommand{\OFB}{\mathsf{OFB}}
 \newcommand{\CFB}{\mathsf{CFB}}
 \newcommand{\CTR}{\mathsf{CTR}}
-\newcommand{\CBCCS}{\mathsf{CBC}-\mathsf{CS}}
+\newcommand{\CBCCS}{\mathsf{CBC}\textnormal{-}\mathsf{CS}}
 \newcommand{\EncryptBlk}{\mathsf{EncryptBlk}}
 \newcommand{\DecryptBlk}{\mathsf{DecryptBlk}}
 
@@ -486,7 +486,8 @@
 	
 	\newpage
 	\mainmatter
-	\input{chapters/chapter1.tex}
+	\input{chapters/chapter1.tex} % LEA: Implementation in Little-Endian
+	\input{chapters/chapter2.tex} % Modes of Operation
 	% Include more chapters as needed
 	
 	\appendix

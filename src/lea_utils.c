@@ -20,10 +20,11 @@ void stringToWordArray(const char* hexString, u32* wordArray) {
         sscanf(&hexString[i], "%8x", &temp);
 
         // Reorder the bytes
-        wordArray[i / 8] = ((temp & 0x000000FF) << 0x18) |
-                           ((temp & 0x0000FF00) << 0x08) |
-                           ((temp & 0x00FF0000) >> 0x08) |
-                           ((temp & 0xFF000000) >> 0x18);
+        wordArray[i / 8] = REVERSE_BYTE_ORDER(temp);
+        // wordArray[i / 8] = ((temp & 0x000000FF) << 0x18) |
+        //                    ((temp & 0x0000FF00) << 0x08) |
+        //                    ((temp & 0x00FF0000) >> 0x08) |
+        //                    ((temp & 0xFF000000) >> 0x18);
     }
 }
 

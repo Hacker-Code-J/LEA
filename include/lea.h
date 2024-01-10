@@ -11,7 +11,7 @@
 #ifndef _LEA_H
 #define _LEA_H
 
-#define LEA_VERSION 256
+#define LEA_VERSION 128
 
 #if LEA_VERSION == 192
 #define KEY_SIZE 6
@@ -35,6 +35,10 @@ extern const u32 delta[8];
 
 #define ROTL32(val, shift) (((val) << (shift)) | ((val) >> (32 - (shift))))
 #define ROTR32(val, shift) (((val) >> (shift)) | ((val) << (32 - (shift))))
+#define REVERSE_BYTE_ORDER(word) (((word & 0x000000FF) << 0x18) | \
+                                  ((word & 0x0000FF00) << 0x08) | \
+                                  ((word & 0x00FF0000) >> 0x08) | \
+                                  ((word & 0xFF000000) >> 0x18))
 
 /* LEA_CORE */
 

@@ -7,6 +7,8 @@
 #define _LEA_MODES_H
 
 void pkcs7_pad(u8* block, size_t block_len, size_t input_len);
+void PKCS7_PAD_32bit(u32* block, size_t block_len_bits, size_t input_len_bits);
+void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_bytes);
 
 void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize);
 

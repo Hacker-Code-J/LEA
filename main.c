@@ -11,12 +11,13 @@
 #include <string.h>
 
 #include "lea.h"
+#include "lea_modes.h"
 
 int main(void) {
     u32 key[KEY_SIZE];
-    // const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0"; // 128-bit Key
+    const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0"; // 128-bit Key
     // const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a59687"; // 192-bit Key
-    const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a5968778695a4b3c2d1e0f"; // 256-bit Key
+    // const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a5968778695a4b3c2d1e0f"; // 256-bit Key
     stringToWordArray(keyString, key);
     
     // Print the plaintext
@@ -40,11 +41,20 @@ int main(void) {
 
     // const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
     // const char* plainString = "202122232425262728292a2b2c2d2e2f"; // for 192-bit Key
-    const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
+    // const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
     
-    printf("\nPlain-Text: \n");
-    printf("%s\n", plainString);
+    const char* plainString = "4F524954484D"; // 48-bit
+    size_t plainStringBitLen = 4 * strlen(plainString);
+    if (plainStringBitLen % 8) plainStringBitLen += 8;
+    
     stringToWordArray(plainString, plain);
+
+    printf("\nPlain-Text: \n");
+    // // size_t input_len_bytes = strlen(plainString) / 2;
+    // // PKCS7_PAD_32bit(plain, 16, plainStringBitLen / 8);
+    PKCS7_BYTE_PAD_32bit(plain, 16, plainStringBitLen / 8);
+    printLittleEndian(plain, 4);
+
 
     leaEncrypt(plain, enc_roundkey, cipher);
     
