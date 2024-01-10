@@ -68,6 +68,9 @@ void stringToWordArray(const char* hexString, u32* wordArray);
 void printBigEndian(u32* array, size_t size);
 void printLittleEndian(u32* array, size_t size);
 
+void printEncRoundKeys(u32* enc_roundkey);
+void printEncRoundKeys(u32* dec_roundkey);
+
 double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst);
 
 // void RANDOM_KEY_GENERATION(u32* key);

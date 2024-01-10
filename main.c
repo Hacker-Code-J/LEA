@@ -22,7 +22,8 @@ int main(void) {
     
     // Print the plaintext
     printf("Key: \n");
-    printLittleEndian(key, KEY_SIZE);
+    printBigEndian(key, KEY_SIZE);
+    // printLittleEndian(key, KEY_SIZE);
 
     // 192 * 24 = 4608 = 32 * 144
     // 192 * 28 = 5376 = 32 * 168
@@ -31,43 +32,43 @@ int main(void) {
     leaEncKeySchedule(key, enc_roundkey);
     printf("\nEncryption RoundKey: \n");
     for (int i = 0, j = 0; i < TOTAL_RK; i++) {
-        if((i % 6) == 0) printf("\nEnc_Round[%02d] | ", j++);
+        if((i % 6) == 0) printf("\nenc_Round[%02d] | ", j++);
         printf("%08x:", enc_roundkey[i]);
     }
     printf("\n");
+    printEncRoundKeys(enc_roundkey);
 
     // To ensure proper padding, initialize the array to zero
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
 
-    // const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
+    const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
     // const char* plainString = "202122232425262728292a2b2c2d2e2f"; // for 192-bit Key
     // const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
     
-    const char* plainString = "4F524954484D"; // 48-bit
-    if (strlen(plainString) % 2) {
-        printf("It is a invalid plain-text\n");
-        exit(1);
-    }
-    size_t plainStringBitLen = 4 * strlen(plainString);
+    // const char* plainString = "4F524954484D"; // 48-bit
+    // if (strlen(plainString) % 2) {
+    //     printf("It is a invalid plain-text\n");
+    //     exit(1);
+    // }
+    // size_t plainStringBitLen = 4 * strlen(plainString);
     
     stringToWordArray(plainString, plain);
 
     printf("\nPlain-Text: \n");
     // // size_t input_len_bytes = strlen(plainString) / 2;
     // // PKCS7_PAD_32bit(plain, 16, plainStringBitLen / 8);
-    PKCS7_BYTE_PAD_32bit(plain, 16, plainStringBitLen / 8);
-    printLittleEndian(plain, 4);
+    // PKCS7_BYTE_PAD_32bit(plain, 16, plainStringBitLen / 8);
+    printBigEndian(plain, 4);
 
-#if 0
     leaEncrypt(plain, enc_roundkey, cipher);
     
     printf("\nCipher-Text: \n");
-    printLittleEndian(cipher, sizeof(u32));
+    printBigEndian(cipher, sizeof(u32));
 
     // double enc_time = measure_time(leaEncrypt, plain, enc_roundkey, cipher);
     // printf("%.3f ns\n", enc_time*1000000000);
-
+#if 0
     u32 encrypted[4];
     u32 decrypted[4];
 

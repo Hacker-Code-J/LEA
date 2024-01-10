@@ -14,17 +14,8 @@
 
 void stringToWordArray(const char* hexString, u32* wordArray) {
     size_t length = strlen(hexString);
-
     for (size_t i = 0; i < length; i += 8) {
-        u32 temp;
-        sscanf(&hexString[i], "%8x", &temp);
-
-        // Reorder the bytes
-        wordArray[i / 8] = REVERSE_BYTE_ORDER(temp);
-        // wordArray[i / 8] = ((temp & 0x000000FF) << 0x18) |
-        //                    ((temp & 0x0000FF00) << 0x08) |
-        //                    ((temp & 0x00FF0000) >> 0x08) |
-        //                    ((temp & 0xFF000000) >> 0x18);
+        sscanf(&hexString[i], "%8x", &wordArray[i / 8]);
     }
 }
 
@@ -49,6 +40,34 @@ void printLittleEndian(u32* array, size_t size) {
         }
     }
     printf("\n");
+}
+
+void printEncRoundKeys(u32* enc_roundkey) {
+    /*
+     * RK[00] = 005 || 004 || 003 || 002 || 001 || 000
+     * RK[01] = 011 || 010 || 009 || 008 || 007 || 006
+     * RK[02] = 017 || 016 || 015 || 014 || 013 || 012
+     * ...
+     * RK[23] = 143 || 142 || 141 || 140 || 139 || 138
+     * ...
+     * RK[27] = 167 || 166 || 165 || 164 || 163 || 162
+     * ...
+     * RK[31] = 191 || 190 || 189 || 188 || 187 || 186
+    */
+    printf("\nEncryption RoundKey: \n");
+    int rows = Nr;
+    int elementsPerRow = 6;
+    int start = 5; // Starting number of the first row
+
+    for (int i = 0; i < rows; i++) {
+        printf("Enc_Round[%02d] | ", i);
+        int num = start;
+        for (int j = 0; j < elementsPerRow; j++) {
+            printf("%08x:", enc_roundkey[num--]);
+        }
+        start += elementsPerRow; // Set the starting number for the next row
+        printf("\n");
+    }
 }
 
 double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst) {
