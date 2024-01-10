@@ -12,20 +12,6 @@
 
 #include "lea.h"
 
-void stringToByteArray(const char* hexString, u8* byteArray) {
-    size_t length = strlen(hexString);
-    for (size_t i = 0; i < length; i += 2) {
-        sscanf(&hexString[i], "%2hhx", &byteArray[i / 2]);
-    }
-}
-
-// void stringToWordArray(const char* hexString, u32* wordArray) {
-//     size_t length = strlen(hexString);
-//     for (size_t i = 0; i < length; i += 8) {
-//         sscanf(&hexString[i], "%8x", &wordArray[i / 8]);
-//     }
-// }
-
 void stringToWordArray(const char* hexString, u32* wordArray) {
     size_t length = strlen(hexString);
 
@@ -62,6 +48,53 @@ void printLittleEndian(u32* array, size_t size) {
     }
     printf("\n");
 }
+
+double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst) {
+    // srand((u32)time(NULL));
+    // clock_t start, end;
+    // double cpu_time_used;
+
+    // start = clock();
+    // func(input, key, output);
+    // end = clock();
+
+    // cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    // return cpu_time_used;
+
+    struct timespec start, end;
+    double cpu_time_used;
+    const int num_runs = 10000; // Number of runs for averaging
+
+    // Warm-up run (optional, but often a good idea)
+    func(src, key, dst);
+
+    clock_gettime(1, &start);  // Start timing
+    // clock_gettime(CLOCK_MONOTONIC, &start);
+    for (int i = 0; i < num_runs; i++) {
+        func(src, key, dst);
+    }
+    clock_gettime(1, &end); // End timing
+    // clock_gettime(CLOCK_MONOTONIC, &end);
+
+    // Calculate elapsed time in seconds
+    cpu_time_used = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    
+    return cpu_time_used / num_runs; // Average time per run
+}
+
+// void stringToByteArray(const char* hexString, u8* byteArray) {
+//     size_t length = strlen(hexString);
+//     for (size_t i = 0; i < length; i += 2) {
+//         sscanf(&hexString[i], "%2hhx", &byteArray[i / 2]);
+//     }
+// }
+
+// void stringToWordArray(const char* hexString, u32* wordArray) {
+//     size_t length = strlen(hexString);
+//     for (size_t i = 0; i < length; i += 8) {
+//         sscanf(&hexString[i], "%8x", &wordArray[i / 8]);
+//     }
+// }
 
 // void stringToWordArray(const char* hexString, u32* wordArray) {
 //     size_t length = strlen(hexString);

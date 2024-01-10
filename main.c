@@ -28,7 +28,7 @@ int main(void) {
     leaEncKeySchedule(key, enc_roundkey);
     printf("\nEncryption RoundKey: \n");
     for (int i = 0, j = 0;
-         i < 144;
+         i < TOTAL_RK;
          i++) {
         if((i % 6) == 0) printf("\nEnc_Round[%02d] | ", j++);
         printf("%08x:", enc_roundkey[i]);
@@ -44,9 +44,12 @@ int main(void) {
     stringToWordArray(plainString, plain);
 
     leaEncrypt(plain, enc_roundkey, cipher);
-
+    
     printf("\nCipher-Text: \n");
     printLittleEndian(cipher, sizeof(u32));
+
+    // double enc_time = measure_time(leaEncrypt, plain, enc_roundkey, cipher);
+    // printf("%.3f ns\n", enc_time*1000000000);
 
     u32 encrypted[4];
     u32 decrypted[4];
@@ -70,8 +73,11 @@ int main(void) {
     printf("\n");
 
     leaDecrypt(encrypted, dec_roundkey, decrypted);
-
+    
     printf("\nDecrypted Text: \n");
     printLittleEndian(decrypted, sizeof(u32));
+
+    // double dec_time = measure_time(leaDecrypt, encrypted, dec_roundkey, decrypted);
+    // printf("%.3f ns\n", dec_time*1000000000);
 
 }

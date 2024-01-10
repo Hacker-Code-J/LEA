@@ -36,23 +36,34 @@ extern const u32 delta[8];
 /* LEA_CORE */
 
 /**
- * @brief Function to perform key scheduling in LEA.
+ * @brief Function to perform encryption key scheduling in LEA.
  * 
  * @param key The encryption key.
  * @param roundKeys The array to store the generated round keys.
  */
 void leaEncKeySchedule(const u32* key, u32* roundKeys);
+
+/**
+ * @brief Function to perform decryption key scheduling in LEA.
+ * 
+ * @param key The decryption key.
+ * @param roundKeys The array to store the generated round keys.
+ */
 void leaDecKeySchedule(const u32* key, u32* roundKeys);
+
 void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst);
 void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst);
 
 /* LEA_UTILS */
 
-void RANDOM_KEY_GENERATION(u32* key);
-void stringToByteArray(const char* hexString, u8* byteArray);
 void stringToWordArray(const char* hexString, u32* wordArray);
 
 void printBigEndian(u32* array, size_t size);
 void printLittleEndian(u32* array, size_t size);
+
+double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst);
+
+// void RANDOM_KEY_GENERATION(u32* key);
+// void stringToByteArray(const char* hexString, u8* byteArray);
 
 #endif // _LEA_H
