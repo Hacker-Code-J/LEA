@@ -12,106 +12,59 @@ void pkcs7_pad(u8* block, size_t block_len, size_t input_len) {
     }
 }
 
-void PKCS7_PAD_32bit(u32* block, size_t block_len_bits, size_t input_len_bits) {
-    size_t block_len_bytes = block_len_bits / 0x08;
-    size_t input_len_bytes = input_len_bits / 0x08;
-
-    if (block_len_bits < input_len_bits) {
-        fprintf(stderr, "Block length must be greater than or equal to input length.\n");
-        return;
-    }
-
-    // Calculate the padding value
-    u8 padding_byte_value = block_len_bytes - input_len_bytes;
-    
-    // // Apply the padding in a big-endian manner
-    // u8* byte_ptr = (u8*)block;
-    // size_t start_padding_index = input_len_bytes;
-
-    // // Find the start of the last 32-bit word to be padded
-    // size_t word_index = (start_padding_index + 3) / sizeof(u32);
-    // size_t word_start = word_index * sizeof(u32);
-
-    // // Padding within the last 32-bit word
-    // for (size_t i = start_padding_index; i < word_start + sizeof(u32); ++i) {
-    //     byte_ptr[i] = padding_byte_value;
-    // }
-
-    // Apply the padding in a little-endian manner
-    u8* byte_ptr = (u8*)block;
-    size_t start_padding_index = input_len_bytes;
-
-    // Padding within the last 32-bit word
-    for (size_t i = start_padding_index; i < block_len_bytes; ++i) {
-        byte_ptr[i] = padding_byte_value;
-    }
-}
-
 void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_bytes) {
     if (block_len_bytes < input_len_bytes) {
         fprintf(stderr, "Block length must be greater than or equal to input length.\n");
         return;
     }
 
-    if (block_len_bytes < input_len_bytes) {
-        fprintf(stderr, "Block length must be greater than or equal to input length.\n");
-        return;
-    }
-
-    // Reverse byte order before padding
-    size_t num_words = input_len_bytes / sizeof(u32);
-    for (size_t i = 0; i < num_words; i++) {
-        block[i] = REVERSE_BYTE_ORDER(block[i]);
+    for (int i = 0; i < block_len_bytes / sizeof(u32); i++) {
+        printf("P[%02d]: 0x%08x\n", i, block[i]);
     }
 
     // Calculate the padding value
     u8 padding_byte_value = block_len_bytes - input_len_bytes;
+    if (padding_byte_value == 0) {
+        return; // No padding needed
+    }
 
     // Apply the padding
     u8* byte_ptr = (u8*)block;
-    for (size_t i = input_len_bytes; i < block_len_bytes; ++i) {
-        byte_ptr[i] = padding_byte_value;
+    // printf("Byte 0: 0x%02x\n", byte_ptr[0]);
+    // printf("Byte 1: 0x%02x\n", byte_ptr[1]);
+    // printf("Byte 2: 0x%02x\n", byte_ptr[2]);
+    // printf("Byte 3: 0x%02x\n", byte_ptr[3]);
+    // printf("Byte 4: 0x%02x\n", byte_ptr[4]);
+    // printf("Byte 5: 0x%02x\n", byte_ptr[5]);
+    // printf("Byte 6: 0x%02x\n", byte_ptr[6]);
+    // printf("Byte 7: 0x%02x\n", byte_ptr[7]);
+    // printf("Byte 8: 0x%02x\n", byte_ptr[8]);
+    // printf("Byte 9: 0x%02x\n", byte_ptr[9]);
+    // printf("Byte 10: 0x%02x\n", byte_ptr[10]);
+    // printf("Byte 11: 0x%02x\n", byte_ptr[11]);
+    // printf("Byte 12: 0x%02x\n", byte_ptr[12]);
+    // printf("Byte 13: 0x%02x\n", byte_ptr[13]);
+    // printf("Byte 14: 0x%02x\n", byte_ptr[14]);
+    // printf("Byte 15: 0x%02x\n", byte_ptr[15]);
+    
+    int s = 0x00;
+    int t = 0x00;
+    if (input_len_bytes == 2 && byte_ptr[3] == 0x00) s++;
+    if (input_len_bytes == 2 && byte_ptr[2] == 0x00) t++;
+    for (size_t i =
+        (input_len_bytes > 3) ?
+         input_len_bytes - (padding_byte_value % sizeof(u32)) : 0;
+         i < block_len_bytes; i++) {
+        printf("Byte %ld: 0x%02x\n", i, byte_ptr[i]);
+        if (!byte_ptr[i])
+            byte_ptr[i] = padding_byte_value;
     }
-
-    // Reorder bytes for little-endian storage after padding
-    num_words = block_len_bytes / sizeof(u32);
-    for (size_t i = 0; i < num_words; i++) {
-        block[i] = REVERSE_BYTE_ORDER(block[i]);
+    if (s) byte_ptr[3] = 0x00;
+    if (t) byte_ptr[2] = 0x00;
+    
+    for (int i = 0; i < block_len_bytes / sizeof(u32); i++) {
+        printf("P[%02d]: 0x%08x\n", i, block[i]);
     }
-
-    // // Calculate the padding value
-    // u8 padding_byte_value = block_len_bytes - input_len_bytes;
-
-    // // Apply the padding in a little-endian manner
-    // u8* byte_ptr = (u8*)block;
-
-    // // Identify the word and the byte within the word where padding starts
-    // size_t word_index = input_len_bytes / sizeof(u32);
-    // size_t byte_index_within_word = input_len_bytes % sizeof(u32);
-
-    // // Start padding from the identified position
-    // for (size_t i = 0; i < padding_byte_value; ++i) {
-    //     if (word_index * sizeof(u32) + byte_index_within_word + i < block_len_bytes) {
-    //         byte_ptr[word_index * sizeof(u32) + byte_index_within_word + i] = padding_byte_value;
-    //     }
-    // }
-
-    // // Calculate the padding value
-    // u8 padding_byte_value = block_len_bytes - input_len_bytes;
-
-    // // Apply the padding in a little-endian manner
-    // u8* byte_ptr = (u8*)block;
-    // size_t start_padding_index = input_len_bytes % sizeof(u32); // Start padding within the last used word
-
-    // // Identify the word that needs padding
-    // size_t word_index = input_len_bytes / sizeof(u32);
-
-    // // Start padding from the correct byte in the identified word
-    // for (size_t i = 0; i < padding_byte_value; ++i) {
-    //     if (start_padding_index + i < sizeof(u32)) {
-    //         byte_ptr[word_index * sizeof(u32) + start_padding_index + i] = padding_byte_value;
-    //     }
-    // }
 }
 
 // void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize) {

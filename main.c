@@ -36,7 +36,8 @@ int main(void) {
     }
     printf("\n");
 
-    u32 plain[4];
+    // To ensure proper padding, initialize the array to zero
+    u32 plain[4] = { 0x00, };
     u32 cipher[4];
 
     // const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
@@ -44,8 +45,11 @@ int main(void) {
     // const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
     
     const char* plainString = "4F524954484D"; // 48-bit
+    if (strlen(plainString) % 2) {
+        printf("It is a invalid plain-text\n");
+        exit(1);
+    }
     size_t plainStringBitLen = 4 * strlen(plainString);
-    if (plainStringBitLen % 8) plainStringBitLen += 8;
     
     stringToWordArray(plainString, plain);
 
@@ -55,7 +59,7 @@ int main(void) {
     PKCS7_BYTE_PAD_32bit(plain, 16, plainStringBitLen / 8);
     printLittleEndian(plain, 4);
 
-
+#if 0
     leaEncrypt(plain, enc_roundkey, cipher);
     
     printf("\nCipher-Text: \n");
@@ -90,5 +94,6 @@ int main(void) {
 
     // double dec_time = measure_time(leaDecrypt, encrypted, dec_roundkey, decrypted);
     // printf("%.3f ns\n", dec_time*1000000000);
-
+#endif
+    return 0;
 }
