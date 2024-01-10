@@ -85,6 +85,13 @@ P[i] = \state[4i+3]\adjacent\state[4i+2]\adjacent\state[4i+1]\adjacent\state[4i]
 \end{example}
 
 \begin{lstlisting}[style=C]
+void stringToWordArray(const char* hexString, u32* wordArray) {
+	size_t length = strlen(hexString);
+	for (size_t i = 0; i < length; i += 8) {
+		sscanf(&hexString[i], "%8x", &wordArray[i / 8]);
+	}
+}
+
 const char* inputString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0";
 u32 key[4];
 stringToWordArray(inputString, key);
