@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "lea.h"
+#include "lea_modes.h"
 
 void lea128_test() {
     u32 key[KEY_SIZE];
@@ -24,7 +25,6 @@ void lea128_test() {
     leaEncKeySchedule(key, enc_roundkey);
     printEncRoundKeys(enc_roundkey);
 
-    // To ensure proper padding, initialize the array to zero
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
 
@@ -33,21 +33,21 @@ void lea128_test() {
     // const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
     
     // const char* plainString = "4F524954484D"; // 48-bit
-    // if (strlen(plainString) % 2) {
-    //     printf("It is a invalid plain-text\n");
-    //     exit(1);
-    // }
-    // size_t plainStringBitLen = 4 * strlen(plainString);
-    
     stringToWordArray(plainString, plain);
 
     printf("\nPlain-Text: \n");
-    // // size_t input_len_bytes = strlen(plainString) / 2;
-    // // PKCS7_PAD_32bit(plain, 16, plainStringBitLen / 8);
-    // PKCS7_BYTE_PAD_32bit(plain, 16, plainStringBitLen / 8);
     printBigEndian(plain, 4);
-    // printLittleEndian(plain, 4);
+    printLittleEndian(plain, 4);
 
+    // PKCS7_BYTE_PAD_32bit(plain, 16,
+    //     (strlen(plainString) % 2) ? (strlen(plainString) + 1) / 2 : strlen(plainString) / 2);
+
+    // printf("\nPadding Plain-Text: \n");
+    // printBigEndian(plain, 4);
+    // printLittleEndian(plain, 4);
+    
+
+#if 1
     leaEncrypt(plain, enc_roundkey, cipher);
     
     printf("\nCipher-Text: \n");
@@ -85,6 +85,7 @@ void lea128_test() {
 
     // double dec_time = measure_time(leaDecrypt, encrypted, dec_roundkey, decrypted);
     // printf("%.3f ns\n", dec_time*1000000000);
+#endif
 }
 
 void lea192_test() {
@@ -116,7 +117,7 @@ void lea192_test() {
     
     printf("\nCipher-Text: \n");
     printBigEndian(cipher, sizeof(u32));
-    printLittleEndian(cipher, sizeof(u32));
+    // printLittleEndian(cipher, sizeof(u32));
 
     // double enc_time = measure_time(leaEncrypt, plain, enc_roundkey, cipher);
     // printf("%.3f ns\n", enc_time*1000000000);
