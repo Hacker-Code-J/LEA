@@ -42,13 +42,16 @@ $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR
 # Clean up
 clean:
 	rm -f $(OBJS) $(TARGET)
-	rm -f lea_test
+# rm -f lea_test
 
 # Create necessary directories
 dir:
 	@mkdir -p $(OBJDIR) $(BINDIR)
 
 rebuild: clean all
+
+leak: 
+	valgrind --leak-check=full --show-leak-kinds=all $(TARGET)
 
 # Phony targets
 .PHONY: all clean directories

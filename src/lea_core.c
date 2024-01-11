@@ -228,8 +228,8 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
                     + (t[3] ^ roundKeys[j + 5]), 3);
         t[3] = _t0;
 
-        // printf("t[%02d] = %08x:%08x:%08x:%08x\n",
-        //         i+1, t[0],t[1],t[2],t[3]);
+        printf("t[%02d] = %08x:%08x:%08x:%08x\n",
+                i+1, t[0],t[1],t[2],t[3]);
     }
 
     dst[0] = REVERSE_BYTE_ORDER(t[0]);

@@ -13,5 +13,8 @@ int main(void) {
     lea128_test();
     // lea192_test();
     // lea256_test();
+
+    // lea128_ECB_test();
+    
     return 0;
 }

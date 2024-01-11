@@ -40,7 +40,7 @@ void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len
     leaEncKeySchedule(roundKeys, key);
 
     // Encrypt each block
-    for (size_t i = 0; i < plaintext_len; i += BLOCK_SIZE) {
+    for (size_t i = 0; i < plaintext_len * sizeof(u32); i += sizeof(u32)) {
         leaEncrypt(&ciphertext[i], &plaintext[i], roundKeys);
     }
 }
@@ -51,10 +51,40 @@ void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_le
     leaDecKeySchedule(roundKeys, key);
 
     // Decrypt each block
-    for (size_t i = 0; i < ciphertext_len; i += BLOCK_SIZE) {
+    for (size_t i = 0; i < ciphertext_len * sizeof(u32); i += sizeof(u32)) {
         leaDecrypt(&plaintext[i], &ciphertext[i], roundKeys);
     }
 }
+
+void xorBlocks(u32* dst, const u32* src1, const u32* src2, size_t blockSize) {
+    for (size_t i = 0; i < blockSize / sizeof(u32); i++) {
+        dst[i] = src1[i] ^ src2[i];
+    }
+}
+
+void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv) {
+    u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
+    leaEncKeySchedule(roundKeys, key);
+
+    u32 prev_block[16 / sizeof(u32)];
+    memcpy(prev_block, iv, 16);  // Initialize with IV
+
+    for (size_t i = 0; i < plaintext_len; i += 16) {
+        // XOR plaintext with previous ciphertext (or IV for the first block)
+        xorBlocks(prev_block, plaintext, prev_block, 16);
+        
+        // for (size_t j = 0; j < 16 / sizeof(u32); ++j) {
+        //     prev_block[j] ^= plaintext[i + j];
+        // }
+
+        // Encrypt the XORed data
+        leaEncrypt(&ciphertext[i], prev_block, roundKeys);
+
+        // Update prev_block to current ciphertext
+        memcpy(prev_block, &ciphertext[i], 16);
+    }
+}
+// void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key, const u32* iv);
 
 // // CBC Encryption
 // void cbcEncrypt(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv) {
