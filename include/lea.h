@@ -7,6 +7,7 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifndef _LEA_H
 #define _LEA_H
@@ -63,17 +64,23 @@ void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst);
 
 /* LEA_UTILS */
 
+void keyToWordArray(const char* hexString, u32* wordArray);
 void stringToWordArray(const char* hexString, u32* wordArray);
 
-void printBigEndian(u32* array, size_t size);
-void printLittleEndian(u32* array, size_t size);
+void printBigEndian(u32* array, size_t size); // User Array
+void printLittleEndian(u32* array, size_t size); // Real Virtual Memory
 
 void printEncRoundKeys(u32* enc_roundkey);
-void printEncRoundKeys(u32* dec_roundkey);
+void printDecRoundKeys(u32* dec_roundkey);
 
 double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst);
 
 // void RANDOM_KEY_GENERATION(u32* key);
 // void stringToByteArray(const char* hexString, u8* byteArray);
+
+/* LEA_TESTS */
+void lea128_test();
+void lea192_test();
+void lea256_test();
 
 #endif // _LEA_H
