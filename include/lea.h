@@ -49,7 +49,7 @@ extern const u32 delta[8];
  * @param key The encryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaEncKeySchedule(const u32* key, u32* roundKeys);
+void leaEncKeySchedule(u32* roundKeys, const u32* key);
 
 /**
  * @brief Function to perform decryption key scheduling in LEA.
@@ -57,15 +57,14 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys);
  * @param key The decryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaDecKeySchedule(const u32* key, u32* roundKeys);
+void leaDecKeySchedule(u32* roundKeys, const u32* key);
 
-void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst);
-void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst);
+void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys);
+void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys);
 
 /* LEA_UTILS */
 
-void keyToWordArray(const char* hexString, u32* wordArray);
-void stringToWordArray(const char* hexString, u32* wordArray);
+void stringToWordArray(u32* wordArray, const char* hexString);
 
 void printBigEndian(u32* array, size_t size); // User Array
 void printLittleEndian(u32* array, size_t size); // Real Virtual Memory
@@ -73,8 +72,9 @@ void printLittleEndian(u32* array, size_t size); // Real Virtual Memory
 void printEncRoundKeys(u32* enc_roundkey);
 void printDecRoundKeys(u32* dec_roundkey);
 
-double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst);
+double measure_time(void (*func)(u32*, const u32*, const u32*), u32* dst, const u32* src, const u32* key);
 
+// void keyToWordArray(u32* wordArray, const char* hexString);
 // void RANDOM_KEY_GENERATION(u32* key);
 // void stringToByteArray(const char* hexString, u8* byteArray);
 

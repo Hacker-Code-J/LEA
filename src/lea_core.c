@@ -22,7 +22,7 @@ const u32 delta[8] = {
  * @param key Pointer to the src key.
  * @param roundKeys Pointer to the array where round keys will be stored.
 */
-void leaEncKeySchedule(const u32* key, u32* roundKeys) {
+void leaEncKeySchedule(u32* roundKeys, const u32* key) {
 #if LEA_VERSION == 192
     u32 T[6];
 
@@ -116,7 +116,7 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
 #endif
 }
 
-void leaDecKeySchedule(const u32* key, u32* roundKeys) {
+void leaDecKeySchedule(u32* roundKeys, const u32* key) {
 #if LEA_VERSION == 192
     u32 T[6];
 
@@ -203,7 +203,7 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
 #endif
 }
 
-void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst) {
+void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);
@@ -237,7 +237,7 @@ void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst) {
     dst[3] = REVERSE_BYTE_ORDER(t[3]);
 }
 
-void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst) {
+void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys) {
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);

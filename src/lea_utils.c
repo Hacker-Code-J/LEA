@@ -12,29 +12,7 @@
 
 #include "lea.h"
 
-void keyToWordArray(const char* hexString, u32* wordArray) {
-    size_t length = strlen(hexString);
-
-    // Calculate the number of 32-bit words
-    size_t numWords = length / 8;
-    if (length % 8 != 0) {
-        numWords++;  // Add one more word if there are extra characters
-    }
-
-    for (size_t i = 0; i < numWords; i++) {
-        char temp[9] = {0};  // Temporary buffer to store 8 characters + null terminator
-        size_t start = length > 8 ? length - 8 : 0;  // Calculate the start index for the current word
-
-        strncpy(temp, &hexString[start], length - start);  // Copy the relevant part of the string
-        sscanf(temp, "%8x", &wordArray[i]);  // Read the value into the word array
-
-        if (length >= 8) {
-            length -= 8;  // Move to the previous word
-        }
-    }
-}
-
-void stringToWordArray(const char* hexString, u32* wordArray) {
+void stringToWordArray(u32* wordArray, const char* hexString) {
     size_t length = strlen(hexString);
     for (size_t i = 0; i < length; i += 8) {
         sscanf(&hexString[i], "%8x", &wordArray[i / 8]);
@@ -120,7 +98,7 @@ void printDecRoundKeys(u32* dec_roundkey) {
     printf("\n");
 }
 
-double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, const u32* key, u32* dst) {
+double measure_time(void (*func)(u32*, const u32*, const u32*), u32* dst, const u32* src, const u32* key) {
     // srand((u32)time(NULL));
     // clock_t start, end;
     // double cpu_time_used;
@@ -137,12 +115,12 @@ double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, 
     const int num_runs = 10000; // Number of runs for averaging
 
     // Warm-up run (optional, but often a good idea)
-    func(src, key, dst);
+    func(dst, src, key);
 
     clock_gettime(1, &start);  // Start timing
     // clock_gettime(CLOCK_MONOTONIC, &start);
     for (int i = 0; i < num_runs; i++) {
-        func(src, key, dst);
+        func(dst, src, key);
     }
     clock_gettime(1, &end); // End timing
     // clock_gettime(CLOCK_MONOTONIC, &end);
@@ -152,6 +130,29 @@ double measure_time(void (*func)(const u32*, const u32*, u32*), const u32* src, 
     
     return cpu_time_used / num_runs; // Average time per run
 }
+
+
+// void keyToWordArray(u32* wordArray, const char* hexString) {
+//     size_t length = strlen(hexString);
+
+//     // Calculate the number of 32-bit words
+//     size_t numWords = length / 8;
+//     if (length % 8 != 0) {
+//         numWords++;  // Add one more word if there are extra characters
+//     }
+
+//     for (size_t i = 0; i < numWords; i++) {
+//         char temp[9] = {0};  // Temporary buffer to store 8 characters + null terminator
+//         size_t start = length > 8 ? length - 8 : 0;  // Calculate the start index for the current word
+
+//         strncpy(temp, &hexString[start], length - start);  // Copy the relevant part of the string
+//         sscanf(temp, "%8x", &wordArray[i]);  // Read the value into the word array
+
+//         if (length >= 8) {
+//             length -= 8;  // Move to the previous word
+//         }
+//     }
+// }
 
 // void stringToByteArray(const char* hexString, u8* byteArray) {
 //     size_t length = strlen(hexString);

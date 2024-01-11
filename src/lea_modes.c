@@ -30,7 +30,7 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
 
 void ecbEncrypt(const u32* plaintext, const u32* roundKeys, u32* ciphertext, size_t blockSize) {
     for (size_t offset = 0; offset < blockSize; offset += sizeof(u32)) {
-        leaEncrypt(&plaintext[offset / sizeof(u32)], roundKeys, &ciphertext[offset / sizeof(u32)]);
+        leaEncrypt(&ciphertext[offset / sizeof(u32)], &plaintext[offset / sizeof(u32)], roundKeys);
     }
 }
 
