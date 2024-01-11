@@ -26,12 +26,12 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
 #if LEA_VERSION == 192
     u32 T[6];
 
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
-    T[4] = key[4];
-    T[5] = key[5];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
+    T[4] = REVERSE_BYTE_ORDER(key[4]);
+    T[5] = REVERSE_BYTE_ORDER(key[5]);
 
     for (int i = 0; i < Nr; i++) {
         T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
@@ -53,14 +53,14 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
 
     // Initialize T array from key
     // memcpy(T, key, sizeof(u32) * 8);
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
-    T[4] = key[4];
-    T[5] = key[5];
-    T[6] = key[6];
-    T[7] = key[7];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
+    T[4] = REVERSE_BYTE_ORDER(key[4]);
+    T[5] = REVERSE_BYTE_ORDER(key[5]);
+    T[6] = REVERSE_BYTE_ORDER(key[6]);
+    T[7] = REVERSE_BYTE_ORDER(key[7]);
 
     for (int i = 0; i < Nr; i++) {
         T[(i * 6 + 0) % 8] =
@@ -92,10 +92,10 @@ void leaEncKeySchedule(const u32* key, u32* roundKeys) {
     // }
 
     // Load the word key into T
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
 
     // int rounds = (keySize == 128) ? 24 : (keySize == 192) ? 28 : 32;
 
@@ -131,12 +131,12 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
 #if LEA_VERSION == 192
     u32 T[6];
 
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
-    T[4] = key[4];
-    T[5] = key[5];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
+    T[4] = REVERSE_BYTE_ORDER(key[4]);
+    T[5] = REVERSE_BYTE_ORDER(key[5]);
 
     for (int i = 0; i < Nr; i++) {
         T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
@@ -158,14 +158,14 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
 
     // Initialize T array from key
     // memcpy(T, key, sizeof(u32) * 8);
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
-    T[4] = key[4];
-    T[5] = key[5];
-    T[6] = key[6];
-    T[7] = key[7];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
+    T[4] = REVERSE_BYTE_ORDER(key[4]);
+    T[5] = REVERSE_BYTE_ORDER(key[5]);
+    T[6] = REVERSE_BYTE_ORDER(key[6]);
+    T[7] = REVERSE_BYTE_ORDER(key[7]);
 
     for (int i = 0; i < Nr; i++) {
         T[(i * 6 + 0) % 8] =
@@ -192,10 +192,10 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
     u32 T[4];
 
     // Load the word key into T
-    T[0] = key[0];
-    T[1] = key[1];
-    T[2] = key[2];
-    T[3] = key[3];
+    T[0] = REVERSE_BYTE_ORDER(key[0]);
+    T[1] = REVERSE_BYTE_ORDER(key[1]);
+    T[2] = REVERSE_BYTE_ORDER(key[2]);
+    T[3] = REVERSE_BYTE_ORDER(key[3]);
 
     // Generate round keys
     for (int i = 0; i < Nr; i++) {
@@ -228,10 +228,10 @@ void leaDecKeySchedule(const u32* key, u32* roundKeys) {
 void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst) {
     u32 t[4];
 
-    t[0] = src[0];
-    t[1] = src[1];
-    t[2] = src[2];
-    t[3] = src[3];
+    t[0] = REVERSE_BYTE_ORDER(src[0]);
+    t[1] = REVERSE_BYTE_ORDER(src[1]);
+    t[2] = REVERSE_BYTE_ORDER(src[2]);
+    t[3] = REVERSE_BYTE_ORDER(src[3]);
 
     printf("\nEncryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
                 0, t[0],t[1],t[2],t[3]);
@@ -253,19 +253,19 @@ void leaEncrypt(const u32* src, const u32* roundKeys, u32* dst) {
                 i+1, t[0],t[1],t[2],t[3]);
     }
 
-    dst[0] = t[0];
-    dst[1] = t[1];
-    dst[2] = t[2];
-    dst[3] = t[3];
+    dst[0] = REVERSE_BYTE_ORDER(t[0]);
+    dst[1] = REVERSE_BYTE_ORDER(t[1]);
+    dst[2] = REVERSE_BYTE_ORDER(t[2]);
+    dst[3] = REVERSE_BYTE_ORDER(t[3]);
 }
 
 void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst) {
     u32 t[4];
 
-    t[0] = src[0];
-    t[1] = src[1];
-    t[2] = src[2];
-    t[3] = src[3];
+    t[0] = REVERSE_BYTE_ORDER(src[0]);
+    t[1] = REVERSE_BYTE_ORDER(src[1]);
+    t[2] = REVERSE_BYTE_ORDER(src[2]);
+    t[3] = REVERSE_BYTE_ORDER(src[3]);
 
     printf("\nDecryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
                 0, t[0],t[1],t[2],t[3]);
@@ -290,10 +290,10 @@ void leaDecrypt(const u32* src, const u32* roundKeys, u32* dst) {
                 i+1, t[0],t[1],t[2],t[3]);
     }
 
-    dst[0] = t[0];
-    dst[1] = t[1];
-    dst[2] = t[2];
-    dst[3] = t[3];    
+    dst[0] = REVERSE_BYTE_ORDER(t[0]);
+    dst[1] = REVERSE_BYTE_ORDER(t[1]);
+    dst[2] = REVERSE_BYTE_ORDER(t[2]);
+    dst[3] = REVERSE_BYTE_ORDER(t[3]);    
 }
 
 // Other functions...
