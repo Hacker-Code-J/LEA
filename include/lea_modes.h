@@ -6,7 +6,12 @@
 #ifndef _LEA_MODES_H
 #define _LEA_MODES_H
 
+#define BLOCK_SIZE 4
+
 void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_bytes);
+
+void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key);
+void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key);
 
 // void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize);
 

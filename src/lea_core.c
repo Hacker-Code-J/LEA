@@ -204,6 +204,7 @@ void leaDecKeySchedule(u32* roundKeys, const u32* key) {
 }
 
 void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
+    
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);
@@ -212,7 +213,7 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
     t[3] = REVERSE_BYTE_ORDER(src[3]);
 
     printf("\nEncryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
-                0, t[0],t[1],t[2],t[3]);
+                0, t[0], t[1], t[2], t[3]);
 
     for (int i = 0, j = 0;
          i < Nr;
@@ -238,6 +239,7 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
 }
 
 void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys) {
+    
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);
@@ -246,7 +248,7 @@ void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys) {
     t[3] = REVERSE_BYTE_ORDER(src[3]);
 
     printf("\nDecryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
-                0, t[0],t[1],t[2],t[3]);
+                0, t[0], t[1], t[2], t[3]);
 
     for (int i = 0, j = 0;
          i < Nr;
@@ -265,7 +267,7 @@ void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys) {
             ^ roundKeys[j + 5];
 
         printf("t[%02d] = %08x:%08x:%08x:%08x\n",
-                i+1, t[0],t[1],t[2],t[3]);
+                i + 1, t[0], t[1], t[2], t[3]);
     }
 
     dst[0] = REVERSE_BYTE_ORDER(t[0]);

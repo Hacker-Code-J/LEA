@@ -28,23 +28,23 @@ void lea128_test() {
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
 
-    const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
+    // const char* plainString = "101112131415161718191a1b1c1d1e1f"; // for 128-bit Key
     // const char* plainString = "202122232425262728292a2b2c2d2e2f"; // for 192-bit Key
     // const char* plainString = "303132333435363738393a3b3c3d3e3f"; // for 256-bit Key
     
-    // const char* plainString = "4F524954484D"; // 48-bit
+    const char* plainString = "4F524954484D"; // 48-bit
     stringToWordArray(plain, plainString);
 
     printf("\nPlain-Text: \n");
     printBigEndian(plain, 4);
     printLittleEndian(plain, 4);
 
-    // PKCS7_BYTE_PAD_32bit(plain, 16,
-    //     (strlen(plainString) % 2) ? (strlen(plainString) + 1) / 2 : strlen(plainString) / 2);
+    PKCS7_BYTE_PAD_32bit(plain, 16,
+        (strlen(plainString) % 2) ? (strlen(plainString) + 1) / 2 : strlen(plainString) / 2);
 
-    // printf("\nPadding Plain-Text: \n");
-    // printBigEndian(plain, 4);
-    // printLittleEndian(plain, 4);
+    printf("\nPadding Plain-Text: \n");
+    printBigEndian(plain, 4);
+    printLittleEndian(plain, 4);
     
 
 #if 1
