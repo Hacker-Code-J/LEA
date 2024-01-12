@@ -13,7 +13,6 @@
 #define _LEA_H
 
 #define LEA_VERSION 128
-
 #define BLOCK_SIZE 16 // 16-byte (128-bit) block
 
 #if LEA_VERSION == 192
