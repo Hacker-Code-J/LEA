@@ -21,4 +21,6 @@ void create_LEA128CBC_KAT_ReqFile(const char* inputFileName, const char* outputF
 void create_LEA128CBC_KAT_FaxFile(const char* inputFileName, const char* outputFileName);
 void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputFileName);
 
+void MOVS_LEA128CBC_KAT_TEST();
+
 #endif // _LEA_CBC_MOVS_H

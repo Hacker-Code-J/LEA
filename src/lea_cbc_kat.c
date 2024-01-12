@@ -265,3 +265,74 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
     
     printf(".rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
+
+void MOVS_LEA128CBC_KAT_TEST() {
+    const char* folderPath = "../LEA128(CBC)MOVS/";
+    char txtFileName[50];
+    char reqFileName[50];
+    char faxFileName[50];
+    char rspFileName[50];
+    
+    // Construct full paths for input and output files
+    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
+    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)KAT.req");
+    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
+    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
+    
+    create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
+    create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
+    create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
+
+    const char* file1 = faxFileName;
+    const char* file2 = rspFileName;
+
+    FILE *fp1 = fopen(file1, "r");
+    FILE *fp2 = fopen(file2, "r");
+
+    char line1[INITIAL_BUF_SIZE], line2[INITIAL_BUF_SIZE];
+    char last_ct1[INITIAL_BUF_SIZE], last_ct2[INITIAL_BUF_SIZE];
+
+    if (!fp1 || !fp2) {
+        perror("Error opening files");
+        exit(1); // Terminate the program due to file open error
+    }
+
+    while (!feof(fp1) && !feof(fp2)) {
+        int foundCT1 = 0, foundCT2 = 0;
+
+        // Read paragraphs from both files
+        while (fgets(line1, INITIAL_BUF_SIZE, fp1) != NULL) {
+            if (strncmp(line1, "CT", 2) == 0) {
+                strcpy(last_ct1, line1);
+                foundCT1 = 1;
+            }
+        }
+        while (fgets(line2, INITIAL_BUF_SIZE, fp2) != NULL) {
+            if (strncmp(line2, "CT", 2) == 0) {
+                strcpy(last_ct2, line2);
+                foundCT2 = 1;
+            }
+        }
+
+        // Ensure both paragraphs had a CT line
+        if (!foundCT1 || !foundCT2) {
+            printf("FAIL\n");
+            fclose(fp1);
+            fclose(fp2);
+            exit(1); // Terminate the program due to missing CT line
+        }
+
+        // Compare last CT strings
+        if (strcmp(last_ct1, last_ct2) != 0) {
+            printf("FAIL\n");
+            fclose(fp1);
+            fclose(fp2);
+            exit(1); // Terminate the program due to mismatch
+        } else {
+            printf("PASS\n"); // Print PASS for each matched pair
+        }
+    }
+
+    fclose(fp1);
+    fclose(fp2);
+}
