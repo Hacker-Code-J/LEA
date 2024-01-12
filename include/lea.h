@@ -14,6 +14,8 @@
 
 #define LEA_VERSION 128
 
+#define BLOCK_SIZE 16 // 16-byte (128-bit) block
+
 #if LEA_VERSION == 192
 #define KEY_SIZE 6
 #define Nr 28

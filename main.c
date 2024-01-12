@@ -18,20 +18,22 @@ int main(void) {
     // lea128_ECB_test();
 
     const char* folderPath = "../LEA128(CBC)MOVS/";
-    char txtFilePath[100];
-    char reqFilePath[100];
-    char faxFilePath[100];
+    char txtFilePath[50];
+    char reqFilePath[50];
+    char faxFilePath[50];
+    char rspFilePath[50];
 
     // Construct full paths for input and output files
     snprintf(txtFilePath, sizeof(txtFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
     snprintf(reqFilePath, sizeof(reqFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.req");
     snprintf(faxFilePath, sizeof(faxFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
+    snprintf(rspFilePath, sizeof(rspFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
 
-    createReqFile(txtFilePath, reqFilePath);
-    printf(".req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
-
-    createFaxFile(txtFilePath, faxFilePath);
-    printf(".fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+    create_LEA128CBC_KAT_ReqFile(txtFilePath, reqFilePath);
+    
+    create_LEA128CBC_KAT_FaxFile(txtFilePath, faxFilePath);
+    
+    create_LEA128CBC_KAT_RspFile(reqFilePath, rspFilePath);
     
     return 0;
 }

@@ -25,6 +25,48 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
     }
 }
 
+// Helper function for XORing blocks
+void xorBlocks(u32* dst, const u32* src1, const u32* src2) {
+    for (int i = 0; i < BLOCK_SIZE/4; i++) {
+        dst[i] = src1[i] ^ src2[i];
+    }
+}
+
+// Assuming block size is fixed (e.g., 128 bits for LEA)
+void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, int length, 
+                const u32* key, const u32* iv) {
+    u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
+    leaEncKeySchedule(roundKeys, key);
+
+    u32 previousBlock[BLOCK_SIZE/4];
+    u32 srcBlock[BLOCK_SIZE/4]; // Temporary block for processing
+
+    memcpy(previousBlock, iv, BLOCK_SIZE);
+
+    for (int i = 0; i < length; i += BLOCK_SIZE) {
+        xorBlocks(srcBlock, &plaintext[i], previousBlock);
+        leaEncrypt(&ciphertext[i], srcBlock, roundKeys);
+        memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
+    }
+}
+
+void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, int length, 
+                const u32* key, const u32* iv) {
+    u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
+    leaDecKeySchedule(roundKeys, key);
+
+    u32 previousBlock[BLOCK_SIZE/4];
+    u32 dstBlock[BLOCK_SIZE/4]; // Temporary block for processing
+
+    memcpy(previousBlock, iv, BLOCK_SIZE);
+
+    for (int i = 0; i < length; i += BLOCK_SIZE) {
+        leaDecrypt(dstBlock, &ciphertext[i], roundKeys);
+        xorBlocks(&plaintext[i], dstBlock, previousBlock);
+        memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
+    }
+}
+
 // void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize) {
 //     for (size_t i = 0; i < blockSize / sizeof(u32); i++) {
 //         dst[i] = src1[i] ^ src2[i];
@@ -37,56 +79,56 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
 //     }
 // }
 
-// ECB Encryption
-void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key) {
-    u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
-    leaEncKeySchedule(roundKeys, key);
+// // ECB Encryption
+// void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key) {
+//     u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
+//     leaEncKeySchedule(roundKeys, key);
 
-    // Encrypt each block
-    for (size_t i = 0; i < plaintext_len * sizeof(u32); i += sizeof(u32)) {
-        leaEncrypt(&ciphertext[i], &plaintext[i], roundKeys);
-    }
-}
+//     // Encrypt each block
+//     for (size_t i = 0; i < plaintext_len * sizeof(u32); i += sizeof(u32)) {
+//         leaEncrypt(&ciphertext[i], &plaintext[i], roundKeys);
+//     }
+// }
 
-// ECB Decryption
-void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key) {
-    u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
-    leaDecKeySchedule(roundKeys, key);
+// // ECB Decryption
+// void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key) {
+//     u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
+//     leaDecKeySchedule(roundKeys, key);
 
-    // Decrypt each block
-    for (size_t i = 0; i < ciphertext_len * sizeof(u32); i += sizeof(u32)) {
-        leaDecrypt(&plaintext[i], &ciphertext[i], roundKeys);
-    }
-}
+//     // Decrypt each block
+//     for (size_t i = 0; i < ciphertext_len * sizeof(u32); i += sizeof(u32)) {
+//         leaDecrypt(&plaintext[i], &ciphertext[i], roundKeys);
+//     }
+// }
 
-void xorBlocks(u32* dst, const u32* src1, const u32* src2, size_t blockSize) {
-    for (size_t i = 0; i < blockSize / sizeof(u32); i++) {
-        dst[i] = src1[i] ^ src2[i];
-    }
-}
+// void xorBlocks(u32* dst, const u32* src1, const u32* src2, size_t blockSize) {
+//     for (size_t i = 0; i < blockSize / sizeof(u32); i++) {
+//         dst[i] = src1[i] ^ src2[i];
+//     }
+// }
 
-void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv) {
-    u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
-    leaEncKeySchedule(roundKeys, key);
+// void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv) {
+//     u32 roundKeys[TOTAL_RK];  // Define the size according to LEA specification
+//     leaEncKeySchedule(roundKeys, key);
 
-    u32 prev_block[16 / sizeof(u32)];
-    memcpy(prev_block, iv, 16);  // Initialize with IV
+//     u32 prev_block[16 / sizeof(u32)];
+//     memcpy(prev_block, iv, 16);  // Initialize with IV
 
-    for (size_t i = 0; i < plaintext_len; i += 16) {
-        // XOR plaintext with previous ciphertext (or IV for the first block)
-        xorBlocks(prev_block, plaintext, prev_block, 16);
+//     for (size_t i = 0; i < plaintext_len; i += 16) {
+//         // XOR plaintext with previous ciphertext (or IV for the first block)
+//         xorBlocks(prev_block, plaintext, prev_block, 16);
         
-        // for (size_t j = 0; j < 16 / sizeof(u32); ++j) {
-        //     prev_block[j] ^= plaintext[i + j];
-        // }
+//         // for (size_t j = 0; j < 16 / sizeof(u32); ++j) {
+//         //     prev_block[j] ^= plaintext[i + j];
+//         // }
 
-        // Encrypt the XORed data
-        leaEncrypt(&ciphertext[i], prev_block, roundKeys);
+//         // Encrypt the XORed data
+//         leaEncrypt(&ciphertext[i], prev_block, roundKeys);
 
-        // Update prev_block to current ciphertext
-        memcpy(prev_block, &ciphertext[i], 16);
-    }
-}
+//         // Update prev_block to current ciphertext
+//         memcpy(prev_block, &ciphertext[i], 16);
+//     }
+// }
 // void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key, const u32* iv);
 
 // // CBC Encryption

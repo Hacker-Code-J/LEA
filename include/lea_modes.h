@@ -7,13 +7,18 @@
 
 void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_bytes);
 
-void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key);
-void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key);
+void xorBlocks(u32* dst, const u32* src1, const u32* src2);
 
-void xorBlocks(u32* dst, const u32* src1, const u32* src2, size_t blockSize);
+// void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key);
+// void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key);
 
-void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv);
-void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key, const u32* iv);
+void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, int length, 
+                const u32* key, const u32* iv);
+void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, int length, 
+                const u32* key, const u32* iv);
+
+// void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv);
+// void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key, const u32* iv);
 
 // void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize);
 

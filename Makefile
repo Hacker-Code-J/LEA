@@ -13,10 +13,12 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
       $(OBJDIR)/lea_cbc_kat.o \
       $(OBJDIR)/main.o
 
-
 # Executable
 TARGET=$(BINDIR)/lea_alg
 # TARGET=lea_test
+
+# Phony targets
+.PHONY: all clean dir rebuild
 
 # Default target
 all: dir $(TARGET)
@@ -27,9 +29,12 @@ $(TARGET): $(OBJS)
 
 # Compile source files into object files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 $(OBJDIR)/%.o: $(TESTDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# Include automatically generated dependencies
+-include $(OBJS:.o=.d)
 
 # Dependency for main.c
 $(OBJDIR)/main.o: main.c $(INCDIR)/lea.h
@@ -52,7 +57,7 @@ FILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \
 
 # Clean up
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(OBJDIR)/*.d $(TARGET)
 	@echo "Removing MOVS files"
 	rm -f $(FILES_TO_DELETE)
 	@echo "Removed MOVS files"
@@ -66,6 +71,3 @@ rebuild: clean all
 
 leak: 
 	valgrind --leak-check=full --show-leak-kinds=all $(TARGET)
-
-# Phony targets
-.PHONY: all clean directories

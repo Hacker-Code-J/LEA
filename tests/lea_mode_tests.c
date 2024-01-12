@@ -36,7 +36,7 @@ void lea128_ECB_test() {
     printBigEndian(plain, sizeof(u32) * plain_len_word);
     printLittleEndian(plain, sizeof(u32) * plain_len_word);
 
-    ECB_Encrypt_LEA(cipher, plain, plain_len_word, key);
+    // ECB_Encrypt_LEA(cipher, plain, plain_len_word, key);
     
     printf("\nCipher-Text: \n");
     printBigEndian(cipher, sizeof(u32) * plain_len_word);

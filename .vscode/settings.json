@@ -24,7 +24,9 @@
     "stdio.h": "c",
     "stdint.h": "c",
     "stdlib.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "lea_modes.h": "c",
+    "lea_cbc_movs.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

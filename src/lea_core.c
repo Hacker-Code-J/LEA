@@ -212,8 +212,8 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
     t[2] = REVERSE_BYTE_ORDER(src[2]);
     t[3] = REVERSE_BYTE_ORDER(src[3]);
 
-    printf("\nEncryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
-                0, t[0], t[1], t[2], t[3]);
+    // printf("\nEncryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
+    //             0, t[0], t[1], t[2], t[3]);
 
     for (int i = 0, j = 0;
          i < Nr;
@@ -228,8 +228,8 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
                     + (t[3] ^ roundKeys[j + 5]), 3);
         t[3] = _t0;
 
-        printf("t[%02d] = %08x:%08x:%08x:%08x\n",
-                i+1, t[0],t[1],t[2],t[3]);
+        // printf("t[%02d] = %08x:%08x:%08x:%08x\n",
+        //         i+1, t[0],t[1],t[2],t[3]);
     }
 
     dst[0] = REVERSE_BYTE_ORDER(t[0]);
