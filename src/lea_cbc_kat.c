@@ -2,40 +2,52 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITIAL_BUF_SIZE 1500
 
 #include "lea_cbc_movs.h"
 
-void parseHexToU32(const char *hex, u32* output) {
-    // Temporary buffer to hold two hexadecimal digits
-    char hexPair[3] = { 0x00, };
-
-    // Loop over the hex string two characters at a time
-    for (int i = 0; i < 4; i += 2) {
-        // Copy two hex digits into the temporary buffer
-        hexPair[0] = hex[i];
-        hexPair[1] = hex[i + 1];
-
-        // Convert the hex pair to a single byte and store it in the output array
-        u32 byte;
-        sscanf(hexPair, "%02x", &byte);
-        output[i / 8] |= byte << (24 - 8 * (i / 8));
+void parseHexLine(u32 arr[4], const char* line) {
+    // Assuming line is in the format "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
+    // for (int i = 0; i < 4; i++) {
+    //     char buffer[9]; // 8 characters for 32 bits + null terminator
+    //     strncpy(buffer, line + i * 8, 8);
+    //     buffer[8] = '\0';
+    //     arr[i] = strtoul(buffer, NULL, 16);
+    // }
+    for (int i = 0; i < 4; i++) {
+        sscanf(line + i * 8, "%8x", &arr[i]);
     }
 }
 
-void parseLine(char* line, u32* output) {
-    // Assuming line format is like "KEY = 0123456789ABCDEF..."
-    // Skip the "KEY = " part to get to the hex string
-    const char* hexString = line + 6;
+// void parseHexToU32(const char *hex, u32* output) {
+//     // Temporary buffer to hold two hexadecimal digits
+//     char hexPair[3] = { 0x00, };
 
-    // Reset the output array
-    for (size_t i = 0; i < sizeof(u32); i++)
-        output[i] = 0x00;
+//     // Loop over the hex string two characters at a time
+//     for (int i = 0; i < 32; i += 2) {
+//         // Copy two hex digits into the temporary buffer
+//         hexPair[0] = hex[i];
+//         hexPair[1] = hex[i + 1];
 
-    // Parse the hex string into the output array
-    for (int i = 0; i < BLOCK_SIZE; i++)
-        parseHexToU32(hexString, output + i);
-}
+//         // Convert the hex pair to a single byte and store it in the output array
+//         u32 byte;
+//         sscanf(hexPair, "%02x", &byte);
+//         output[i / 8] |= byte << (24 - 8 * (i / 8));
+//     }
+// }
+
+// void parseLine(char* line, u32* output) {
+//     // Assuming line format is like "KEY = 0123456789ABCDEF..."
+//     // Skip the "KEY = " part to get to the hex string
+//     const char* hexString = line;
+
+//     // Reset the output array
+//     for (size_t i = 0; i < sizeof(u32); i++)
+//         output[i] = 0x00;
+
+//     // Parse the hex string into the output array
+//     for (int i = 0; i < BLOCK_SIZE; i++)
+//         parseHexToU32(hexString, output + i);
+// }
 
 // Usage:
 // char testLine[] = "KEY = 0123456789ABCDEFFEDCBA9876543210";
@@ -184,6 +196,9 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
     size_t bufsize = INITIAL_BUF_SIZE;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
     
+    DATA data;
+    memset(&data, 0, sizeof(DATA));
+
     // Open the source text file for reading
     reqFile = fopen(inputFileName, "r");
     if (reqFile == NULL) {
@@ -208,33 +223,21 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
         return;
     }
 
-    while (fgets(line, sizeof(line), reqFile) != NULL) {
-        DATA data;
+    while (fgets(line, bufsize, reqFile) != NULL) {
         if (strncmp(line, "KEY =", 5) == 0) {
             if (!isFirstKey) {
                 // If not the first KEY, add a newline before writing the line
                 fputc('\n', rspFile);
             }
             isFirstKey = 0;
+            parseHexLine(data.key, line + 6);
             fputs(line, rspFile);
-            // parseLine(line + 6, data.key);
-            // fprintf(rspFile, "%s", line); // Write KEY to the response file
         } else if (strncmp(line, "IV =", 4) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', rspFile);
-            }
-            isFirstKey = 0;
-            parseLine(line + 5, data.iv);
-            fprintf(rspFile, "%s", line); // Write IV to the response file
+            parseHexLine(data.iv, line + 5);
+            fputs(line, rspFile);
         } else if (strncmp(line, "PT =", 4) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', rspFile);
-            }
-            isFirstKey = 0;
-            parseLine(line + 5, data.pt);
-            fprintf(rspFile, "%s\n", line); // Write PT to the response file
+            parseHexLine(data.pt, line + 5);
+            fputs(line, rspFile);
 
             CBC_Encrypt_LEA(data.ct, data.pt, BLOCK_SIZE, data.key, data.iv);
 
@@ -244,7 +247,16 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
                 fprintf(rspFile, "%08X", data.ct[i]);
             }
             fprintf(rspFile, "\n");
+            
+            // fwrite(&data, sizeof(DATA), 1, rspFile);
+            memset(&data, 0, sizeof(DATA));
         }
+        // else if (strncmp(line, "CT =", 4) == 0) {
+        //     parseHexLine(data.ct, line + 5);
+        //     // Write to file and reset struct
+        //     fwrite(&data, sizeof(DATA), 1, rspFile);
+        //     memset(&data, 0, sizeof(DATA));
+        // }
     }
 
     free(line);

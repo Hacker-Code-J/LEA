@@ -18,22 +18,20 @@ int main(void) {
     // lea128_ECB_test();
 
     const char* folderPath = "../LEA128(CBC)MOVS/";
-    char txtFilePath[50];
-    char reqFilePath[50];
-    char faxFilePath[50];
-    char rspFilePath[50];
-
+    char txtFileName[50];
+    char reqFileName[50];
+    char faxFileName[50];
+    char rspFileName[50];
+    
     // Construct full paths for input and output files
-    snprintf(txtFilePath, sizeof(txtFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
-    snprintf(reqFilePath, sizeof(reqFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.req");
-    snprintf(faxFilePath, sizeof(faxFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
-    snprintf(rspFilePath, sizeof(rspFilePath), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
-
-    create_LEA128CBC_KAT_ReqFile(txtFilePath, reqFilePath);
+    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
+    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)KAT.req");
+    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
+    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
     
-    create_LEA128CBC_KAT_FaxFile(txtFilePath, faxFilePath);
-    
-    create_LEA128CBC_KAT_RspFile(reqFilePath, rspFilePath);
+    create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
+    create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
+    create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
     
     return 0;
 }
