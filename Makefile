@@ -14,7 +14,7 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
       $(OBJDIR)/main.o
 
 # Executable
-TARGET=$(BINDIR)/lea_alg
+TARGET=$(BINDIR)/lea128_cbc_movs
 # TARGET=lea_test
 
 # Phony targets
