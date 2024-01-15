@@ -4,6 +4,7 @@
 
 #include "lea_cbc_movs.h"
 
+#if 0
 void create_LEA128CBC_MMT_ReqFile(const char* inputFileName, const char* outputFileName) {
     FILE *infile, *reqFile;
     char* line;
@@ -239,7 +240,7 @@ void MOVS_LEA128CBC_MMT_TEST() {
     fclose(file1);
     fclose(file2);
 }
-
+#endif
 // =====================================================
 // If the "CT" (Ciphertext) value is longer and doesn't fit into the existing structure of DataSet, you will need to adjust your data structure and parsing logic to accommodate the longer CT values. Here's how you can modify the program:
 

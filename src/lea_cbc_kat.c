@@ -4,6 +4,110 @@
 
 #include "lea_cbc_movs.h"
 
+void freeCryptoData(CryptoData* cryptoData) {
+    if (cryptoData != NULL) {
+        // Free the dynamically allocated memory for pt and ct
+        free(cryptoData->pt);
+        free(cryptoData->ct);
+
+        // Set the pointers to NULL to avoid dangling pointers
+        cryptoData->pt = NULL;
+        cryptoData->ct = NULL;
+
+        // Reset the lengths to zero
+        cryptoData->ptLength = 0;
+        cryptoData->ctLength = 0;
+    }
+}
+
+void parseHexLineVariable(u32* arr, const char* line, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        u32 value;
+        // Ensure not to read beyond the line's end
+        if (sscanf(line + i * 8, "%8x", &value) != 1) {
+            // Handle parsing error, such as setting a default value or logging an error
+            arr[i] = 0; // Example: set to zero if parsing fails
+        } else {
+            arr[i] = value;
+        }
+    }
+}
+
+size_t determineLength(const char* hexString) {
+    // Calculate the length of the hexadecimal string
+    size_t hexLength = strlen(hexString);
+
+    // Convert hex length to the length of the u32 array
+    size_t u32Length = hexLength / 8;
+
+    // If the hex string length is not a multiple of 8, add an extra element
+    if (hexLength % 8 != 0) {
+        u32Length++;
+    }
+
+    return u32Length;
+}
+
+int readCryptoData(FILE* fp, CryptoData* cryptoData) {
+    char line[1024]; // Assuming each line will not exceed this length
+
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        if (strncmp(line, "KEY =", 5) == 0) {
+            parseHexLine(cryptoData->key, line + 6); // Skip "KEY = "
+        } else if (strncmp(line, "IV =", 4) == 0) {
+            parseHexLine(cryptoData->iv, line + 5); // Skip "IV = "
+        } else if (strncmp(line, "PT =", 4) == 0) {
+            cryptoData->ptLength = determineLength(line + 5); // Calculate length
+            cryptoData->pt = (u32*)malloc(cryptoData->ptLength * sizeof(u32));
+            if (cryptoData->pt == NULL) return -1;
+            parseHexLineVariable(cryptoData->pt, line + 5, cryptoData->ptLength);
+        } else if (strncmp(line, "CT =", 4) == 0) {
+            cryptoData->ctLength = determineLength(line + 5); // Calculate length
+            cryptoData->ct = (u32*)malloc(cryptoData->ctLength * sizeof(u32));
+            if (cryptoData->ct == NULL) {
+                free(cryptoData->pt); // Free pt if ct allocation fails
+                return -1;
+            }
+            parseHexLineVariable(cryptoData->ct, line + 5, cryptoData->ctLength);
+        }
+        // Add more conditions here if there are more data types
+    }
+
+    return 0; // Return 0 on successful read
+}
+
+bool compareCryptoData(const CryptoData* data1, const CryptoData* data2) {
+    // Compare fixed-size arrays: key and iv
+    for (int i = 0; i < 4; i++) {
+        if (data1->key[i] != data2->key[i] || data1->iv[i] != data2->iv[i]) {
+            return 0; // Not equal
+        }
+    }
+
+    // Compare lengths and contents of pt
+    if (data1->ptLength != data2->ptLength) {
+        return 0; // Not equal
+    }
+    for (size_t i = 0; i < data1->ptLength; i++) {
+        if (data1->pt[i] != data2->pt[i]) {
+            return 0; // Not equal
+        }
+    }
+
+    // Compare lengths and contents of ct
+    if (data1->ctLength != data2->ctLength) {
+        return 0; // Not equal
+    }
+    for (size_t i = 0; i < data1->ctLength; i++) {
+        if (data1->ct[i] != data2->ct[i]) {
+            return 0; // Not equal
+        }
+    }
+
+    return 1; // All comparisons passed, data structures are equal
+}
+
+#if 1
 void printProgressBar(int current, int total) {
     int width = 50; // Width of the progress bar
     float progress = (float)current / total;
@@ -25,24 +129,6 @@ void printProgressBar(int current, int total) {
     printf("%s] %d%% (%d/%d)", CYAN, (int)(progress * 100.0), current, total);
     fflush(stdout); // Flush the output buffer
 
-    // int width = 50; // Width of the progress bar
-    // float progress = (float)current / total;
-    // int pos = width * progress;
-
-    // // ANSI Escape Codes for colors
-    // const char* RED = "\x1b[31m";
-    // const char* GREEN = "\x1b[32m";
-    // const char* YELLOW = "\x1b[33m";
-    // const char* RESET = "\x1b[0m";
-
-    // printf("\r[");
-    // for (int i = 0; i < width; ++i) {
-    //     if (i < pos) printf("%s=", GREEN); // Green for completed part
-    //     else if (i == pos) printf("%s>", YELLOW); // Yellow for current position
-    //     else printf("%s ", RED); // Red for remaining part
-    // }
-    // printf("%s] %d%% (%d/%d", RESET, (int)(progress * 100.0), current, total);
-    // fflush(stdout); // Flush the output buffer
     // ==============================================
     // int width = 50; // Width of the progress bar
     // float progress = (float)current / total;
@@ -89,7 +175,7 @@ bool compareDataSets(const DataSet* data1, const DataSet* data2) {
     return 1;
 }
 
-void parseHexLine(u32 arr[4], const char* line) {
+void parseHexLine(u32* arr, const char* line) {
     // Assuming line is in the format "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     // for (int i = 0; i < 4; i++) {
     //     char buffer[9]; // 8 characters for 32 bits + null terminator
@@ -105,7 +191,7 @@ void parseHexLine(u32 arr[4], const char* line) {
     for (int i = 0; i < 4; i++) {
         u32 value;
         sscanf(line + i * 8, "%8x", &value);
-        arr[i] = value;
+        *(arr + i) = value;
     }
 }
 
@@ -124,48 +210,6 @@ const char* skipPrefix(const char* line) {
     }
     return line;
 }
-
-// void parseHexToU32(const char *hex, u32* output) {
-//     // Temporary buffer to hold two hexadecimal digits
-//     char hexPair[3] = { 0x00, };
-
-//     // Loop over the hex string two characters at a time
-//     for (int i = 0; i < 32; i += 2) {
-//         // Copy two hex digits into the temporary buffer
-//         hexPair[0] = hex[i];
-//         hexPair[1] = hex[i + 1];
-
-//         // Convert the hex pair to a single byte and store it in the output array
-//         u32 byte;
-//         sscanf(hexPair, "%02x", &byte);
-//         output[i / 8] |= byte << (24 - 8 * (i / 8));
-//     }
-// }
-
-// void parseLine(char* line, u32* output) {
-//     // Assuming line format is like "KEY = 0123456789ABCDEF..."
-//     // Skip the "KEY = " part to get to the hex string
-//     const char* hexString = line;
-
-//     // Reset the output array
-//     for (size_t i = 0; i < sizeof(u32); i++)
-//         output[i] = 0x00;
-
-//     // Parse the hex string into the output array
-//     for (int i = 0; i < BLOCK_SIZE; i++)
-//         parseHexToU32(hexString, output + i);
-// }
-
-// Usage:
-// char testLine[] = "KEY = 0123456789ABCDEFFEDCBA9876543210";
-// u32 output[4] = {0};
-
-// parseLine(testLine, output);
-
-// // Print the output for verification
-// for (int i = 0; i < 4; i++) {
-//     printf("output[%d] = %08x\n", i, output[i]);
-// }
 
 void create_LEA128CBC_KAT_ReqFile(const char* inputFileName, const char* outputFileName) {
     FILE *infile, *reqFile;
@@ -299,6 +343,69 @@ void create_LEA128CBC_KAT_FaxFile(const char* inputFileName, const char* outputF
 
 void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputFileName) {
     FILE *reqFile, *rspFile;
+    char line[INITIAL_BUF_SIZE];
+    int isFirstKey = 1;
+    CryptoData data;
+    memset(&data, 0, sizeof(CryptoData));
+
+    reqFile = fopen(inputFileName, "r");
+    if (reqFile == NULL) {
+        perror("Error opening input file");
+        return;
+    }
+
+    rspFile = fopen(outputFileName, "w");
+    if (rspFile == NULL) {
+        perror("Error opening output file");
+        fclose(reqFile);
+        return;
+    }
+
+    while (fgets(line, sizeof(line), reqFile) != NULL) {
+        if (strncmp(line, "KEY =", 5) == 0) {
+            if (!isFirstKey) {
+                fputc('\n', rspFile);
+            }
+            isFirstKey = 0;
+            parseHexLine(data.key, line + 6);
+            fputs(line, rspFile);
+        } else if (strncmp(line, "IV =", 4) == 0) {
+            parseHexLine(data.iv, line + 5);
+            fputs(line, rspFile);
+        } else if (strncmp(line, "PT =", 4) == 0) {
+            data.ptLength = determineLength(line + 5);
+            data.pt = (u32*)malloc(data.ptLength * sizeof(u32));
+            if (data.pt == NULL) {
+                perror("Unable to allocate memory for PT");
+                break;
+            }
+            parseHexLineVariable(data.pt, line + 5, data.ptLength);
+            fputs(line, rspFile);
+
+            data.ct = (u32*)malloc(data.ptLength * sizeof(u32));
+            if (data.ct == NULL) {
+                perror("Unable to allocate memory for CT");
+                free(data.pt);
+                break;
+            }
+            CBC_Encrypt_LEA(data.ct, data.pt, data.ptLength, data.key, data.iv);
+
+            fprintf(rspFile, "CT = ");
+            for (size_t i = 0; i < data.ptLength - 1; i++) {
+                fprintf(rspFile, "%08X", data.ct[i]);
+            }
+            fprintf(rspFile, "\n");
+
+            freeCryptoData(&data);
+        }
+    }
+
+    fclose(reqFile);
+    fclose(rspFile);
+
+    printf("LEA128(CBC)KAT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+#if 0
+    FILE *reqFile, *rspFile;
     char* line;
     size_t bufsize = INITIAL_BUF_SIZE;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
@@ -358,12 +465,6 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
             // fwrite(&data, sizeof(DATA), 1, rspFile);
             memset(&data, 0, sizeof(DataSet));
         }
-        // else if (strncmp(line, "CT =", 4) == 0) {
-        //     parseHexLine(data.ct, line + 5);
-        //     // Write to file and reset struct
-        //     fwrite(&data, sizeof(DATA), 1, rspFile);
-        //     memset(&data, 0, sizeof(DATA));
-        // }
     }
 
     free(line);
@@ -371,23 +472,8 @@ void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputF
     fclose(rspFile);
     
     printf("LEA128(CBC)KAT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+#endif
 }
-
-// bool compare_sets(FILE* file1, FILE* file2) {
-//     char line1[MAX_LINE_LENGTH], line2[MAX_LINE_LENGTH];
-
-//     for (int i = 0; i < 4; i++) {
-//         if (!fgets(line1, MAX_LINE_LENGTH, file1) || !fgets(line2, MAX_LINE_LENGTH, file2)) {
-//             return false; // Error or end of file
-//         }
-
-//         if (i < 3 && strcmp(line1, line2) != 0) {
-//             return false; // Mismatch in KEY, IV, or PT
-//         }
-//     }
-
-//     return true;
-// }
 
 void MOVS_LEA128CBC_KAT_TEST() {
     const char* folderPath = "../LEA128(CBC)MOVS/";
@@ -416,6 +502,38 @@ void MOVS_LEA128CBC_KAT_TEST() {
         return;
     }
 
+    CryptoData data1, data2;
+    memset(&data1, 0, sizeof(CryptoData));
+    memset(&data2, 0, sizeof(CryptoData));
+    int result = 1; // Default to pass
+    int idx = 1;
+    int totalTests = 275; // Assuming a total of 275 tests
+    int passedTests = 0;
+    while (idx <= totalTests) {
+        if (readCryptoData(file1, &data1) == -1 || readCryptoData(file2, &data2) == -1) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(&data1, &data2)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(&data1);
+        freeCryptoData(&data2);
+
+        // Reset the structures for the next iteration
+        memset(&data1, 0, sizeof(CryptoData));
+        memset(&data2, 0, sizeof(CryptoData));
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+#if 0
     DataSet data1, data2;
     memset(&data1, 0, sizeof(DataSet));
     memset(&data2, 0, sizeof(DataSet));
@@ -439,7 +557,8 @@ void MOVS_LEA128CBC_KAT_TEST() {
         passedTests++;
         printProgressBar(idx++, totalTests);
     }
-    
+
+#endif    
     printf("\n\nTesting Summary:\n");
     printf("Passed: %d/%d\n", passedTests, totalTests);
     if (result) {
@@ -450,39 +569,5 @@ void MOVS_LEA128CBC_KAT_TEST() {
 
     fclose(file1);
     fclose(file2);
-
-    // if (file1 == NULL || file2 == NULL) {
-    //     perror("Error opening files");
-    //     return;
-    // }
-
-    // char line1[MAX_LINE_LENGTH], line2[MAX_LINE_LENGTH];
-    // int allMatch = 1;
-
-    // while (fgets(line1, MAX_LINE_LENGTH, file1) != NULL &&
-    //        fgets(line2, MAX_LINE_LENGTH, file2) != NULL) {
-
-    //     if (strcmp(line1, line2) != 0) {
-    //         // Allow difference in CT lines
-    //         if (strncmp(line1, "CT", 2) == 0 && strncmp(line2, "CT", 2) == 0) 
-    //             continue;
-
-    //         allMatch = 0;
-    //         break;
-    //     }
-    // }
-
-    // // Check for file ending consistency
-    // if (!feof(file1) || !feof(file2)) {
-    //     allMatch = 0;
-    // }
-
-    // fclose(file1);
-    // fclose(file2);
-
-    // if (allMatch) {
-    //     printf("PASS\n");
-    // } else {
-    //     printf("FAIL\n");
-    // }
 }
+#endif
