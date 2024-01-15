@@ -10,7 +10,7 @@ INCDIR=./include
 # Object files
 OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
       $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
-      $(OBJDIR)/lea_cbc_kat.o \
+      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o\
       $(OBJDIR)/main.o
 
 # Executable
@@ -46,6 +46,7 @@ $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
 
 $(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
+$(OBJDIR)/lea_cbc_mmt.o: $(SRCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_cbc_movs.h
 
 $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
 $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
@@ -53,14 +54,17 @@ $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR
 # Define the file paths
 FILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \
                   LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.fax \
-                  LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.rsp
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.rsp \
+				  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.req \
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.fax \
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.rsp
 
 # Clean up
 clean:
 	rm -f $(OBJS) $(OBJDIR)/*.d $(TARGET)
 	@echo "Removing MOVS files"
 	rm -f $(FILES_TO_DELETE)
-	@echo "Removed MOVS files"
+	@echo "MOVS files removal completed successfully."
 # rm -f lea_test
 
 # Create necessary directories

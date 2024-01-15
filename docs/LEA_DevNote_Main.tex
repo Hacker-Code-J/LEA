@@ -133,23 +133,22 @@
 	keywordstyle=[7]{\bfseries\color{Turquoise}},
 	otherkeywords={bool},
 	morekeywords=[2]{;},
-	morekeywords=[3]{u8,u32,u64, size\_t},
+	morekeywords=[3]{u8,u32,u64, size\_t, FILE},
 	morekeywords=[4]{
-		rCon, SubWord, RotWord, MUL\_GF256, PKCS7\_PAD, StringToWordArray
+		PKCS7\_PAD, StringToWordArray,
+		freeCryptoData, parseHexLine,
+		parseHexLineVariable, determineLength,
+		readCryptoData, compareCryptoData
 	},
 	morekeywords=[5]{
-		KeyExpansion, AddRoundKey,
-		SubBytes, InvSubBytes,
-		ShiftRows, InvShiftRows,
-		MixColumns, InvMixColumns,
-		SubMix, InvSubInvMix,
-		AES\_Encrypt, AES\_Decrypt
+		MOVS\_LEA128CBC\_KAT\_TEST,
+		create\_LEA128CBC\_KAT\_ReqFile,
+		create\_LEA128CBC\_KAT\_FaxFile,
+		create\_LEA128CBC\_KAT\_RspFile
 	},
-	morekeywords=[6]{false, true, MAX, MIN},
-	morekeywords=[7]{AES\_VERSION, AES\_BLOCK\_SIZE, ROUND\_KEYS\_SIZE,
-		s\_box, inv\_s\_box, Nk, Nr,
-		Te0, Te1, Te2, Te3,
-		Td0, Td1, Td2, Td3
+	morekeywords=[6]{false, true, MAX, MIN, INITIAL\_BUF\_SIZE},
+	morekeywords=[7]{
+		CryptoData
 	},
 	numberstyle=\tiny\color{gray},
 	stringstyle=\color{purple},
@@ -476,7 +475,7 @@
 	\mainmatter
 	\input{chapters/chapter1.tex} % LEA: Implementation in Little-Endian
 	\input{chapters/chapter2.tex} % Modes of Operation
-	\input{chapters/chapter3.tex} % Modes of Operation
+	\input{chapters/chapter3.tex} % Mode of Operations Validation System (MOVS)
 	% Include more chapters as needed
 	
 	\appendix

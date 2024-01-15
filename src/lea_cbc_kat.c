@@ -6,15 +6,10 @@
 
 void freeCryptoData(CryptoData* cryptoData) {
     if (cryptoData != NULL) {
-        // Free the dynamically allocated memory for pt and ct
         free(cryptoData->pt);
         free(cryptoData->ct);
-
-        // Set the pointers to NULL to avoid dangling pointers
         cryptoData->pt = NULL;
         cryptoData->ct = NULL;
-
-        // Reset the lengths to zero
         cryptoData->ptLength = 0;
         cryptoData->ctLength = 0;
     }
@@ -49,7 +44,7 @@ size_t determineLength(const char* hexString) {
 }
 
 int readCryptoData(FILE* fp, CryptoData* cryptoData) {
-    char line[1024]; // Assuming each line will not exceed this length
+    char line[INITIAL_BUF_SIZE]; // Assuming each line will not exceed this length
 
     while (fgets(line, sizeof(line), fp) != NULL) {
         if (strncmp(line, "KEY =", 5) == 0) {

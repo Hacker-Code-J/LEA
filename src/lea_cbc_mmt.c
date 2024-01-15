@@ -4,7 +4,7 @@
 
 #include "lea_cbc_movs.h"
 
-#if 0
+#if 1
 void create_LEA128CBC_MMT_ReqFile(const char* inputFileName, const char* outputFileName) {
     FILE *infile, *reqFile;
     char* line;
@@ -111,41 +111,27 @@ void create_LEA128CBC_MMT_FaxFile(const char* inputFileName, const char* outputF
 
 void create_LEA128CBC_MMT_RspFile(const char* inputFileName, const char* outputFileName) {
     FILE *reqFile, *rspFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
-    int isFirstKey = 1; // Flag to check if it's the first KEY line
-    
-    DataSet data;
-    memset(&data, 0, sizeof(DataSet));
+    char line[INITIAL_BUF_SIZE];
+    int isFirstKey = 1;
+    CryptoData data;
+    memset(&data, 0, sizeof(CryptoData));
 
-    // Open the source text file for reading
     reqFile = fopen(inputFileName, "r");
     if (reqFile == NULL) {
         perror("Error opening input file");
         return;
     }
 
-    // Open the .rsp file for writing
     rspFile = fopen(outputFileName, "w");
     if (rspFile == NULL) {
-        perror("Error opening .rsp file");
+        perror("Error opening output file");
         fclose(reqFile);
         return;
     }
 
-    // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
-        perror("Unable to allocate memory");
-        fclose(reqFile);
-        fclose(rspFile);
-        return;
-    }
-
-    while (fgets(line, bufsize, reqFile) != NULL) {
+    while (fgets(line, sizeof(line), reqFile) != NULL) {
         if (strncmp(line, "KEY =", 5) == 0) {
             if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
                 fputc('\n', rspFile);
             }
             isFirstKey = 0;
@@ -155,26 +141,36 @@ void create_LEA128CBC_MMT_RspFile(const char* inputFileName, const char* outputF
             parseHexLine(data.iv, line + 5);
             fputs(line, rspFile);
         } else if (strncmp(line, "PT =", 4) == 0) {
-            parseHexLine(data.pt, line + 5);
+            data.ptLength = determineLength(line + 5);
+            data.pt = (u32*)malloc(data.ptLength * sizeof(u32));
+            if (data.pt == NULL) {
+                perror("Unable to allocate memory for PT");
+                break;
+            }
+            parseHexLineVariable(data.pt, line + 5, data.ptLength);
             fputs(line, rspFile);
 
-            CBC_Encrypt_LEA(data.ct, data.pt, BLOCK_SIZE, data.key, data.iv);
+            data.ct = (u32*)malloc(data.ptLength * sizeof(u32));
+            if (data.ct == NULL) {
+                perror("Unable to allocate memory for CT");
+                free(data.pt);
+                break;
+            }
+            CBC_Encrypt_LEA(data.ct, data.pt, data.ptLength, data.key, data.iv);
 
-            // Write CT to the response file
             fprintf(rspFile, "CT = ");
-            for (int i = 0; i < 4; i++) {
+            for (size_t i = 0; i < data.ptLength - 1; i++) {
                 fprintf(rspFile, "%08X", data.ct[i]);
             }
             fprintf(rspFile, "\n");
-        
-            memset(&data, 0, sizeof(DataSet));
+
+            freeCryptoData(&data);
         }
     }
 
-    free(line);
     fclose(reqFile);
     fclose(rspFile);
-    
+
     printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 

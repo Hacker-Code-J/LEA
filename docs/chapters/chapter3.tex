@@ -1,9 +1,315 @@
 \chapter{Mode of Operations Validation System (MOVS)}
 
+\section{Structure}
+\textcolor{blue}{\bf LEA128(CBC)KAT.txt:}
+\begin{lstlisting}
+KEY = 00000000000000000000000000000000
+IV = 00000000000000000000000000000000
+PT = 80000000000000000000000000000000
+CT = CE8DCF04DD60982B1D8F5035FD534DE2
+\end{lstlisting}
+\vspace{4pt}
+\textcolor{blue}{\bf LEA128(CBC)MMT.txt:}
+\begin{lstlisting}
+KEY = 724F8279123B9307658A109101466A15
+IV = FEF995090770B941B0BF2B120A859BB8
+PT = 76718FF5B60510FB4A9AA28CF9A57A60
+CT = D65A9EC458B768C4E9BE62C6FE04A51D
+
+KEY = AE38ECC785CC238F263D14285216B406
+IV = BB0F694719D4BF967A085D4FD98A37E3
+PT = F3F7057F5670F3E8BB9D9AAA95F12F71EA30FAB7622F0A9F9EDC2821CA7D0968
+CT = D504FFC845EF447C516799AD8877F967628F49F15A8B64FA48AD215232884A52
+\end{lstlisting}
+\vspace{4pt}
+\textcolor{blue}{\bf LEA128(CBC)MCT.txt:}
+\begin{lstlisting}
+COUNT = 0
+KEY = 724F8279123B9307658A109101466A15
+IV = FEF995090770B941B0BF2B120A859BB8
+PT = 76718FF5B60510FB4A9AA28CF9A57A60
+CT = 92E58A0B613CA94D922F7E6A445A4EC7
+\end{lstlisting}
+\vspace{12pt}
+
+\begin{lstlisting}[style=C]
+typedef struct {
+	u32 key[4];     // Fixed 128 bits for key
+	u32 iv[4];      // Fixed 128 bits for iv
+	u32* pt;        // Pointer for arbitrary length plaintext
+	size_t ptLength; // Length of pt
+	u32* ct;        // Pointer for arbitrary length ciphertext
+	size_t ctLength; // Length of ct
+} CryptoData; // 64-byte (16 + 16 + 8 + 8 + 8 + 8)
+\end{lstlisting}
+
+\newpage
+\subsection{\texttt{freeCryptoData()}}
+\begin{lstlisting}[style=C]
+void freeCryptoData(CryptoData* cryptoData) {
+	if (cryptoData != NULL) {
+		// Free the dynamically allocated memory for pt and ct
+		free(cryptoData->pt);
+		free(cryptoData->ct);
+		
+		// Set the pointers to NULL to avoid dangling pointers
+		cryptoData->pt = NULL;
+		cryptoData->ct = NULL;
+		
+		// Reset the lengths to zero
+		cryptoData->ptLength = 0;
+		cryptoData->ctLength = 0;
+	}
+}
+\end{lstlisting}
+
+\subsection{\texttt{parseHexLine()}}
+\begin{lstlisting}[style=C]
+void parseHexLine(u32* arr, const char* line) {
+	for (int i = 0; i < 4; i++) {
+		u32 value;
+		sscanf(line + i * 8, "%8x", &value);
+		*(arr + i) = value;
+	}
+}
+\end{lstlisting}
+\subsection{\texttt{parseHexLineVariable()}}
+\begin{lstlisting}[style=C]
+void parseHexLineVariable(u32* arr, const char* line, size_t length) {
+	for (size_t i = 0; i < length; i++) {
+		u32 value;
+		// Ensure not to read beyond the line's end
+		if (sscanf(line + i * 8, "%8x", &value) != 1) {
+			// Handle parsing error, such as setting a default value or logging an error
+			arr[i] = 0; // Example: set to zero if parsing fails
+		} else {
+			arr[i] = value;
+		}
+	}
+}
+\end{lstlisting}
+
+\newpage
+\subsection{\texttt{determineLength()}}
+\begin{lstlisting}[style=C]
+size_t determineLength(const char* hexString) {
+	// Calculate the length of the hexadecimal string
+	size_t hexLength = strlen(hexString);
+	
+	// Convert hex length to the length of the u32 array
+	size_t u32Length = hexLength / 8;
+	
+	// If the hex string length is not a multiple of 8, add an extra element
+	if (hexLength % 8 != 0) {
+		u32Length++;
+	}
+	
+	return u32Length;
+}
+\end{lstlisting}
+
+\newpage
+\subsection{\texttt{readCryptoData()}}
+\begin{lstlisting}[style=C]
+int readCryptoData(FILE* fp, CryptoData* cryptoData) {
+	 // Assuming each line will not exceed this length
+	char line[INITIAL_BUF_SIZE];
+	
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		if (strncmp(line, "KEY =", 5) == 0) {
+			// Skip "KEY = "
+			parseHexLine(cryptoData->key, line + 6);
+		} else if (strncmp(line, "IV =", 4) == 0) {
+		 	// Skip "IV = "
+			parseHexLine(cryptoData->iv, line + 5);
+		} else if (strncmp(line, "PT =", 4) == 0) {
+		 	// Calculate length
+			cryptoData->ptLength = determineLength(line + 5);
+			cryptoData->pt = (u32*)malloc(cryptoData->ptLength * sizeof(u32));
+			if (cryptoData->pt == NULL) return -1;
+			parseHexLineVariable(cryptoData->pt, line + 5, cryptoData->ptLength);
+		} else if (strncmp(line, "CT =", 4) == 0) {
+			// Calculate length
+			cryptoData->ctLength = determineLength(line + 5);
+			cryptoData->ct = (u32*)malloc(cryptoData->ctLength * sizeof(u32));
+			if (cryptoData->ct == NULL) {
+				// Free pt if ct allocation fails
+				free(cryptoData->pt);
+				return -1;
+			}
+			parseHexLineVariable(cryptoData->ct, line + 5, cryptoData->ctLength);
+		}
+		// Add more conditions here if there are more data types
+	}
+	
+	return 0; // Return 0 on successful read
+}	
+\end{lstlisting}
+
+\newpage
+\subsection{\texttt{compareCryptoData()}}
+\begin{lstlisting}[style=C]
+bool compareCryptoData(const CryptoData* data1, const CryptoData* data2) {
+	// Compare fixed-size arrays: key and iv
+	for (int i = 0; i < 4; i++) {
+		if (data1->key[i] != data2->key[i] || data1->iv[i] != data2->iv[i]) {
+			return 0; // Not equal
+		}
+	}
+	
+	// Compare lengths and contents of pt
+	if (data1->ptLength != data2->ptLength) {
+		return 0; // Not equal
+	}
+	for (size_t i = 0; i < data1->ptLength; i++) {
+		if (data1->pt[i] != data2->pt[i]) {
+			return 0; // Not equal
+		}
+	}
+	
+	// Compare lengths and contents of ct
+	if (data1->ctLength != data2->ctLength) {
+		return 0; // Not equal
+	}
+	for (size_t i = 0; i < data1->ctLength; i++) {
+		if (data1->ct[i] != data2->ct[i]) {
+			return 0; // Not equal
+		}
+	}
+	
+	return 1; // All comparisons passed, data structures are equal
+}
+\end{lstlisting}
+
+\newpage
 \section{Known Answer Test (KAT)}
-\begin{itemize}
-	\item Variable Key KAT
-	\item Variable Text KAT
-\end{itemize}
+\subsection{Overview}
+\begin{lstlisting}[style=C]
+void MOVS_LEA128CBC_KAT_TEST() {
+	const char* folderPath = "../LEA128(CBC)MOVS/";
+	char txtFileName[50]; char reqFileName[50];
+	char faxFileName[50]; char rspFileName[50];
+	
+	// Construct full paths for input and output files
+	snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
+	snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)KAT.req");
+	snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
+	snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
+	
+	create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
+	create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
+	create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
+	
+	printf("\nLEA128-CBC-KAT-TEST:\n");	
+	FILE* file1 = fopen(faxFileName, "r");
+	FILE* file2 = fopen(rspFileName, "r");
+	if (!file1 || !file2) {
+		perror("Error opening files"); return;
+	}
+	
+	CryptoData data1, data2;
+	memset(&data1, 0, sizeof(CryptoData));
+	memset(&data2, 0, sizeof(CryptoData));
+	int result = 1; // Default to pass
+	int idx = 1;
+	int totalTests = 275; // Assuming a total of 275 tests
+	int passedTests = 0;
+	while (idx <= totalTests) {
+		if (readCryptoData(file1, &data1) == -1 || readCryptoData(file2, &data2) == -1) {
+			result = 0; // Indicate failure if read fails
+			break;
+		}
+		
+		if (!compareCryptoData(&data1, &data2)) {
+			result = 0; // Fail
+			printf("\nFAIL\n");
+			break;
+		}
+		
+		// Free the dynamically allocated memory
+		freeCryptoData(&data1);
+		freeCryptoData(&data2);
+		
+		// Reset the structures for the next iteration
+		memset(&data1, 0, sizeof(CryptoData));
+		memset(&data2, 0, sizeof(CryptoData));
+		
+		passedTests++;
+		printProgressBar(idx++, totalTests);
+	}
+
+	printf("\n\nTesting Summary:\n");
+	printf("Passed: %d/%d\n", passedTests, totalTests);
+	if (result) {
+		printf("Perfect PASS !!!\n");
+	} else {
+		printf("Some tests FAILED.\n");
+	}
+	
+	fclose(file1);
+	fclose(file2);
+}
+\end{lstlisting}
+
+\subsection{\texttt{create\_LEA128CBC\_KAT\_ReqFile()}}
+\begin{lstlisting}[style=C]
+void create_LEA128CBC_KAT_ReqFile(const char* inputFileName, const char* outputFileName) {
+	FILE *infile, *reqFile;
+	char* line;
+	size_t bufsize = INITIAL_BUF_SIZE;
+	// Flag to check if it's the first KEY line
+	int isFirstKey = 1; 
+	
+	// Open the source text file for reading
+	infile = fopen(inputFileName, "r");
+	if (infile == NULL) {
+		perror("Error opening input file");
+		return;
+	}
+	
+	// Open the .req file for writing
+	reqFile = fopen(outputFileName, "w");
+	if (reqFile == NULL) {
+		perror("Error opening .req file");
+		fclose(infile);
+		return;
+	}
+	
+	// Allocate initial buffer
+	line = (char*)malloc(bufsize * sizeof(char));
+	if (line == NULL) {
+		perror("Unable to allocate memory");
+		fclose(infile);
+		fclose(reqFile);
+		return;
+	}
+	
+	// Read the source file line by line
+	while (fgets(line, bufsize, infile) != NULL) {
+		if (strncmp(line, "KEY", 3) == 0) {
+			if (!isFirstKey) {
+				// If not the first KEY, add a newline before writing the line
+				fputc('\n', reqFile);
+			}
+			isFirstKey = 0;
+			fputs(line, reqFile);
+		} else if (strncmp(line, "IV", 2) == 0 || strncmp(line, "PT", 2) == 0) {
+			fputs(line, reqFile);
+		}
+	}
+	
+	// Free the allocated line buffer and close files
+	free(line);
+	fclose(infile);
+	fclose(reqFile);
+	
+	printf("LEA128(CBC)KAT.req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+}
+\end{lstlisting}
+
+
+\subsection{\texttt{create\_LEA128CBC\_KAT\_FaxFile()}}
+\subsection{\texttt{create\_LEA128CBC\_KAT\_RspFile()}}
+
 \section{Multi-block Message Test (MMT)}
 \section{Monte Carlo Test (MCT)}
