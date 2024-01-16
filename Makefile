@@ -15,7 +15,7 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
 
 # Executable
 TARGET=$(BINDIR)/lea128_cbc_movs
-# TARGET=lea_test
+# TARGET=lea128_test
 
 # Phony targets
 .PHONY: all clean dir rebuild
@@ -74,4 +74,4 @@ dir:
 rebuild: clean all
 
 leak: 
-	valgrind --leak-check=full --show-leak-kinds=all $(TARGET)
+	(cd bin && valgrind --leak-check=full --show-leak-kinds=all ./lea128_cbc_movs)

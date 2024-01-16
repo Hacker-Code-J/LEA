@@ -5,6 +5,8 @@
  * This file contains the main function to demonstrate the usage of the LEA
  * encryption algorithm. It may include example usage or benchmarking.
  */
+#if 1
+#include <string.h>
 
 #include "lea.h"
 #include "lea_modes.h"
@@ -24,7 +26,30 @@ int main(int argc, char** argv) {
     // char rspFileName[50];
     
     // // Construct full paths for input and output files
-    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
+    // snprintf(tlderPath = "../LEA128(CBC)MOVS/";
+    // char txtFileName[50];
+    // char reqFileName[50];
+    // char faxFileName[50];
+    // char rspFileName[50];
+    
+    // // // Construct full paths for input and output files
+    // // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
+    // // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)KAT.req");
+    // // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
+    // // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
+    
+    // // // create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
+    // // // create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
+    // // // create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
+
+    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MMT.txt");
+    // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MMT.req");
+    // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MMT.fax");
+    // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MMT.rsp");
+
+    // create_LEA128CBC_MMT_ReqFile(txtFileName, reqFileName);
+    // create_LEA128CBC_MMT_FaxFile(txtFileName, faxFileName);
+    // create_LEA128CBC_xtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)KAT.txt");
     // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)KAT.req");
     // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
     // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
@@ -33,7 +58,7 @@ int main(int argc, char** argv) {
     // create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
     // create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
     
-    MOVS_LEA128CBC_KAT_TEST();
+    
 
     // const char* folderPath = "../LEA128(CBC)MOVS/";
     // char txtFileName[50];
@@ -47,9 +72,9 @@ int main(int argc, char** argv) {
     // // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
     // // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
     
-    // // create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
-    // // create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
-    // // create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
+    // // // create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
+    // // // create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
+    // // // create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
 
     // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MMT.txt");
     // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MMT.req");
@@ -60,5 +85,9 @@ int main(int argc, char** argv) {
     // create_LEA128CBC_MMT_FaxFile(txtFileName, faxFileName);
     // create_LEA128CBC_MMT_RspFile(reqFileName, rspFileName);
 
+    MOVS_LEA128CBC_KAT_TEST();
+    MOVS_LEA128CBC_MMT_TEST();
+
     return 0;
 }
+#endif

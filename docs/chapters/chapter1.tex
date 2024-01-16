@@ -10,7 +10,8 @@
 		\midrule
 		Block Size (bits) & 128 & 128 \\
 		Key Size (bits) & 128/192/256 & 128/192/256 \\
-		Structure & \textcolor{red}{S}ubstitution-\textcolor{red}{P}ermutation \textcolor{red}{N}etwork & \textcolor{blue}{G}eneralized \textcolor{blue}{F}eistel \textcolor{blue}{N}etwork \\
+		\multirow{2}{*}{Structure} & \multirow{2}{*}{\textcolor{red}{S}ubstitution-\textcolor{red}{P}ermutation \textcolor{red}{N}etwork} & \textcolor{blue}{G}eneralized \textcolor{blue}{F}eistel \textcolor{blue}{N}etwork\\
+		&& (ARX - Add-Rotation-Xor)\\
 		Rounds & 10/12/14 (depends on key size) & 24/28/32 (depends on key size) \\
 		Design Year & 1998 & 2013 \\
 		\bottomrule
@@ -105,15 +106,15 @@ stringToWordArray(inputString, key);
 \section{Key Schedule}
 
 $$
-\text{KeySchedule}^{\enc}_{128}:\binaryfield^{128=8\cdot 16}\to\binaryfield^{4608=192\cdot 24}
+\text{KeySchedule}^{\enc}_{128}:\binaryfield^{128=32\cdot 4}\to\binaryfield^{192\cdot 24=4608=32\cdot 144}
 $$
 
 $$
-\text{KeySchedule}^{\enc}_{192}:\binaryfield^{192=8\cdot 24}\to\binaryfield^{5376=192\cdot 28}
+\text{KeySchedule}^{\enc}_{192}:\binaryfield^{192=32\cdot 6}\to\binaryfield^{192\cdot 28=5376=32\cdot 168}
 $$
 
 $$
-\text{KeySchedule}^{\enc}_{256}:\binaryfield^{256=8\cdot 32}\to\binaryfield^{6144=192\cdot 24}
+\text{KeySchedule}^{\enc}_{256}:\binaryfield^{256=32\cdot 8}\to\binaryfield^{192\cdot 32=6144=32\cdot 192}
 $$
 
 \subsection{Round Constant}

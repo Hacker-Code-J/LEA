@@ -12,9 +12,9 @@ void xorBlocks(u32* dst, const u32* src1, const u32* src2);
 // void ECB_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key);
 // void ECB_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key);
 
-void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, int length, 
+void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t length, 
                 const u32* key, const u32* iv);
-void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, int length, 
+void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t length, 
                 const u32* key, const u32* iv);
 
 // void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t plaintext_len, const u32* key, const u32* iv);

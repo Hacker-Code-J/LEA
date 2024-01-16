@@ -33,7 +33,7 @@ void xorBlocks(u32* dst, const u32* src1, const u32* src2) {
 }
 
 // Assuming block size is fixed (e.g., 128 bits for LEA)
-void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, int length, 
+void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t length, 
                 const u32* key, const u32* iv) {
     u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
     leaEncKeySchedule(roundKeys, key);
@@ -43,14 +43,14 @@ void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, int length,
 
     memcpy(previousBlock, iv, BLOCK_SIZE);
 
-    for (int i = 0; i < length; i += BLOCK_SIZE) {
+    for (size_t i = 0; i < length; i += BLOCK_SIZE) {
         xorBlocks(srcBlock, &plaintext[i], previousBlock);
         leaEncrypt(&ciphertext[i], srcBlock, roundKeys);
         memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
     }
 }
 
-void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, int length, 
+void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t length, 
                 const u32* key, const u32* iv) {
     u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
     leaDecKeySchedule(roundKeys, key);
@@ -60,7 +60,7 @@ void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, int length,
 
     memcpy(previousBlock, iv, BLOCK_SIZE);
 
-    for (int i = 0; i < length; i += BLOCK_SIZE) {
+    for (size_t i = 0; i < length; i += BLOCK_SIZE) {
         leaDecrypt(dstBlock, &ciphertext[i], roundKeys);
         xorBlocks(&plaintext[i], dstBlock, previousBlock);
         memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
