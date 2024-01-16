@@ -106,10 +106,12 @@ void cbcEncrypt(CryptoData* data) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     size_t blockSize = 4; 
     size_t numBlocks = data->ptLength / blockSize;
+    // size_t numBlocks = data->dataLength / blockSize;
 
     // Allocate memory for ciphertext
     data->ct = (u32*)malloc(numBlocks * blockSize * sizeof(u32));
     data->ctLength = numBlocks * blockSize;
+    // data->dataLength = numBlocks * blockSize;
 
     // Generate round keys
     u32 roundKeys[TOTAL_RK];

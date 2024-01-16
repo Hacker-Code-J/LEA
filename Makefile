@@ -10,8 +10,9 @@ INCDIR=./include
 # Object files
 OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
       $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
-      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o\
-      $(OBJDIR)/main.o
+      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o\
+	  $(OBJDIR)/main.o
+     
 
 # Executable
 TARGET=$(BINDIR)/lea128_cbc_movs
@@ -47,6 +48,7 @@ $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
 
 $(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
 $(OBJDIR)/lea_cbc_mmt.o: $(SRCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_cbc_movs.h
+$(OBJDIR)/lea_cbc_mct.o: $(SRCDIR)/lea_cbc_mct.c $(INCDIR)/lea_cbc_movs.h
 
 $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
 $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
@@ -57,7 +59,10 @@ FILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \
                   LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.rsp \
 				  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.req \
                   LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.fax \
-                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.rsp
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MMT.rsp \
+				  LEA128\(CBC\)MOVS/LEA128\(CBC\)MCT.req \
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MCT.fax \
+                  LEA128\(CBC\)MOVS/LEA128\(CBC\)MCT.rsp
 
 # Clean up
 clean:

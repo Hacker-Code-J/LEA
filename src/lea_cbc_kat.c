@@ -10,8 +10,6 @@ void freeCryptoData(CryptoData* cryptoData) {
         free(cryptoData->ct);
         cryptoData->pt = NULL;
         cryptoData->ct = NULL;
-        cryptoData->ptLength = 0;
-        cryptoData->ctLength = 0;
     }
 }
 
@@ -44,7 +42,7 @@ size_t determineLength(const char* hexString) {
 }
 
 int readCryptoData(FILE* fp, CryptoData* cryptoData) {
-    char line[INITIAL_BUF_SIZE]; // Assuming each line will not exceed this length
+    char line[MAX_LINE_LENGTH]; // Assuming each line will not exceed this length
 
     while (fgets(line, sizeof(line), fp) != NULL) {
         if (strncmp(line, "KEY =", 5) == 0) {
