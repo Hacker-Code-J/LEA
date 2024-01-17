@@ -29,6 +29,15 @@ typedef struct {
     u32 iv[4];              // Fixed 128 bits for iv
 } CryptoData;               // 64-byte (8 + 8 + 8 + 8 + 16 + 16)
 
+// typedef struct {
+//     u32* key;               // Pointer for arbitrary length key
+//     u32* iv;                // Pointer for arbitrary length iv
+//     size_t keyLength;       // Length of pt or ct
+//     u32* pt;                // Pointer for arbitrary length plaintext
+//     u32* ct;                // Pointer for arbitrary length ciphertext
+//     size_t dataLength;      // Length of pt or ct
+// } CryptoData;               // 48-byte (8 * 6)
+
 // +--------------+-----------------+------------------------------+
 // |  pt/ct union |   dataLength    |          key[4]              |
 // | (u32* 8 byte)| (size_t 8 byte) | (u32 4*4 bytes = 16 bytes)   |

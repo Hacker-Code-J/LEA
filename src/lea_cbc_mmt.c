@@ -102,6 +102,7 @@ void create_LEA128CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFile
     printf("LEA128(CBC)MMT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
+#if 1
 void cbcEncrypt(CryptoData* data) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     size_t blockSize = 4; 
@@ -144,7 +145,7 @@ void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFile
     CryptoData* pData = (CryptoData*)malloc(sizeof(CryptoData));
     if (pData == NULL) {
         perror("Unable to allocate memory");
-        exit(1);
+        return;
     }
     memset(pData, 0, sizeof(CryptoData));
 
@@ -231,7 +232,7 @@ void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFile
 
     printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
-
+#endif
 void MOVS_LEA128CBC_MMT_TEST() {
     const char* folderPath = "../LEA128(CBC)MOVS/";
     char txtFileName[50];

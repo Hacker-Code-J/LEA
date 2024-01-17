@@ -4,6 +4,7 @@
 
 #include "lea_cbc_movs.h"
 
+#if 0
 void create_LEA128CBC_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
     FILE *pTxtFile, *pReqFile;
     char* pLine;
@@ -200,6 +201,7 @@ void create_LEA128CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFile
 
     printf("LEA128(CBC)MCT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
+#endif
 
 #if 0
 void customEncrypt(u32* key, u32* iv, u32* pt, size_t keylen) {

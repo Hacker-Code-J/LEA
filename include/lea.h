@@ -38,6 +38,10 @@ extern const u32 delta[8];
 
 // #define ROTL32(val, shift) (((val) << (shift)) | ((val) >> (32 - (shift))))
 // #define ROTR32(val, shift) (((val) >> (shift)) | ((val) << (32 - (shift))))
+// #define REVERSE_BYTE_ORDER(word) (((word & 0x000000FF) << 0x18) | 
+//                                   ((word & 0x0000FF00) << 0x08) | 
+//                                   ((word & 0x00FF0000) >> 0x08) | 
+//                                   ((word & 0xFF000000) >> 0x18))
 
 static inline u32 ROTL32(u32 val, u32 shift) {
     return (val << shift) | (val >> (32 - shift));
@@ -47,10 +51,12 @@ static inline u32 ROTR32(u32 val, u32 shift) {
     return (val >> shift) | (val << (32 - shift));
 }
 
-#define REVERSE_BYTE_ORDER(word) (((word & 0x000000FF) << 0x18) | \
-                                  ((word & 0x0000FF00) << 0x08) | \
-                                  ((word & 0x00FF0000) >> 0x08) | \
-                                  ((word & 0xFF000000) >> 0x18))
+static inline u32 REVERSE_BYTE_ORDER(u32 word) {
+    return ((word & 0x000000FF) << 0x18) |
+           ((word & 0x0000FF00) << 0x08)  |
+           ((word & 0x00FF0000) >> 0x08)  |
+           ((word & 0xFF000000) >> 0x18);
+}
 
 /* LEA_CORE */
 
