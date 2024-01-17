@@ -10,8 +10,6 @@ void freeCryptoData(CryptoData* cryptoData) {
         free(cryptoData->ct);
         cryptoData->pt = NULL;
         cryptoData->ct = NULL;
-        cryptoData->ptLength = 0;
-        cryptoData->ctLength = 0;
     }
 }
 
@@ -44,7 +42,7 @@ size_t determineLength(const char* hexString) {
 }
 
 int readCryptoData(FILE* fp, CryptoData* cryptoData) {
-    char line[INITIAL_BUF_SIZE]; // Assuming each line will not exceed this length
+    char line[MAX_LINE_LENGTH]; // Assuming each line will not exceed this length
 
     while (fgets(line, sizeof(line), fp) != NULL) {
         if (strncmp(line, "KEY =", 5) == 0) {
@@ -112,8 +110,8 @@ void printProgressBar(int current, int total) {
     const char* GREEN = "\x1b[32m";
     const char* YELLOW = "\x1b[33m";
     const char* RED = "\x1b[31m";
-    const char* CYAN = "\x1b[36m";
-    // const char* RESET = "\x1b[0m";
+    // const char* CYAN = "\x1b[36m";
+    const char* RESET = "\x1b[0m";
 
     printf("\r[");
     for (int i = 0; i < width; ++i) {
@@ -121,7 +119,7 @@ void printProgressBar(int current, int total) {
         else if (i == pos) printf("%s>", YELLOW); // Yellow for current position
         else printf("%s ", RED); // Red for remaining part
     }
-    printf("%s] %d%% (%d/%d)", CYAN, (int)(progress * 100.0), current, total);
+    printf("%s] %d%% (%d/%d)", RESET, (int)(progress * 100.0), current, total);
     fflush(stdout); // Flush the output buffer
 
     // ==============================================
@@ -170,24 +168,23 @@ bool compareDataSets(const DataSet* data1, const DataSet* data2) {
     return 1;
 }
 
-void parseHexLine(u32* arr, const char* line) {
+void parseHexLine(u32* pArr, const char* pLine) {
     // Assuming line is in the format "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    // for (int i = 0; i < 4; i++) {
-    //     char buffer[9]; // 8 characters for 32 bits + null terminator
-    //     strncpy(buffer, line + i * 8, 8);
-    //     buffer[8] = '\0';
-    //     arr[i] = strtoul(buffer, NULL, 16);
-    // }
-
-    // for (int i = 0; i < 4; i++) {
-    //     sscanf(line + i * 8, "%8x", &arr[i]);
-    // }
-
-    for (int i = 0; i < 4; i++) {
+    int i = 0;
+    while (pLine[i * 8] != '\0') {
         u32 value;
-        sscanf(line + i * 8, "%8x", &value);
-        *(arr + i) = value;
+        if (sscanf(pLine + i * 8, "%8x", &value) != 1) {
+            // Handle error or invalid input
+            break;
+        }
+        pArr[i] = value;
+        i++;
     }
+    // for (int i = 0; i < 4; i++) {
+    //     u32 value;
+    //     sscanf(pLine + i * 8, "%8x", &value);
+    //     *(pArr + i) = value;
+    // }
 }
 
 // Function to skip the prefix and return the pointer to the hexadecimal part
@@ -553,16 +550,17 @@ void MOVS_LEA128CBC_KAT_TEST() {
         printProgressBar(idx++, totalTests);
     }
 
-#endif    
+#endif   
+
     printf("\n\nTesting Summary:\n");
     printf("Passed: %d/%d\n", passedTests, totalTests);
     if (result) {
-        printf("Perfect PASS !!!\n");
+        printf("Perfect PASS !!!\n\n");
     } else {
-        printf("Some tests FAILED.\n");
+        printf("Some tests FAILED.\n\n");
     }
 
     fclose(file1);
     fclose(file2);
 }
-#endif
+#endif 

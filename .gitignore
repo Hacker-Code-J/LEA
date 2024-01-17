@@ -1,9 +1,11 @@
 bin/
 obj/
+html/
+latex/
 
-LEA128(CBC)MOVS/LEA128(CBC)KAT.req
-LEA128(CBC)MOVS/LEA128(CBC)KAT.fax
-LEA128(CBC)MOVS/LEA128(CBC)KAT.rsp
+*.req
+*.fax
+*.rsp
 
 # Prerequisites
 *.d

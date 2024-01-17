@@ -16,7 +16,7 @@ void lea128_ECB_test() {
     printBigEndian(key, KEY_SIZE);
     // printLittleEndian(key, KEY_SIZE);
     
-    const char* plainString = "101112131415161718191a1b1c1d1e1f4F524954484D"; // 176-bit (No. 44)
+    const char* plainString = "101112131415161718191a1b1c1d1e1f4F524954484D";
     int plain_len_word = (strlen(plainString) % 32) ? ((strlen(plainString) / 32) + 1) : (strlen(plainString) / 32);
     
     u32* plain = (u32*)calloc(plain_len_word, sizeof(u32));
@@ -45,6 +45,7 @@ void lea128_ECB_test() {
     // printf("%.3f ns\n", enc_time*1000000000);
 
 #if 0
+    4F524954484D
     u32* encrypted = (u32*)calloc(plain_len_word, sizeof(u32));
     // u32* encrypted = cipher;
     u32* decrypted = (u32*)calloc(plain_len_word, sizeof(u32));

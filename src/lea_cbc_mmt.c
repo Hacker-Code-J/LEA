@@ -4,111 +4,306 @@
 
 #include "lea_cbc_movs.h"
 
-#if 1
-void create_LEA128CBC_MMT_ReqFile(const char* inputFileName, const char* outputFileName) {
-    FILE *infile, *reqFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
+void create_LEA128CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
+    FILE *pTxtFile, *pReqFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    // Open the source text file for reading
-    infile = fopen(inputFileName, "r");
-    if (infile == NULL) {
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    if (pTxtFile == NULL) {
         perror("Error opening input file");
         return;
     }
 
     // Open the .req file for writing
-    reqFile = fopen(outputFileName, "w");
-    if (reqFile == NULL) {
+    pReqFile = fopen(pReqFileName, "w"); // LEA128(CBC)MMT.req
+    if (pReqFile == NULL) {
         perror("Error opening .req file");
-        fclose(infile);
+        fclose(pTxtFile);
         return;
     }
-
+    
     // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
+    pLine = (char*)calloc(bufsize, sizeof(char)); // 500 x 1
+    if(pLine == NULL) {
         perror("Unable to allocate memory");
-        fclose(infile);
-        fclose(reqFile);
+        fclose(pTxtFile);
+        fclose(pReqFile);
         return;
     }
 
     // Read the source file line by line
-    while (fgets(line, bufsize, infile) != NULL) {
-        if (strncmp(line, "KEY", 3) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', reqFile);
-            }
+    while (fgets(pLine, bufsize, pTxtFile)) {
+        if (strncmp(pLine, "KEY =", 5) == 0) {
+            // If not the first KEY, add a newline before writing the line
+            if (!isFirstKey) fputc('\n', pReqFile);
             isFirstKey = 0;
-            fputs(line, reqFile);
-        } else if (strncmp(line, "IV", 2) == 0 || strncmp(line, "PT", 2) == 0) {
-            fputs(line, reqFile);
+            fputs(pLine, pReqFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0 || strncmp(pLine, "PT =", 4) == 0) {
+            fputs(pLine, pReqFile);
         }
     }
 
-    // Free the allocated line buffer and close files
-    free(line);
-    fclose(infile);
-    fclose(reqFile);
+    free(pLine);
+    fclose(pTxtFile);
+    fclose(pReqFile);
 
     printf("LEA128(CBC)MMT.req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void create_LEA128CBC_MMT_FaxFile(const char* inputFileName, const char* outputFileName) {
-    FILE *infile, *faxFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
+void create_LEA128CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
+    FILE *pTxtFile, *pFaxFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    // Open the source text file for reading
-    infile = fopen(inputFileName, "r");
-    if (infile == NULL) {
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    if (pTxtFile == NULL) {
         perror("Error opening input file");
         return;
     }
 
-    // Open the .fax file for writing
-    faxFile = fopen(outputFileName, "w");
-    if (faxFile == NULL) {
-        perror("Error opening .fax file");
-        fclose(infile);
+    // Open the .req file for writing
+    pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CBC)MMT.fax
+    if (pFaxFile == NULL) {
+        perror("Error opening .req file");
+        fclose(pTxtFile);
         return;
     }
-
+    
     // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
+    pLine = (char*)calloc(bufsize, sizeof(char)); // 500 x 1
+    if(pLine == NULL) {
         perror("Unable to allocate memory");
-        fclose(infile);
-        fclose(faxFile);
+        fclose(pTxtFile);
+        fclose(pFaxFile);
         return;
     }
 
     // Read the source file line by line
-    while (fgets(line, bufsize, infile) != NULL) {
-        if (strncmp(line, "KEY", 3) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', faxFile);
-            }
+    while (fgets(pLine, bufsize, pTxtFile)) {
+        if (strncmp(pLine, "KEY =", 5) == 0) {
+            // If not the first KEY, add a newline before writing the line
+            if (!isFirstKey) fputc('\n', pFaxFile);
             isFirstKey = 0;
-            fputs(line, faxFile);
-        } else if (strncmp(line, "IV", 2) == 0 || strncmp(line, "PT", 2) == 0 || strncmp(line, "CT", 2) == 0) {
-            fputs(line, faxFile);
+            fputs(pLine, pFaxFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0 ||
+                   strncmp(pLine, "PT =", 4) == 0 ||
+                   strncmp(pLine, "CT =", 4) == 0) {
+            fputs(pLine, pFaxFile);
         }
     }
 
-    // Free the allocated line buffer and close files
-    free(line);
-    fclose(infile);
-    fclose(faxFile);
+    free(pLine);
+    fclose(pTxtFile);
+    fclose(pFaxFile);
 
     printf("LEA128(CBC)MMT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
+#if 1
+void cbcEncrypt(CryptoData* data) {
+    // Assuming block size is the size of u32 * 4 (128 bits)
+    size_t blockSize = 4; 
+    size_t numBlocks = data->ptLength / blockSize;
+    // size_t numBlocks = data->dataLength / blockSize;
+
+    // Allocate memory for ciphertext
+    data->ct = (u32*)malloc(numBlocks * blockSize * sizeof(u32));
+    data->ctLength = numBlocks * blockSize;
+    // data->dataLength = numBlocks * blockSize;
+
+    // Generate round keys
+    u32 roundKeys[TOTAL_RK];
+    leaEncKeySchedule(roundKeys, data->key);
+
+    u32 temp[blockSize];
+    u32* iv = data->iv;
+
+    // CBC encryption
+    for (size_t i = 0; i < numBlocks; ++i) {
+        // XOR with IV or previous ciphertext block
+        for (size_t j = 0; j < blockSize; ++j) {
+            temp[j] = data->pt[i * blockSize + j] ^ iv[j];
+        }
+
+        // Encrypt the block
+        leaEncrypt(&data->ct[i * blockSize], temp, roundKeys);
+
+        // Update IV (current ciphertext block becomes next IV)
+        iv = &data->ct[i * blockSize];
+    }
+}
+
+void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName) {
+    FILE *pReqFile, *pRspFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
+    int isFirstKey = 1;
+    
+    CryptoData* pData = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
+    memset(pData, 0, sizeof(CryptoData));
+
+    pReqFile = fopen(pReqFileName, "r"); // LEA128(CBC)MMT.req
+    if (pReqFile == NULL) {
+        perror("Error opening input file");
+        return;
+    }
+
+    // Open the .req file for writing
+    pRspFile = fopen(pRspFileName, "w"); // LEA128(CBC)MMT.rsp
+    if (pRspFile == NULL) {
+        perror("Error opening .req file");
+        fclose(pReqFile);
+        return;
+    }
+    
+    // Allocate initial buffer
+    pLine = (char*)calloc(bufsize, sizeof(char));
+    if(pLine == NULL) {
+        perror("Unable to allocate memory");
+        fclose(pReqFile);
+        fclose(pRspFile);
+        return;
+    }
+
+    // Read the source file line by line
+    while (fgets(pLine, bufsize, pReqFile)) {
+        if (pData->ptLength != 0 && pData->ctLength == 0) {
+            pData->ctLength = pData->ptLength;
+            pData->ct = (u32*)malloc(pData->ctLength * sizeof(u32));
+            if (pData->ct == NULL) {
+                perror("Unable to allocate memory for CT");
+                free(pData->pt);
+                break;
+            }
+
+            fprintf(pRspFile, "CT = ");
+            cbcEncrypt(pData);
+            // CBC_Encrypt_LEA(pData->ct, pData->pt, pData->ptLength, pData->key, pData->iv);
+            for (size_t i = 0; i < pData->ctLength; i++) {
+                fprintf(pRspFile, "%08X", pData->ct[i]);
+            }
+            fprintf(pRspFile, "\n");
+            freeCryptoData(pData);
+            memset(pData, 0, sizeof(CryptoData));
+        } else if (strncmp(pLine, "KEY =", 5) == 0) {
+            if (!isFirstKey) fputc('\n', pRspFile);
+            isFirstKey = 0;
+            parseHexLine(pData->key, pLine + 6);
+            fputs(pLine, pRspFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0) {
+            parseHexLine(pData->iv, pLine + 5);
+            fputs(pLine, pRspFile);
+        } else if (strncmp(pLine, "PT =", 4) == 0) {
+            pData->ptLength = determineLength(pLine + 5);
+            pData->pt = (u32*)malloc(pData->ptLength * sizeof(u32));
+            if (pData->pt == NULL) {
+                perror("Unable to allocate memory for PT");
+                break;
+            }
+            parseHexLine(pData->pt, pLine + 5);
+            fputs(pLine, pRspFile);
+        }
+    }
+    pData->ctLength = pData->ptLength;
+    pData->ct = (u32*)malloc(pData->ctLength * sizeof(u32));
+    if (pData->ct == NULL) {
+        perror("Unable to allocate memory for CT");
+        free(pData->pt);
+    }
+
+    fprintf(pRspFile, "CT = ");
+    cbcEncrypt(pData);
+    for (size_t i = 0; i < pData->ctLength; i++) {
+        fprintf(pRspFile, "%08X", pData->ct[i]);
+    }
+    fprintf(pRspFile, "\n");
+
+    free(pData);  
+    free(pLine);
+    fclose(pReqFile);
+    fclose(pRspFile);
+
+    printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+}
+#endif
+void MOVS_LEA128CBC_MMT_TEST() {
+    const char* folderPath = "../LEA128(CBC)MOVS/";
+    char txtFileName[50];
+    char reqFileName[50];
+    char faxFileName[50];
+    char rspFileName[50];
+    
+    // Construct full paths for input and output files
+    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MMT.txt");
+    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MMT.req");
+    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MMT.fax");
+    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MMT.rsp");
+    
+    create_LEA128CBC_MMT_ReqFile(txtFileName, reqFileName);
+    create_LEA128CBC_MMT_FaxFile(txtFileName, faxFileName);
+    create_LEA128CBC_MMT_RspFile(reqFileName, rspFileName);
+
+    printf("\nLEA128-CBC-MMT-TEST:\n");
+
+    FILE* file1 = fopen(faxFileName, "r");
+    FILE* file2 = fopen(rspFileName, "r");
+
+    if (!file1 || !file2) {
+        perror("Error opening files");
+        return;
+    }
+
+    CryptoData data1, data2;
+    memset(&data1, 0, sizeof(CryptoData));
+    memset(&data2, 0, sizeof(CryptoData));
+    int result = 1; // Default to pass
+    int idx = 1;
+    int totalTests = 10; // Assuming a total of 275 tests
+    int passedTests = 0;
+    while (idx <= totalTests) {
+        if (readCryptoData(file1, &data1) == -1 || readCryptoData(file2, &data2) == -1) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(&data1, &data2)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(&data1);
+        freeCryptoData(&data2);
+
+        // Reset the structures for the next iteration
+        memset(&data1, 0, sizeof(CryptoData));
+        memset(&data2, 0, sizeof(CryptoData));
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+    printf("\n\nTesting Summary:\n");
+    printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) {
+        printf("Perfect PASS !!!\n\n");
+    } else {
+        printf("Some tests FAILED.\n\n");
+    }
+
+    fclose(file1);
+    fclose(file2);
+}
+
+#if 0
 void create_LEA128CBC_MMT_RspFile(const char* inputFileName, const char* outputFileName) {
     FILE *reqFile, *rspFile;
     char line[INITIAL_BUF_SIZE];
