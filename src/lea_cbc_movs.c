@@ -1,9 +1,201 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "lea_cbc_movs.h"
 
+void printProgressBar(int current, int total) {
+    int width = 50; // Width of the progress bar
+    float progress = (float)current / total;
+    int pos = width * progress;
+
+    // ANSI Escape Codes for colors
+    const char* GREEN = "\x1b[32m";
+    const char* YELLOW = "\x1b[33m";
+    const char* RED = "\x1b[31m";
+    const char* RESET = "\x1b[0m";
+
+    printf("\r[");
+    for (int i = 0; i < width; ++i) {
+        if (i < pos) printf("%s=", GREEN); // White for completed part
+        else if (i == pos) printf("%s>", YELLOW); // Yellow for current position
+        else printf("%s ", RED); // Red for remaining part
+    }
+    printf("%s] %d%% (%d/%d)", RESET, (int)(progress * 100.0), current, total);
+}
+
+void freeCryptoData(CryptoData* pData) {
+    if (pData != NULL) {
+        free(pData->key);
+        free(pData->iv);
+        free(pData->pt);
+        free(pData->ct);
+        pData->key = NULL;
+        pData->iv = NULL;
+        pData->pt = NULL;
+        pData->ct = NULL;
+    }
+}
+
+void parseHexLine(u32* pU32dst, const char* pI8src, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        u32 value;
+        // Ensure not to read beyond the line's end
+        if (sscanf(pI8src + i * 8, "%8x", &value) != 1) {
+            // Handle parsing error, such as setting a default value or logging an error
+            pU32dst[i] = 0; // Example: set to zero if parsing fails
+        } else {
+            pU32dst[i] = value;
+        }
+    }
+}
+
+size_t wordLength(const char* pHexString) {
+    size_t hexLength = strlen(pHexString);
+
+    size_t u32Length = hexLength / 8; // 0x00: 1-byte
+
+    // If the hex string length is not a multiple of 8, add an extra element
+    // if (hexLength % 8 != 0) {
+    //     u32Length++;
+    // }
+
+    return u32Length;
+}
+
+bool readCryptoData(FILE* fp, CryptoData* pData) {
+    char line[MAX_LINE_LENGTH];
+    bool keyFound = false,
+         ivFound = false,
+         ptFound = false,
+         ctFound = false;
+
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        if (strncmp(line, "KEY =", 5) == 0 && !keyFound) {
+            pData->keyLength = wordLength(line + 6);
+            pData->key = (u32*)calloc(pData->keyLength, sizeof(u32));
+            if (pData->key == NULL) return false;
+            parseHexLine(pData->key, line, pData->keyLength);
+            keyFound = true;
+        } else if (strncmp(line, "IV =", 4) == 0 && !ivFound) {
+            if (pData->key == NULL) {
+                perror("Key not found");
+                return false;
+            }
+            pData->iv = (u32*)calloc(pData->keyLength, sizeof(u32));
+            if (pData->iv == NULL) return false;
+            parseHexLine(pData->iv, line, pData->keyLength);
+            ivFound = true;
+        } else if (strncmp(line, "PT =", 4) == 0 && !ptFound) {
+            pData->dataLength = wordLength(line + 5);
+            pData->pt = (u32*)calloc(pData->dataLength, sizeof(u32));
+            if (pData->pt == NULL) return false;
+            parseHexLine(pData->pt, line, pData->dataLength);
+            ptFound = true;
+        } else if (strncmp(line, "CT =", 4) == 0 && !ctFound) {
+            if (pData->pt == NULL) {
+                perror("Plaintext not found");
+                return false;
+            }
+            pData->ct = (u32*)calloc(pData->dataLength, sizeof(u32));
+            if (pData->ct == NULL) return false;
+            parseHexLine(pData->ct, line, pData->dataLength);
+            ctFound = true;
+        }
+    }
+
+    // if (!keyFound || !ivFound || !ptFound || !ctFound) {
+    //     perror("Incomplete crypto data");
+    //     return false;
+    // }
+
+    return true; // Return true on successful read
+}
+
+#if 0
+bool readCryptoData(FILE* fp, CryptoData* pCryptoData) {
+    char line[MAX_LINE_LENGTH];
+
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        if (strncmp(line, "KEY =", 5) == 0) {
+            pCryptoData->keyLength = wordLength(line + 6);
+            pCryptoData->key = (u32*)calloc(pCryptoData->keyLength, sizeof(u32));
+            if(pCryptoData->key == NULL) return;
+            parseHexLine(pCryptoData->key, line, pCryptoData->keyLength);
+        } else if (strncmp(line, "IV =", 4) == 0) {
+            if (!pCryptoData->keyLength) {
+                perror("Key Length is invalid");
+                free(pCryptoData->key);
+                return;
+            }
+            pCryptoData->iv = (u32*)calloc(pCryptoData->keyLength, sizeof(u32));
+            if(pCryptoData->iv == NULL) {
+                free(pCryptoData->key);
+                return;
+            }
+            parseHexLine(pCryptoData->iv, line, pCryptoData->keyLength);
+        } else if (strncmp(line, "PT =", 4) == 0) {
+            pCryptoData->dataLength = wordLength(line + 5);
+            pCryptoData->pt = (u32*)calloc(pCryptoData->dataLength, sizeof(u32));
+            if(pCryptoData->pt == NULL) {
+                free(pCryptoData->key);
+                free(pCryptoData->iv);
+                return;
+            }
+            parseHexLine(pCryptoData->pt, line, pCryptoData->dataLength);
+        } else if (strncmp(line, "CT =", 4) == 0) {
+            if (!pCryptoData->keyLength) {
+                perror("Data Length is invalid");
+                free(pCryptoData->key);
+                free(pCryptoData->iv);
+                free(pCryptoData->pt);
+                return;
+            }
+            pCryptoData->ct = (u32*)calloc(pCryptoData->dataLength, sizeof(u32));
+            if(pCryptoData->iv == NULL) {
+                free(pCryptoData->key);
+                free(pCryptoData->iv);
+                free(pCryptoData->pt);
+                return;
+            }
+            parseHexLine(pCryptoData->ct, line, pCryptoData->dataLength);
+        }
+    }
+
+    return 0; // Return 0 on successful read
+}
+#endif
+
+bool compareCryptoData(const CryptoData* pData1, const CryptoData* pData2) {
+    if (pData1->keyLength != pData2->keyLength ||
+        pData1->dataLength != pData2->dataLength) {
+        return false;
+    }
+
+    size_t keyLen = pData1->keyLength;
+    size_t dataLen = pData1->dataLength;
+    
+    // Compare contents key and iv
+    for (size_t i = 0; i < keyLen; i++) {
+        if (pData1->key[i] != pData2->key[i] ||
+            pData1->iv[i] != pData2->iv[i]) {
+            return false;
+        }
+    }
+
+    // Compare contents pt and ct
+    for (size_t i = 0; i < dataLen; i++) {
+        if (pData1->pt[i] != pData2->pt[i] ||
+            pData1->ct[i] != pData2->ct[i]) {
+            return false;
+        }
+    }
+
+    return true; // All comparisons passed, data structures are equal
+}
+
+#if 0
 void create_LEA128CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
     FILE *pTxtFile, *pReqFile;
     char* pLine;
@@ -216,75 +408,4 @@ void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFile
 
     printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
-
-void MOVS_LEA128CBC_MMT_TEST() {
-    const char* folderPath = "../LEA128(CBC)MOVS/";
-    char txtFileName[50];
-    char reqFileName[50];
-    char faxFileName[50];
-    char rspFileName[50];
-    
-    // Construct full paths for input and output files
-    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MMT.txt");
-    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MMT.req");
-    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MMT.fax");
-    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MMT.rsp");
-    
-    create_LEA128CBC_MMT_ReqFile(txtFileName, reqFileName);
-    create_LEA128CBC_MMT_FaxFile(txtFileName, faxFileName);
-    create_LEA128CBC_MMT_RspFile(reqFileName, rspFileName);
-
-    printf("\nLEA128-CBC-MMT-TEST:\n");
-
-    FILE* file1 = fopen(faxFileName, "r");
-    FILE* file2 = fopen(rspFileName, "r");
-
-    if (!file1 || !file2) {
-        perror("Error opening files");
-        return;
-    }
-
-    CryptoData* pData1 = (CryptoData*)malloc(sizeof(CryptoData));
-    CryptoData* pData2 = (CryptoData*)malloc(sizeof(CryptoData));
-    if (pData1 == NULL || pData2 == NULL) {
-        perror("Unable to allocate memory");
-        return;
-    }
-    int result = 1; // Default to pass
-    int idx = 1;
-    int totalTests = 10; // Assuming a total of 10 tests
-    int passedTests = 0;
-    while (idx <= totalTests) {
-        // sReset the structures for the next iteration
-        memset(pData1, 0, sizeof(CryptoData));
-        memset(pData2, 0, sizeof(CryptoData));
-        if (!readCryptoData(file1, pData1) || !readCryptoData(file2, pData2)) {
-            result = 0; // Indicate failure if read fails
-            break;
-        }
-
-        if (!compareCryptoData(pData1, pData2)) {
-            result = 0; // Fail
-            printf("\nFAIL\n");
-            break;
-        }
-
-        // Free the dynamically allocated memory
-        freeCryptoData(pData1);
-        freeCryptoData(pData2);
-
-        passedTests++;
-        printProgressBar(idx++, totalTests);
-    }
-
-    printf("\n\nTesting Summary:\n");
-    printf("Passed: %d/%d\n", passedTests, totalTests);
-    if (result) {
-        printf("Perfect PASS !!!\n\n");
-    } else {
-        printf("Some tests FAILED.\n\n");
-    }
-
-    fclose(file1);
-    fclose(file2);
-}
+#endif

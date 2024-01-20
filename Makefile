@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS=-Wall -g -O3 -I./include
+CC=gcc # Define the compiler
+CFLAGS=-Wall -std=c99 -g -O2 -I./include # Define any compile-time flags
 LDFLAGS=
 OBJDIR=./obj
 BINDIR=./bin
@@ -10,12 +10,15 @@ INCDIR=./include
 # Object files
 OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
       $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
-      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o\
+      $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o \
+	  $(OBJDIR)/lea_cbc_mmt.o \
+	  $(OBJDIR)/main.o
+#      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o\
 	  $(OBJDIR)/main.o
      
 
-# Executable
-TARGET=$(BINDIR)/lea128_cbc_movs
+# Define the target executable name
+TARGET=$(BINDIR)/lea128_cbc_movs 
 # TARGET=lea128_test
 
 # Phony targets
@@ -24,11 +27,11 @@ TARGET=$(BINDIR)/lea128_cbc_movs
 # Default target
 all: dir $(TARGET)
 
-# Target for LEA algorithm
+# Rule for building the final target
 $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-# Compile source files into object files
+# Rule for compiling source files to object files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 $(OBJDIR)/%.o: $(TESTDIR)/%.c
@@ -46,9 +49,10 @@ $(OBJDIR)/lea_core.o: $(SRCDIR)/lea_core.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
 
-$(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
 $(OBJDIR)/lea_cbc_mmt.o: $(SRCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_cbc_movs.h
-$(OBJDIR)/lea_cbc_mct.o: $(SRCDIR)/lea_cbc_mct.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_mct.o: $(SRCDIR)/lea_cbc_mct.c $(INCDIR)/lea_cbc_movs.h
+$(OBJDIR)/lea_cbc_movs.o: $(SRCDIR)/lea_cbc_movs.c $(INCDIR)/lea_cbc_movs.h
 
 $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
 $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
@@ -64,7 +68,7 @@ FILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \
                   LEA128\(CBC\)MOVS/LEA128\(CBC\)MCT.fax \
                   LEA128\(CBC\)MOVS/LEA128\(CBC\)MCT.rsp
 
-# Clean up
+# Rule for cleaning up the project
 clean:
 	rm -f $(OBJS) $(OBJDIR)/*.d $(TARGET)
 	@echo "Removing MOVS files"

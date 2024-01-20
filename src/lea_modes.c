@@ -25,47 +25,84 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
     }
 }
 
-// Helper function for XORing blocks
-void xorBlocks(u32* dst, const u32* src1, const u32* src2) {
-    for (int i = 0; i < BLOCK_SIZE/4; i++) {
-        dst[i] = src1[i] ^ src2[i];
-    }
-}
+void CBC_Encrypt_LEA(u32* restrict ct, 
+                     const u32* restrict pt, const size_t dataLength,
+                     const u32* restrict key, const size_t keyLength,
+                     const u32* restrict iv) {
+    // Assuming block size is the size of u32 * 4 (128 bits)
+    const size_t blockSize = 4; 
+    const size_t numBlocks = dataLength / blockSize;
 
-// Assuming block size is fixed (e.g., 128 bits for LEA)
-void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t length, 
-                const u32* key, const u32* iv) {
-    u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
+    // Avoid allocating ct, it should be provided by the caller
+
+    // Round keys should be computed outside if key does not change frequently
+    u32 roundKeys[(keyLength == 4) ? 144 : (keyLength == 6) ? 168 : 192];
     leaEncKeySchedule(roundKeys, key);
 
-    u32 previousBlock[BLOCK_SIZE/4];
-    u32 srcBlock[BLOCK_SIZE/4]; // Temporary block for processing
+    // Use restrict keyword if supported, and avoid using temp if not necessary
+    u32 buffer[blockSize];
 
-    memcpy(previousBlock, iv, BLOCK_SIZE);
+    // Assuming IV is not modified, make a copy if it needs to be preserved
+    u32 currentIV[blockSize];
+    memcpy(currentIV, iv, blockSize * sizeof(u32));
 
-    for (size_t i = 0; i < length; i += BLOCK_SIZE) {
-        xorBlocks(srcBlock, &plaintext[i], previousBlock);
-        leaEncrypt(&ciphertext[i], srcBlock, roundKeys);
-        memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
+    // CBC encryption
+    for (size_t i = 0; i < numBlocks; i++) {
+        // XOR with IV or previous ciphertext block
+        for (size_t j = 0; j < blockSize; j++) {
+            buffer[j] = pt[i * blockSize + j] ^ currentIV[j];
+        }
+
+        // Encrypt the Block
+        leaEncrypt(&ct[i * blockSize], buffer, roundKeys);
+
+        // Update IV (current ciphertext block becomes next IV)
+        memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
     }
 }
 
-void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t length, 
-                const u32* key, const u32* iv) {
-    u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
-    leaDecKeySchedule(roundKeys, key);
 
-    u32 previousBlock[BLOCK_SIZE/4];
-    u32 dstBlock[BLOCK_SIZE/4]; // Temporary block for processing
+// // Helper function for XORing blocks
+// void xorBlocks(u32* dst, const u32* src1, const u32* src2) {
+//     for (int i = 0; i < BLOCK_SIZE/4; i++) {
+//         dst[i] = src1[i] ^ src2[i];
+//     }
+// }
 
-    memcpy(previousBlock, iv, BLOCK_SIZE);
+// // Assuming block size is fixed (e.g., 128 bits for LEA)
+// void CBC_Encrypt_LEA(u32* ciphertext, const u32* plaintext, size_t length, 
+//                 const u32* key, const u32* iv) {
+//     u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
+//     leaEncKeySchedule(roundKeys, key);
 
-    for (size_t i = 0; i < length; i += BLOCK_SIZE) {
-        leaDecrypt(dstBlock, &ciphertext[i], roundKeys);
-        xorBlocks(&plaintext[i], dstBlock, previousBlock);
-        memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
-    }
-}
+//     u32 previousBlock[BLOCK_SIZE/4];
+//     u32 srcBlock[BLOCK_SIZE/4]; // Temporary block for processing
+
+//     memcpy(previousBlock, iv, BLOCK_SIZE);
+
+//     for (size_t i = 0; i < length; i += BLOCK_SIZE) {
+//         xorBlocks(srcBlock, &plaintext[i], previousBlock);
+//         leaEncrypt(&ciphertext[i], srcBlock, roundKeys);
+//         memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
+//     }
+// }
+
+// void CBC_Decrypt_LEA(u32* plaintext, const u32* ciphertext, size_t length, 
+//                 const u32* key, const u32* iv) {
+//     u32 roundKeys[TOTAL_RK]; // Size as per LEA spec
+//     leaDecKeySchedule(roundKeys, key);
+
+//     u32 previousBlock[BLOCK_SIZE/4];
+//     u32 dstBlock[BLOCK_SIZE/4]; // Temporary block for processing
+
+//     memcpy(previousBlock, iv, BLOCK_SIZE);
+
+//     for (size_t i = 0; i < length; i += BLOCK_SIZE) {
+//         leaDecrypt(dstBlock, &ciphertext[i], roundKeys);
+//         xorBlocks(&plaintext[i], dstBlock, previousBlock);
+//         memcpy(previousBlock, &ciphertext[i], BLOCK_SIZE);
+//     }
+// }
 
 // void xorBlocks(const u32* src1, const u32* src2, u32* dst, size_t blockSize) {
 //     for (size_t i = 0; i < blockSize / sizeof(u32); i++) {
