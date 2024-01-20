@@ -4,469 +4,218 @@
 
 #include "lea_cbc_movs.h"
 
-void freeCryptoData(CryptoData* cryptoData) {
-    if (cryptoData != NULL) {
-        free(cryptoData->pt);
-        free(cryptoData->ct);
-        cryptoData->pt = NULL;
-        cryptoData->ct = NULL;
-    }
-}
-
-void parseHexLineVariable(u32* arr, const char* line, size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        u32 value;
-        // Ensure not to read beyond the line's end
-        if (sscanf(line + i * 8, "%8x", &value) != 1) {
-            // Handle parsing error, such as setting a default value or logging an error
-            arr[i] = 0; // Example: set to zero if parsing fails
-        } else {
-            arr[i] = value;
-        }
-    }
-}
-
-size_t determineLength(const char* hexString) {
-    // Calculate the length of the hexadecimal string
-    size_t hexLength = strlen(hexString);
-
-    // Convert hex length to the length of the u32 array
-    size_t u32Length = hexLength / 8;
-
-    // If the hex string length is not a multiple of 8, add an extra element
-    if (hexLength % 8 != 0) {
-        u32Length++;
-    }
-
-    return u32Length;
-}
-
-int readCryptoData(FILE* fp, CryptoData* cryptoData) {
-    char line[MAX_LINE_LENGTH]; // Assuming each line will not exceed this length
-
-    while (fgets(line, sizeof(line), fp) != NULL) {
-        if (strncmp(line, "KEY =", 5) == 0) {
-            parseHexLine(cryptoData->key, line + 6); // Skip "KEY = "
-        } else if (strncmp(line, "IV =", 4) == 0) {
-            parseHexLine(cryptoData->iv, line + 5); // Skip "IV = "
-        } else if (strncmp(line, "PT =", 4) == 0) {
-            cryptoData->ptLength = determineLength(line + 5); // Calculate length
-            cryptoData->pt = (u32*)malloc(cryptoData->ptLength * sizeof(u32));
-            if (cryptoData->pt == NULL) return -1;
-            parseHexLineVariable(cryptoData->pt, line + 5, cryptoData->ptLength);
-        } else if (strncmp(line, "CT =", 4) == 0) {
-            cryptoData->ctLength = determineLength(line + 5); // Calculate length
-            cryptoData->ct = (u32*)malloc(cryptoData->ctLength * sizeof(u32));
-            if (cryptoData->ct == NULL) {
-                free(cryptoData->pt); // Free pt if ct allocation fails
-                return -1;
-            }
-            parseHexLineVariable(cryptoData->ct, line + 5, cryptoData->ctLength);
-        }
-        // Add more conditions here if there are more data types
-    }
-
-    return 0; // Return 0 on successful read
-}
-
-bool compareCryptoData(const CryptoData* data1, const CryptoData* data2) {
-    // Compare fixed-size arrays: key and iv
-    for (int i = 0; i < 4; i++) {
-        if (data1->key[i] != data2->key[i] || data1->iv[i] != data2->iv[i]) {
-            return 0; // Not equal
-        }
-    }
-
-    // Compare lengths and contents of pt
-    if (data1->ptLength != data2->ptLength) {
-        return 0; // Not equal
-    }
-    for (size_t i = 0; i < data1->ptLength; i++) {
-        if (data1->pt[i] != data2->pt[i]) {
-            return 0; // Not equal
-        }
-    }
-
-    // Compare lengths and contents of ct
-    if (data1->ctLength != data2->ctLength) {
-        return 0; // Not equal
-    }
-    for (size_t i = 0; i < data1->ctLength; i++) {
-        if (data1->ct[i] != data2->ct[i]) {
-            return 0; // Not equal
-        }
-    }
-
-    return 1; // All comparisons passed, data structures are equal
-}
-
-#if 1
-void printProgressBar(int current, int total) {
-    int width = 50; // Width of the progress bar
-    float progress = (float)current / total;
-    int pos = width * progress;
-
-    // ANSI Escape Codes for colors
-    const char* GREEN = "\x1b[32m";
-    const char* YELLOW = "\x1b[33m";
-    const char* RED = "\x1b[31m";
-    // const char* CYAN = "\x1b[36m";
-    const char* RESET = "\x1b[0m";
-
-    printf("\r[");
-    for (int i = 0; i < width; ++i) {
-        if (i < pos) printf("%s=", GREEN); // White for completed part
-        else if (i == pos) printf("%s>", YELLOW); // Yellow for current position
-        else printf("%s ", RED); // Red for remaining part
-    }
-    printf("%s] %d%% (%d/%d)", RESET, (int)(progress * 100.0), current, total);
-    fflush(stdout); // Flush the output buffer
-
-    // ==============================================
-    // int width = 50; // Width of the progress bar
-    // float progress = (float)current / total;
-    // int pos = width * progress;
-
-    // printf("\r[");
-    // for (int i = 0; i < width; ++i) {
-    //     if (i < pos) printf("=");
-    //     else if (i == pos) printf(">");
-    //     else printf(" ");
-    // }
-    // printf("] %d%% (%d/%d)", (int)(progress * 100.0), current, total);
-    // fflush(stdout); // Flush the output buffer
-}
-
-int readDataSet(FILE* fp, DataSet* dataSet) {
-    char line[50];
-    if (fgets(line, sizeof(line), fp) == NULL) return -1; // Read KEY
-    parseHexLine(dataSet->key, skipPrefix(line));
-    
-    if (fgets(line, sizeof(line), fp) == NULL) return -1; // Read IV
-    parseHexLine(dataSet->iv, skipPrefix(line));
-    
-    if (fgets(line, sizeof(line), fp) == NULL) return -1; // Read PT
-    parseHexLine(dataSet->pt, skipPrefix(line));
-    
-    if (fgets(line, sizeof(line), fp) == NULL) return -1; // Read CT
-    parseHexLine(dataSet->ct, skipPrefix(line));
-
-    if (fgets(line, sizeof(line), fp) == NULL) return -1; // Skip BLANK
-
-    return 0;
-}
-
-bool compareDataSets(const DataSet* data1, const DataSet* data2) {
-    for (int i = 0; i < 4; i++) {
-        if (data1->key[i] != data2->key[i] ||
-            data1->iv[i] != data2->iv[i] ||
-            data1->pt[i] != data2->pt[i] ||
-            data1->ct[i] != data2->ct[i]) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-void parseHexLine(u32* pArr, const char* pLine) {
-    // Assuming line is in the format "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    int i = 0;
-    while (pLine[i * 8] != '\0') {
-        u32 value;
-        if (sscanf(pLine + i * 8, "%8x", &value) != 1) {
-            // Handle error or invalid input
-            break;
-        }
-        pArr[i] = value;
-        i++;
-    }
-    // for (int i = 0; i < 4; i++) {
-    //     u32 value;
-    //     sscanf(pLine + i * 8, "%8x", &value);
-    //     *(pArr + i) = value;
-    // }
-}
-
-// Function to skip the prefix and return the pointer to the hexadecimal part
-const char* skipPrefix(const char* line) {
-    // while (*line != '\0' && *line != '=') {
-    //     line++;
-    // }
-    // return line + 1; // Skip '=' and space
-
-    while (*line != '\0' && *line != '=') {
-        line++;
-    }
-    while (*line == '=' || *line == ' ') {
-        line++; // Skip '=' and any spaces after it
-    }
-    return line;
-}
-
-void create_LEA128CBC_KAT_ReqFile(const char* inputFileName, const char* outputFileName) {
-    FILE *infile, *reqFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
+void create_LEA_CBC_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
+    FILE *pTxtFile, *pReqFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    // Open the source text file for reading
-    infile = fopen(inputFileName, "r");
-    if (infile == NULL) {
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    if (pTxtFile == NULL) {
         perror("Error opening input file");
         return;
     }
 
     // Open the .req file for writing
-    reqFile = fopen(outputFileName, "w");
-    if (reqFile == NULL) {
+    pReqFile = fopen(pReqFileName, "w"); // LEA128(CBC)MMT.req
+    if (pReqFile == NULL) {
         perror("Error opening .req file");
-        fclose(infile);
+        fclose(pTxtFile);
         return;
     }
-
+    
     // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
+    pLine = (char*)calloc(bufsize, sizeof(char)); // 500 x 1
+    if(pLine == NULL) {
         perror("Unable to allocate memory");
-        fclose(infile);
-        fclose(reqFile);
+        fclose(pTxtFile);
+        fclose(pReqFile);
         return;
     }
 
     // Read the source file line by line
-    while (fgets(line, bufsize, infile) != NULL) {
-        if (strncmp(line, "KEY", 3) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', reqFile);
-            }
+    while (fgets(pLine, bufsize, pTxtFile)) {
+        if (strncmp(pLine, "KEY =", 5) == 0) {
+            // If not the first KEY, add a newline before writing the line
+            if (!isFirstKey) fputc('\n', pReqFile);
             isFirstKey = 0;
-            fputs(line, reqFile);
-        } else if (strncmp(line, "IV", 2) == 0 || strncmp(line, "PT", 2) == 0) {
-            fputs(line, reqFile);
+            fputs(pLine, pReqFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0 || strncmp(pLine, "PT =", 4) == 0) {
+            fputs(pLine, pReqFile);
         }
     }
 
-    // Free the allocated line buffer and close files
-    free(line);
-    fclose(infile);
-    fclose(reqFile);
+    free(pLine);
+    fclose(pTxtFile);
+    fclose(pReqFile);
 
     printf("LEA128(CBC)KAT.req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-// Usage:
-// int main() {
-//     const char *inputFileName = "input.txt";
-//     const char *outputFileName = "output.req";
-
-//     createReqFile(inputFileName, outputFileName);
-
-//     printf(".req file has been successfully created.\n");
-//     return 0;
-// }
-// int main() {
-//     const char *folderPath = "LEA128 (CBC) MOVS/";
-//     char inputFilePath[300];
-//     char outputFilePath[300];
-
-//     // Construct full paths for input and output files
-//     snprintf(inputFilePath, sizeof(inputFilePath), "%s%s", folderPath, "input.txt");
-//     snprintf(outputFilePath, sizeof(outputFilePath), "%s%s", folderPath, "output.req");
-
-//     createReqFile(inputFilePath, outputFilePath);
-
-//     printf(".req file has been successfully created in 'LEA128 (CBC) MOVS' folder.\n");
-//     return 0;
-// }
-
-
-void create_LEA128CBC_KAT_FaxFile(const char* inputFileName, const char* outputFileName) {
-    FILE *infile, *faxFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
+void create_LEA_CBC_KAT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
+FILE *pTxtFile, *pFaxFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    // Open the source text file for reading
-    infile = fopen(inputFileName, "r");
-    if (infile == NULL) {
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    if (pTxtFile == NULL) {
         perror("Error opening input file");
         return;
     }
 
-    // Open the .fax file for writing
-    faxFile = fopen(outputFileName, "w");
-    if (faxFile == NULL) {
-        perror("Error opening .fax file");
-        fclose(infile);
+    // Open the .req file for writing
+    pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CBC)MMT.fax
+    if (pFaxFile == NULL) {
+        perror("Error opening .req file");
+        fclose(pTxtFile);
         return;
     }
-
+    
     // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
+    pLine = (char*)calloc(bufsize, sizeof(char)); // 500 x 1
+    if(pLine == NULL) {
         perror("Unable to allocate memory");
-        fclose(infile);
-        fclose(faxFile);
+        fclose(pTxtFile);
+        fclose(pFaxFile);
         return;
     }
 
     // Read the source file line by line
-    while (fgets(line, bufsize, infile) != NULL) {
-        if (strncmp(line, "KEY", 3) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', faxFile);
-            }
+    while (fgets(pLine, bufsize, pTxtFile)) {
+        if (strncmp(pLine, "KEY =", 5) == 0) {
+            // If not the first KEY, add a newline before writing the line
+            if (!isFirstKey) fputc('\n', pFaxFile);
             isFirstKey = 0;
-            fputs(line, faxFile);
-        } else if (strncmp(line, "IV", 2) == 0 || strncmp(line, "PT", 2) == 0 || strncmp(line, "CT", 2) == 0) {
-            fputs(line, faxFile);
+            fputs(pLine, pFaxFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0 ||
+                   strncmp(pLine, "PT =", 4) == 0 ||
+                   strncmp(pLine, "CT =", 4) == 0) {
+            fputs(pLine, pFaxFile);
         }
     }
 
-    // Free the allocated line buffer and close files
-    free(line);
-    fclose(infile);
-    fclose(faxFile);
+    free(pLine);
+    fclose(pTxtFile);
+    fclose(pFaxFile);
 
     printf("LEA128(CBC)KAT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputFileName) {
-    FILE *reqFile, *rspFile;
-    char line[INITIAL_BUF_SIZE];
+void create_LEA_CBC_KAT_RspFile(const char* pReqFileName, const char* pRspFileName) {
+    FILE *pReqFile, *pRspFile;
+    char* pLine;
+    size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1;
-    CryptoData data;
-    memset(&data, 0, sizeof(CryptoData));
-
-    reqFile = fopen(inputFileName, "r");
-    if (reqFile == NULL) {
-        perror("Error opening input file");
-        return;
-    }
-
-    rspFile = fopen(outputFileName, "w");
-    if (rspFile == NULL) {
-        perror("Error opening output file");
-        fclose(reqFile);
-        return;
-    }
-
-    while (fgets(line, sizeof(line), reqFile) != NULL) {
-        if (strncmp(line, "KEY =", 5) == 0) {
-            if (!isFirstKey) {
-                fputc('\n', rspFile);
-            }
-            isFirstKey = 0;
-            parseHexLine(data.key, line + 6);
-            fputs(line, rspFile);
-        } else if (strncmp(line, "IV =", 4) == 0) {
-            parseHexLine(data.iv, line + 5);
-            fputs(line, rspFile);
-        } else if (strncmp(line, "PT =", 4) == 0) {
-            data.ptLength = determineLength(line + 5);
-            data.pt = (u32*)malloc(data.ptLength * sizeof(u32));
-            if (data.pt == NULL) {
-                perror("Unable to allocate memory for PT");
-                break;
-            }
-            parseHexLineVariable(data.pt, line + 5, data.ptLength);
-            fputs(line, rspFile);
-
-            data.ct = (u32*)malloc(data.ptLength * sizeof(u32));
-            if (data.ct == NULL) {
-                perror("Unable to allocate memory for CT");
-                free(data.pt);
-                break;
-            }
-            CBC_Encrypt_LEA(data.ct, data.pt, data.ptLength, data.key, data.iv);
-
-            fprintf(rspFile, "CT = ");
-            for (size_t i = 0; i < data.ptLength - 1; i++) {
-                fprintf(rspFile, "%08X", data.ct[i]);
-            }
-            fprintf(rspFile, "\n");
-
-            freeCryptoData(&data);
-        }
-    }
-
-    fclose(reqFile);
-    fclose(rspFile);
-
-    printf("LEA128(CBC)KAT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
-#if 0
-    FILE *reqFile, *rspFile;
-    char* line;
-    size_t bufsize = INITIAL_BUF_SIZE;
-    int isFirstKey = 1; // Flag to check if it's the first KEY line
     
-    DataSet data;
-    memset(&data, 0, sizeof(DataSet));
-
-    // Open the source text file for reading
-    reqFile = fopen(inputFileName, "r");
-    if (reqFile == NULL) {
-        perror("Error opening input file");
-        return;
-    }
-
-    // Open the .rsp file for writing
-    rspFile = fopen(outputFileName, "w");
-    if (rspFile == NULL) {
-        perror("Error opening .rsp file");
-        fclose(reqFile);
-        return;
-    }
-
-    // Allocate initial buffer
-    line = (char*)malloc(bufsize * sizeof(char));
-    if (line == NULL) {
+    CryptoData* pData = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData == NULL) {
         perror("Unable to allocate memory");
-        fclose(reqFile);
-        fclose(rspFile);
+        return;
+    }
+    memset(pData, 0, sizeof(CryptoData));
+
+    pReqFile = fopen(pReqFileName, "r"); // LEA128(CBC)KAT.req
+    if (pReqFile == NULL) {
+        perror("Error opening input file");
         return;
     }
 
-    while (fgets(line, bufsize, reqFile) != NULL) {
-        if (strncmp(line, "KEY =", 5) == 0) {
-            if (!isFirstKey) {
-                // If not the first KEY, add a newline before writing the line
-                fputc('\n', rspFile);
-            }
-            isFirstKey = 0;
-            parseHexLine(data.key, line + 6);
-            fputs(line, rspFile);
-        } else if (strncmp(line, "IV =", 4) == 0) {
-            parseHexLine(data.iv, line + 5);
-            fputs(line, rspFile);
-        } else if (strncmp(line, "PT =", 4) == 0) {
-            parseHexLine(data.pt, line + 5);
-            fputs(line, rspFile);
-
-            CBC_Encrypt_LEA(data.ct, data.pt, BLOCK_SIZE, data.key, data.iv);
-
-            // Write CT to the response file
-            fprintf(rspFile, "CT = ");
-            for (int i = 0; i < 4; i++) {
-                fprintf(rspFile, "%08X", data.ct[i]);
-            }
-            fprintf(rspFile, "\n");
-            
-            // fwrite(&data, sizeof(DATA), 1, rspFile);
-            memset(&data, 0, sizeof(DataSet));
-        }
+    // Open the .req file for writing
+    pRspFile = fopen(pRspFileName, "w"); // LEA128(CBC)KAT.rsp
+    if (pRspFile == NULL) {
+        perror("Error opening .req file");
+        fclose(pReqFile);
+        return;
+    }
+    
+    // Allocate initial buffer
+    pLine = (char*)calloc(bufsize, sizeof(char));
+    if(pLine == NULL) {
+        perror("Unable to allocate memory");
+        fclose(pReqFile);
+        fclose(pRspFile);
+        return;
     }
 
-    free(line);
-    fclose(reqFile);
-    fclose(rspFile);
-    
-    printf("LEA128(CBC)KAT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
-#endif
-}
+    // Read the source file line by line
+    while (fgets(pLine, bufsize, pReqFile)) {
+        if (strncmp(pLine, "KEY =", 5) == 0) {
+            if (!isFirstKey) fputc('\n', pRspFile);
+            isFirstKey = 0;
+            pData->keyLength = wordLength(pLine + 6);
+            pData->key = (u32*)malloc(pData->keyLength * sizeof(u32));
+            if (pData->key == NULL) {
+                perror("Unable to allocate memory for KEY");
+                break;
+            }
+            parseHexLine(pData->key, pLine + 6, pData->keyLength);
+            fputs(pLine, pRspFile);
+        } else if (strncmp(pLine, "IV =", 4) == 0) {
+            pData->iv = (u32*)malloc(4 * sizeof(u32));
+            if (pData->iv == NULL) {
+                perror("Unable to allocate memory for IV");
+                freeCryptoData(pData);
+                break;
+            }
+            parseHexLine(pData->iv, pLine + 5, 4);
+            fputs(pLine, pRspFile);
+        } else if (strncmp(pLine, "PT =", 4) == 0) {
+            pData->dataLength = wordLength(pLine + 5);
+            pData->pt = (u32*)malloc(pData->dataLength * sizeof(u32));
+            if (pData->pt == NULL) {
+                perror("Unable to allocate memory for PT");
+                freeCryptoData(pData);
+                break;
+            }
+            parseHexLine(pData->pt, pLine + 5, pData->dataLength);
+            fputs(pLine, pRspFile);
+        } else {
+            if (!pData->dataLength) continue;
+            pData->ct = (u32*)malloc(pData->dataLength * sizeof(u32));
+            if (pData->ct == NULL) {
+                perror("Unable to allocate memory for CT");
+                freeCryptoData(pData);
+                break;
+            }
 
+            fprintf(pRspFile, "CT = ");
+            CBC_Encrypt_LEA(pData->ct,
+                            pData->pt, pData->dataLength,
+                            pData->key, pData->keyLength,
+                            pData->iv);
+            for (size_t i = 0; i < pData->dataLength; i++) {
+                fprintf(pRspFile, "%08X", pData->ct[i]);
+            }
+            fprintf(pRspFile, "\n");
+            freeCryptoData(pData);
+            memset(pData, 0, sizeof(CryptoData));
+        }
+    }
+    pData->ct = (u32*)malloc(pData->dataLength * sizeof(u32));
+    if (pData->ct == NULL) {
+        perror("Unable to allocate memory for CT");
+        freeCryptoData(pData);
+        return;
+    }
+
+    fprintf(pRspFile, "CT = ");
+    CBC_Encrypt_LEA(pData->ct,
+                    pData->pt, pData->dataLength,
+                    pData->key, pData->keyLength,
+                    pData->iv);
+    for (size_t i = 0; i < pData->dataLength; i++) {
+        fprintf(pRspFile, "%08X", pData->ct[i]);
+    }
+    fprintf(pRspFile, "\n");
+    freeCryptoData(pData);
+    
+    free(pLine);
+    fclose(pReqFile);
+    fclose(pRspFile);
+
+    printf("LEA128(CBC)KAT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+}
 void MOVS_LEA128CBC_KAT_TEST() {
     const char* folderPath = "../LEA128(CBC)MOVS/";
     char txtFileName[50];
@@ -480,9 +229,9 @@ void MOVS_LEA128CBC_KAT_TEST() {
     snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)KAT.fax");
     snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)KAT.rsp");
     
-    create_LEA128CBC_KAT_ReqFile(txtFileName, reqFileName);
-    create_LEA128CBC_KAT_FaxFile(txtFileName, faxFileName);
-    create_LEA128CBC_KAT_RspFile(reqFileName, rspFileName);
+    create_LEA_CBC_KAT_ReqFile(txtFileName, reqFileName);
+    create_LEA_CBC_KAT_FaxFile(txtFileName, faxFileName);
+    create_LEA_CBC_KAT_RspFile(reqFileName, rspFileName);
 
     printf("\nLEA128-CBC-KAT-TEST:\n");
 
@@ -494,63 +243,38 @@ void MOVS_LEA128CBC_KAT_TEST() {
         return;
     }
 
-    CryptoData data1, data2;
-    memset(&data1, 0, sizeof(CryptoData));
-    memset(&data2, 0, sizeof(CryptoData));
+    CryptoData* pData1 = (CryptoData*)malloc(sizeof(CryptoData));
+    CryptoData* pData2 = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData1 == NULL || pData2 == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
     int result = 1; // Default to pass
     int idx = 1;
     int totalTests = 275; // Assuming a total of 275 tests
     int passedTests = 0;
     while (idx <= totalTests) {
-        if (readCryptoData(file1, &data1) == -1 || readCryptoData(file2, &data2) == -1) {
+        // sReset the structures for the next iteration
+        memset(pData1, 0, sizeof(CryptoData));
+        memset(pData2, 0, sizeof(CryptoData));
+        if (!readCryptoData(file1, pData1) || !readCryptoData(file2, pData2)) {
             result = 0; // Indicate failure if read fails
             break;
         }
 
-        if (!compareCryptoData(&data1, &data2)) {
+        if (!compareCryptoData(pData1, pData2)) {
             result = 0; // Fail
             printf("\nFAIL\n");
             break;
         }
 
         // Free the dynamically allocated memory
-        freeCryptoData(&data1);
-        freeCryptoData(&data2);
-
-        // Reset the structures for the next iteration
-        memset(&data1, 0, sizeof(CryptoData));
-        memset(&data2, 0, sizeof(CryptoData));
+        freeCryptoData(pData1);
+        freeCryptoData(pData2);
 
         passedTests++;
         printProgressBar(idx++, totalTests);
     }
-
-#if 0
-    DataSet data1, data2;
-    memset(&data1, 0, sizeof(DataSet));
-    memset(&data2, 0, sizeof(DataSet));
-    int result = 1; // Default to pass
-    int idx = 1;
-    int totalTests = 275; // Assuming a total of 275 tests
-    int passedTests = 0;
-    while (1) {
-        if (readDataSet(file1, &data1) == -1 || readDataSet(file2, &data2) == -1) break;
-
-        if (!compareDataSets(&data1, &data2)) {
-            result = 0; // Fail
-            printf("\nFAIL\n");
-            break;
-        }
-
-        memset(&data1, 0, sizeof(DataSet));
-        memset(&data2, 0, sizeof(DataSet));
-
-        // printf("PASS(%d/275)\n", idx++);
-        passedTests++;
-        printProgressBar(idx++, totalTests);
-    }
-
-#endif   
 
     printf("\n\nTesting Summary:\n");
     printf("Passed: %d/%d\n", passedTests, totalTests);
@@ -563,4 +287,3 @@ void MOVS_LEA128CBC_KAT_TEST() {
     fclose(file1);
     fclose(file2);
 }
-#endif 

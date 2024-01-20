@@ -5,6 +5,12 @@
  * Contains implementation of various utility functions such as byte manipulation
  * required by the LEA encryption and decryption processes.
  */
+#if __STDC_VERSION__ >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif /* __STDC_VERSION__ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
