@@ -5,7 +5,6 @@
 #ifndef _LEA_CBC_MOVS_H
 #define _LEA_CBC_MOVS_H
 
-#define INITIAL_BUF_SIZE 1500
 #define MAX_LINE_LENGTH 1034
 #define MAX_TXT_SIZE 1028
 
@@ -43,16 +42,16 @@ bool compareCryptoData(const CryptoData* pData1, const CryptoData* pData2);
 
 /* lea_cbc_kat */
 
-void create_LEA128CBC_KAT_ReqFile(const char* inputFileName, const char* outputFileName);
-void create_LEA128CBC_KAT_FaxFile(const char* inputFileName, const char* outputFileName);
-void create_LEA128CBC_KAT_RspFile(const char* inputFileName, const char* outputFileName);
+void create_LEA_CBC_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CBC_KAT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CBC_KAT_RspFile(const char* pReqFileName, const char* pRspFileName);
 void MOVS_LEA128CBC_KAT_TEST();
 
 /* lea_cbc_mmt */
 
-void create_LEA128CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
-void create_LEA128CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
-void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName);
 void MOVS_LEA128CBC_MMT_TEST();
 
 /* lea_cbc_mct */

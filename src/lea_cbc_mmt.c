@@ -4,7 +4,7 @@
 
 #include "lea_cbc_movs.h"
 
-void create_LEA128CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
+void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
     FILE *pTxtFile, *pReqFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
@@ -52,7 +52,7 @@ void create_LEA128CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFile
     printf("LEA128(CBC)MMT.req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void create_LEA128CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
+void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
     FILE *pTxtFile, *pFaxFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
@@ -102,7 +102,7 @@ void create_LEA128CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFile
     printf("LEA128(CBC)MMT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void create_LEA128CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName) {
+void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName) {
     FILE *pReqFile, *pRspFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
@@ -230,9 +230,9 @@ void MOVS_LEA128CBC_MMT_TEST() {
     snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MMT.fax");
     snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MMT.rsp");
     
-    create_LEA128CBC_MMT_ReqFile(txtFileName, reqFileName);
-    create_LEA128CBC_MMT_FaxFile(txtFileName, faxFileName);
-    create_LEA128CBC_MMT_RspFile(reqFileName, rspFileName);
+    create_LEA_CBC_MMT_ReqFile(txtFileName, reqFileName);
+    create_LEA_CBC_MMT_FaxFile(txtFileName, faxFileName);
+    create_LEA_CBC_MMT_RspFile(reqFileName, rspFileName);
 
     printf("\nLEA128-CBC-MMT-TEST:\n");
 
