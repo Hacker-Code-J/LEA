@@ -56,9 +56,9 @@ void MOVS_LEA128CBC_MMT_TEST();
 
 /* lea_cbc_mct */
 
-void create_LEA128CBC_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
-void create_LEA128CBC_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
-void create_LEA128CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void create_LEA_CBC_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CBC_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
 void MOVS_LEA128CBC_MCT_TEST();
 
 #endif // _LEA_CBC_MOVS_H

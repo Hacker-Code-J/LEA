@@ -58,16 +58,17 @@ void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileNa
     size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
+    // Open the .txt file for reading
     pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
     if (pTxtFile == NULL) {
-        perror("Error opening input file");
+        perror("Error opening .txt file");
         return;
     }
 
-    // Open the .req file for writing
+    // Open the .fax file for writing
     pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CBC)MMT.fax
     if (pFaxFile == NULL) {
-        perror("Error opening .req file");
+        perror("Error opening .fax file");
         fclose(pTxtFile);
         return;
     }

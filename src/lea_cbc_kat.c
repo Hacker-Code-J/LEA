@@ -64,10 +64,10 @@ FILE *pTxtFile, *pFaxFile;
         return;
     }
 
-    // Open the .req file for writing
+    // Open the .fax file for writing
     pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CBC)MMT.fax
     if (pFaxFile == NULL) {
-        perror("Error opening .req file");
+        perror("Error opening .fax file");
         fclose(pTxtFile);
         return;
     }
@@ -117,14 +117,14 @@ void create_LEA_CBC_KAT_RspFile(const char* pReqFileName, const char* pRspFileNa
 
     pReqFile = fopen(pReqFileName, "r"); // LEA128(CBC)KAT.req
     if (pReqFile == NULL) {
-        perror("Error opening input file");
+        perror("Error opening .req file");
         return;
     }
 
-    // Open the .req file for writing
+    // Open the .rsp file for writing
     pRspFile = fopen(pRspFileName, "w"); // LEA128(CBC)KAT.rsp
     if (pRspFile == NULL) {
-        perror("Error opening .req file");
+        perror("Error opening .rsp file");
         fclose(pReqFile);
         return;
     }
