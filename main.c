@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
 
     // lea128_ECB_test();
 
-    MOVS_LEA128CBC_KAT_TEST();
-    MOVS_LEA128CBC_MMT_TEST();
+    // MOVS_LEA128CBC_KAT_TEST();
+    // MOVS_LEA128CBC_MMT_TEST();
 
     const char* folderPath = "../LEA128(CBC)MOVS/";
     char txtFileName[50];

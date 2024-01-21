@@ -21,12 +21,12 @@
  * +--------------+----------------+
 */
 typedef struct {
-    size_t keyLength;       // Length of pt or ct
     u32* key;               // Pointer for arbitrary length key
     u32* iv;                // Pointer for arbitrary length iv
-    size_t dataLength;      // Length of pt or ct
     u32* pt;                // Pointer for arbitrary length plaintext
     u32* ct;                // Pointer for arbitrary length ciphertext
+    size_t keyLength;       // Length of pt or ct
+    size_t dataLength;      // Length of pt or ct
 } CryptoData;               // 48-byte (8 * 6)
 
 /* lea_cbc_movs */
