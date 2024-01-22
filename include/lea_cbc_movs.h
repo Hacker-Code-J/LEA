@@ -40,6 +40,9 @@ size_t wordLength(const char* pHexString);
 bool readCryptoData(FILE* fp, CryptoData* pData);
 bool compareCryptoData(const CryptoData* pData1, const CryptoData* pData2);
 
+void printHexToFile(FILE* pFile, const u32* data, size_t length);
+void xorBuffers(u32* result, const u32* a, const u32* b, size_t length);
+
 /* lea_cbc_kat */
 
 void create_LEA_CBC_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
