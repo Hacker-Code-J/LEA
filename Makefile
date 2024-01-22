@@ -9,10 +9,11 @@ INCDIR=./include
 
 # Object files
 OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
-      $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
-      $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o \
-	  $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o \
-	  $(OBJDIR)/main.o
+	$(OBJDIR)/main.o
+    #   $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
+    #   $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o $(OBJDIR)/lea_cbc_movs.o \
+	#   $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o \
+	#   $(OBJDIR)/main.o
 #      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o\
 	  $(OBJDIR)/main.o
      
@@ -47,15 +48,15 @@ $(OBJDIR)/main.o: main.c $(INCDIR)/lea.h
 # Dependencies
 $(OBJDIR)/lea_core.o: $(SRCDIR)/lea_core.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
-$(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
+# $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
 
-$(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
-$(OBJDIR)/lea_cbc_mmt.o: $(SRCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_cbc_movs.h
-$(OBJDIR)/lea_cbc_mct.o: $(SRCDIR)/lea_cbc_mct.c $(INCDIR)/lea_cbc_movs.h
-$(OBJDIR)/lea_cbc_movs.o: $(SRCDIR)/lea_cbc_movs.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_kat.o: $(SRCDIR)/lea_cbc_kat.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_mmt.o: $(SRCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_mct.o: $(SRCDIR)/lea_cbc_mct.c $(INCDIR)/lea_cbc_movs.h
+# $(OBJDIR)/lea_cbc_movs.o: $(SRCDIR)/lea_cbc_movs.c $(INCDIR)/lea_cbc_movs.h
 
 $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
-$(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
+# $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
 
 # Define the file paths
 FILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \

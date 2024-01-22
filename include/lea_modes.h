@@ -45,4 +45,4 @@ void CBC_Decrypt_LEA(u32* restrict pt,
 
 // void ctrCrypt(const u32* input, const u32* roundKeys, u32* output, size_t blockSize, u32* counter);
 
-#endif // _LEA_MODES_H
+#endif /* _LEA_MODES_H */

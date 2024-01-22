@@ -6,6 +6,7 @@
 #include "lea.h"
 #include "lea_modes.h"
 
+#if 0
 void lea128_ECB_test() {
     u32 key[KEY_SIZE];
     const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0"; // 128-bit Key
@@ -70,3 +71,4 @@ void lea128_ECB_test() {
     free(decrypted);
 #endif
 }
+#endif

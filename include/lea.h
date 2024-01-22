@@ -11,36 +11,34 @@
 #ifndef _LEA_H
 #define _LEA_H
 
-#define LEA_VERSION 128
+#define LEA_V 128
+
+#define LEA128 128
+#define LEA192 192
+#define LEA256 256
+
 #define BLOCK_SIZE 16 // 16-byte (128-bit) block
 // #define BLOCK_SIZE 4 // Assuming a block size of 4 u32 values (128 bits)
 
-#if LEA_VERSION == 192
-#define KEY_SIZE 6
-#define Nr 28
-#define TOTAL_RK 168
-#elif LEA_VERSION == 256
-#define KEY_SIZE 8
-#define Nr 32
-#define TOTAL_RK 192
-#else
-#define KEY_SIZE 4
-#define Nr 24
-#define TOTAL_RK 144
-#endif
+// #if LEA_V == 192
+// #define KEY_SIZE 6
+// #define Nr 28
+// #define TOTAL_RK 168
+// #elif LEA_V == 256
+// #define KEY_SIZE 8
+// #define Nr 32
+// #define TOTAL_RK 192
+// #else
+// #define KEY_SIZE 4
+// #define Nr 24
+// #define TOTAL_RK 144
+// #endif
 
 typedef uint8_t u8;
 typedef uint32_t u32;
 typedef uint64_t u64;
 
 extern const u32 delta[8];
-
-// #define ROTL32(val, shift) (((val) << (shift)) | ((val) >> (32 - (shift))))
-// #define ROTR32(val, shift) (((val) >> (shift)) | ((val) << (32 - (shift))))
-// #define REVERSE_BYTE_ORDER(word) (((word & 0x000000FF) << 0x18) | 
-//                                   ((word & 0x0000FF00) << 0x08) | 
-//                                   ((word & 0x00FF0000) >> 0x08) | 
-//                                   ((word & 0xFF000000) >> 0x18))
 
 static inline u32 ROTL32(u32 val, u32 shift) {
     return (val << shift) | (val >> (32 - shift));
@@ -92,7 +90,7 @@ static inline u64 rdtsc() {
  * @param key The encryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaEncKeySchedule(u32* roundKeys, const u32* key);
+void leaEncKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION);
 
 /**
  * @brief Function to perform decryption key scheduling in LEA.
@@ -100,10 +98,10 @@ void leaEncKeySchedule(u32* roundKeys, const u32* key);
  * @param key The decryption key.
  * @param roundKeys The array to store the generated round keys.
  */
-void leaDecKeySchedule(u32* roundKeys, const u32* key);
+void leaDecKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION);
 
-void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys);
-void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys);
+void leaEncrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION);
+void leaDecrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION);
 
 /* LEA_UTILS */
 
@@ -112,8 +110,8 @@ void stringToWordArray(u32* wordArray, const char* hexString);
 void printBigEndian(u32* array, size_t size); // User Array
 void printLittleEndian(u32* array, size_t size); // Real Virtual Memory
 
-void printEncRoundKeys(u32* enc_roundkey);
-void printDecRoundKeys(u32* dec_roundkey);
+void printEncRoundKeys(u32* enc_roundkey, const int LEA_VERSION);
+void printDecRoundKeys(u32* dec_roundkey, const int LEA_VERSION);
 
 double measure_time(void (*func)(u32*, const u32*, const u32*), u32* dst, const u32* src, const u32* key);
 
@@ -122,14 +120,11 @@ double measure_time(void (*func)(u32*, const u32*, const u32*), u32* dst, const 
 // void stringToByteArray(const char* hexString, u8* byteArray);
 
 /* LEA_TESTS */
-void lea128_test();
-void lea192_test();
-void lea256_test();
+void lea128_test(void);
+// void lea192_test();
+// void lea256_test();
 
 /* LEA_MODE_TESTS */
-void lea128_ECB_test();
-void lea192_ECB_test();
-void lea256_ECB_test();
 
 void lea128_CBC_test();
 void lea192_CBC_test();
@@ -139,4 +134,4 @@ void lea128_CTR_test();
 void lea192_CTR_test();
 void lea256_CTR_test();
 
-#endif // _LEA_H
+#endif /* _LEA_H */

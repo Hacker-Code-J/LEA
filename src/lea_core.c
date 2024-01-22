@@ -22,8 +22,9 @@ const u32 delta[8] = {
  * @param key Pointer to the src key.
  * @param roundKeys Pointer to the array where round keys will be stored.
 */
-void leaEncKeySchedule(u32* roundKeys, const u32* key) {
+void leaEncKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION) {
 #if LEA_VERSION == 192
+    const int Nr = 28;
     u32 T[6];
 
     T[0] = REVERSE_BYTE_ORDER(key[0]);
@@ -49,6 +50,7 @@ void leaEncKeySchedule(u32* roundKeys, const u32* key) {
         roundKeys[i * 6 + 5] = T[5];
     }
 #elif LEA_VERSION == 256
+    const int Nr = 32;
     u32 T[8];
 
     // Initialize T array from key
@@ -84,6 +86,7 @@ void leaEncKeySchedule(u32* roundKeys, const u32* key) {
         roundKeys[i * 6 + 5] = T[(i * 6 + 5) % 8];
     }
 #else
+    const int Nr = 24;
     u32 T[4];
 
     // Load the byte key into T
@@ -116,8 +119,9 @@ void leaEncKeySchedule(u32* roundKeys, const u32* key) {
 #endif
 }
 
-void leaDecKeySchedule(u32* roundKeys, const u32* key) {
+void leaDecKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION) {
 #if LEA_VERSION == 192
+    const int Nr = 28;
     u32 T[6];
 
     T[0] = REVERSE_BYTE_ORDER(key[0]);
@@ -143,6 +147,7 @@ void leaDecKeySchedule(u32* roundKeys, const u32* key) {
         roundKeys[(Nr - 1 - i) * 6 + 5] = T[5];
     }
 #elif LEA_VERSION == 256
+    const int Nr = 32;
     u32 T[8];
 
     // Initialize T array from key
@@ -178,6 +183,7 @@ void leaDecKeySchedule(u32* roundKeys, const u32* key) {
         roundKeys[(Nr - 1 - i) * 6 + 5] = T[(i * 6 + 5) % 8];
     }
 #else
+    const int Nr = 24;
     u32 T[4];
 
     // Load the word key into T
@@ -203,8 +209,26 @@ void leaDecKeySchedule(u32* roundKeys, const u32* key) {
 #endif
 }
 
-void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
-    
+void leaEncrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION) {
+    int Nr, TOTAL_RK;
+    switch (LEA_VERSION) {
+        case 192:
+            Nr = 28;
+            TOTAL_RK = 168;
+            break;
+        case 256:
+            Nr = 32;
+            TOTAL_RK = 192;
+            break;
+        default:  // Assuming default is for LEA_VERSION == 128 or any other value
+            Nr = 24;
+            TOTAL_RK = 144;
+            break;
+    }
+
+    u32 roundKeys[TOTAL_RK];
+    leaEncKeySchedule(roundKeys, key, LEA_VERSION);
+
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);
@@ -238,8 +262,26 @@ void leaEncrypt(u32* dst, const u32* src, const u32* roundKeys) {
     dst[3] = REVERSE_BYTE_ORDER(t[3]);
 }
 
-void leaDecrypt(u32* dst, const u32* src, const u32* roundKeys) {
-    
+void leaDecrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION) {
+    int Nr, TOTAL_RK;
+    switch (LEA_VERSION) {
+        case 192:
+            Nr = 28;
+            TOTAL_RK = 168;
+            break;
+        case 256:
+            Nr = 32;
+            TOTAL_RK = 192;
+            break;
+        default:  // Assuming default is for LEA_VERSION == 128 or any other value
+            Nr = 24;
+            TOTAL_RK = 144;
+            break;
+    }
+
+    u32 roundKeys[TOTAL_RK];
+    leaDecKeySchedule(roundKeys, key, LEA_VERSION);
+
     u32 t[4];
 
     t[0] = REVERSE_BYTE_ORDER(src[0]);
