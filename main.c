@@ -15,9 +15,9 @@
 #include "lea_cbc_movs.h"
 
 int main(int argc, char** argv) {
-    lea128_test();
+    // lea128_test();
     // lea192_test();
-    // lea256_test();
+    lea256_test();
 
     // lea128_ECB_test();
 

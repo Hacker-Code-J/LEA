@@ -11,7 +11,7 @@
 #ifndef _LEA_H
 #define _LEA_H
 
-#define LEA_V 128
+// #define LEA_V 128
 
 #define LEA128 128
 #define LEA192 192
@@ -121,8 +121,8 @@ double measure_time(void (*func)(u32*, const u32*, const u32*), u32* dst, const 
 
 /* LEA_TESTS */
 void lea128_test(void);
-// void lea192_test();
-// void lea256_test();
+void lea192_test(void);
+void lea256_test(void);
 
 /* LEA_MODE_TESTS */
 

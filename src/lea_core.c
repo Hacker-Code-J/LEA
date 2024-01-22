@@ -23,190 +23,190 @@ const u32 delta[8] = {
  * @param roundKeys Pointer to the array where round keys will be stored.
 */
 void leaEncKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION) {
-#if LEA_VERSION == 192
-    const int Nr = 28;
-    u32 T[6];
+    if (LEA_VERSION == 192) {
+        const int Nr = 28;
+        u32 T[6];
 
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-    T[4] = REVERSE_BYTE_ORDER(key[4]);
-    T[5] = REVERSE_BYTE_ORDER(key[5]);
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+        T[4] = REVERSE_BYTE_ORDER(key[4]);
+        T[5] = REVERSE_BYTE_ORDER(key[5]);
 
-    for (int i = 0; i < Nr; i++) {
-        T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
-        T[1] = ROTL32(T[1] + ROTL32(delta[i % 6], i + 1),  3);
-        T[2] = ROTL32(T[2] + ROTL32(delta[i % 6], i + 2),  6);
-        T[3] = ROTL32(T[3] + ROTL32(delta[i % 6], i + 3), 11);
-        T[4] = ROTL32(T[4] + ROTL32(delta[i % 6], i + 4), 13);
-        T[5] = ROTL32(T[5] + ROTL32(delta[i % 6], i + 5), 17);
+        for (int i = 0; i < Nr; i++) {
+            T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
+            T[1] = ROTL32(T[1] + ROTL32(delta[i % 6], i + 1),  3);
+            T[2] = ROTL32(T[2] + ROTL32(delta[i % 6], i + 2),  6);
+            T[3] = ROTL32(T[3] + ROTL32(delta[i % 6], i + 3), 11);
+            T[4] = ROTL32(T[4] + ROTL32(delta[i % 6], i + 4), 13);
+            T[5] = ROTL32(T[5] + ROTL32(delta[i % 6], i + 5), 17);
 
-        roundKeys[i * 6 + 0] = T[0];
-        roundKeys[i * 6 + 1] = T[1];
-        roundKeys[i * 6 + 2] = T[2];
-        roundKeys[i * 6 + 3] = T[3];
-        roundKeys[i * 6 + 4] = T[4];
-        roundKeys[i * 6 + 5] = T[5];
+            roundKeys[i * 6 + 0] = T[0];
+            roundKeys[i * 6 + 1] = T[1];
+            roundKeys[i * 6 + 2] = T[2];
+            roundKeys[i * 6 + 3] = T[3];
+            roundKeys[i * 6 + 4] = T[4];
+            roundKeys[i * 6 + 5] = T[5];
+        }
+    } else if (LEA_VERSION == 256) {
+        const int Nr = 32;
+        u32 T[8];
+
+        // Initialize T array from key
+        // memcpy(T, key, sizeof(u32) * 8);
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+        T[4] = REVERSE_BYTE_ORDER(key[4]);
+        T[5] = REVERSE_BYTE_ORDER(key[5]);
+        T[6] = REVERSE_BYTE_ORDER(key[6]);
+        T[7] = REVERSE_BYTE_ORDER(key[7]);
+
+        for (int i = 0; i < Nr; i++) {
+            T[(i * 6 + 0) % 8] =
+                ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
+            T[(i * 6 + 1) % 8] = 
+                ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
+            T[(i * 6 + 2) % 8] = 
+                ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
+            T[(i * 6 + 3) % 8] = 
+                ROTL32(T[(i * 6 + 3) % 8] + ROTL32(delta[i % 8], i + 3), 11);
+            T[(i * 6 + 4) % 8] = 
+                ROTL32(T[(i * 6 + 4) % 8] + ROTL32(delta[i % 8], i + 4), 13);
+            T[(i * 6 + 5) % 8] = 
+                ROTL32(T[(i * 6 + 5) % 8] + ROTL32(delta[i % 8], i + 5), 17);
+
+            roundKeys[i * 6 + 0] = T[(i * 6 + 0) % 8];
+            roundKeys[i * 6 + 1] = T[(i * 6 + 1) % 8];
+            roundKeys[i * 6 + 2] = T[(i * 6 + 2) % 8];
+            roundKeys[i * 6 + 3] = T[(i * 6 + 3) % 8];
+            roundKeys[i * 6 + 4] = T[(i * 6 + 4) % 8];
+            roundKeys[i * 6 + 5] = T[(i * 6 + 5) % 8];
+        }
+    } else {
+        const int Nr = 24;
+        u32 T[4];
+
+        // Load the byte key into T
+        // for (int i = 0; i < 4; i++) {
+        //     T[i] = (key[i * 4] << 24) | (key[i * 4 + 1] << 16) | (key[i * 4 + 2] << 8) | key[i * 4 + 3];
+        // }
+
+        // Load the word key into T
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+
+        // int rounds = (keySize == 128) ? 24 : (keySize == 192) ? 28 : 32;
+
+        // Generate round keys
+        for (int i = 0; i < Nr; i++) {
+            T[0] = ROTL32(T[0] + ROTL32(delta[i % 4], i + 0),  1);
+            T[1] = ROTL32(T[1] + ROTL32(delta[i % 4], i + 1),  3);
+            T[2] = ROTL32(T[2] + ROTL32(delta[i % 4], i + 2),  6);
+            T[3] = ROTL32(T[3] + ROTL32(delta[i % 4], i + 3), 11);
+
+            roundKeys[i * 6 + 0] = T[0];
+            roundKeys[i * 6 + 1] = T[1];
+            roundKeys[i * 6 + 2] = T[2];
+            roundKeys[i * 6 + 3] = T[1];
+            roundKeys[i * 6 + 4] = T[3];
+            roundKeys[i * 6 + 5] = T[1];
+        }
     }
-#elif LEA_VERSION == 256
-    const int Nr = 32;
-    u32 T[8];
-
-    // Initialize T array from key
-    // memcpy(T, key, sizeof(u32) * 8);
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-    T[4] = REVERSE_BYTE_ORDER(key[4]);
-    T[5] = REVERSE_BYTE_ORDER(key[5]);
-    T[6] = REVERSE_BYTE_ORDER(key[6]);
-    T[7] = REVERSE_BYTE_ORDER(key[7]);
-
-    for (int i = 0; i < Nr; i++) {
-        T[(i * 6 + 0) % 8] =
-            ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
-        T[(i * 6 + 1) % 8] = 
-            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
-        T[(i * 6 + 2) % 8] = 
-            ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
-        T[(i * 6 + 3) % 8] = 
-            ROTL32(T[(i * 6 + 3) % 8] + ROTL32(delta[i % 8], i + 3), 11);
-        T[(i * 6 + 4) % 8] = 
-            ROTL32(T[(i * 6 + 4) % 8] + ROTL32(delta[i % 8], i + 4), 13);
-        T[(i * 6 + 5) % 8] = 
-            ROTL32(T[(i * 6 + 5) % 8] + ROTL32(delta[i % 8], i + 5), 17);
-
-        roundKeys[i * 6 + 0] = T[(i * 6 + 0) % 8];
-        roundKeys[i * 6 + 1] = T[(i * 6 + 1) % 8];
-        roundKeys[i * 6 + 2] = T[(i * 6 + 2) % 8];
-        roundKeys[i * 6 + 3] = T[(i * 6 + 3) % 8];
-        roundKeys[i * 6 + 4] = T[(i * 6 + 4) % 8];
-        roundKeys[i * 6 + 5] = T[(i * 6 + 5) % 8];
-    }
-#else
-    const int Nr = 24;
-    u32 T[4];
-
-    // Load the byte key into T
-    // for (int i = 0; i < 4; i++) {
-    //     T[i] = (key[i * 4] << 24) | (key[i * 4 + 1] << 16) | (key[i * 4 + 2] << 8) | key[i * 4 + 3];
-    // }
-
-    // Load the word key into T
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-
-    // int rounds = (keySize == 128) ? 24 : (keySize == 192) ? 28 : 32;
-
-    // Generate round keys
-    for (int i = 0; i < Nr; i++) {
-        T[0] = ROTL32(T[0] + ROTL32(delta[i % 4], i + 0),  1);
-        T[1] = ROTL32(T[1] + ROTL32(delta[i % 4], i + 1),  3);
-        T[2] = ROTL32(T[2] + ROTL32(delta[i % 4], i + 2),  6);
-        T[3] = ROTL32(T[3] + ROTL32(delta[i % 4], i + 3), 11);
-
-        roundKeys[i * 6 + 0] = T[0];
-        roundKeys[i * 6 + 1] = T[1];
-        roundKeys[i * 6 + 2] = T[2];
-        roundKeys[i * 6 + 3] = T[1];
-        roundKeys[i * 6 + 4] = T[3];
-        roundKeys[i * 6 + 5] = T[1];
-    }
-#endif
 }
 
 void leaDecKeySchedule(u32* roundKeys, const u32* key, const int LEA_VERSION) {
-#if LEA_VERSION == 192
-    const int Nr = 28;
-    u32 T[6];
+    if (LEA_VERSION == 192) {
+        const int Nr = 28;
+        u32 T[6];
 
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-    T[4] = REVERSE_BYTE_ORDER(key[4]);
-    T[5] = REVERSE_BYTE_ORDER(key[5]);
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+        T[4] = REVERSE_BYTE_ORDER(key[4]);
+        T[5] = REVERSE_BYTE_ORDER(key[5]);
 
-    for (int i = 0; i < Nr; i++) {
-        T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
-        T[1] = ROTL32(T[1] + ROTL32(delta[i % 6], i + 1),  3);
-        T[2] = ROTL32(T[2] + ROTL32(delta[i % 6], i + 2),  6);
-        T[3] = ROTL32(T[3] + ROTL32(delta[i % 6], i + 3), 11);
-        T[4] = ROTL32(T[4] + ROTL32(delta[i % 6], i + 4), 13);
-        T[5] = ROTL32(T[5] + ROTL32(delta[i % 6], i + 5), 17);
+        for (int i = 0; i < Nr; i++) {
+            T[0] = ROTL32(T[0] + ROTL32(delta[i % 6], i + 0),  1);
+            T[1] = ROTL32(T[1] + ROTL32(delta[i % 6], i + 1),  3);
+            T[2] = ROTL32(T[2] + ROTL32(delta[i % 6], i + 2),  6);
+            T[3] = ROTL32(T[3] + ROTL32(delta[i % 6], i + 3), 11);
+            T[4] = ROTL32(T[4] + ROTL32(delta[i % 6], i + 4), 13);
+            T[5] = ROTL32(T[5] + ROTL32(delta[i % 6], i + 5), 17);
 
-        roundKeys[(Nr - 1 - i) * 6 + 0] = T[0];
-        roundKeys[(Nr - 1 - i) * 6 + 1] = T[1];
-        roundKeys[(Nr - 1 - i) * 6 + 2] = T[2];
-        roundKeys[(Nr - 1 - i) * 6 + 3] = T[3];
-        roundKeys[(Nr - 1 - i) * 6 + 4] = T[4];
-        roundKeys[(Nr - 1 - i) * 6 + 5] = T[5];
+            roundKeys[(Nr - 1 - i) * 6 + 0] = T[0];
+            roundKeys[(Nr - 1 - i) * 6 + 1] = T[1];
+            roundKeys[(Nr - 1 - i) * 6 + 2] = T[2];
+            roundKeys[(Nr - 1 - i) * 6 + 3] = T[3];
+            roundKeys[(Nr - 1 - i) * 6 + 4] = T[4];
+            roundKeys[(Nr - 1 - i) * 6 + 5] = T[5];
+        }
+    } else if (LEA_VERSION == 256) {    
+        const int Nr = 32;
+        u32 T[8];
+
+        // Initialize T array from key
+        // memcpy(T, key, sizeof(u32) * 8);
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+        T[4] = REVERSE_BYTE_ORDER(key[4]);
+        T[5] = REVERSE_BYTE_ORDER(key[5]);
+        T[6] = REVERSE_BYTE_ORDER(key[6]);
+        T[7] = REVERSE_BYTE_ORDER(key[7]);
+
+        for (int i = 0; i < Nr; i++) {
+            T[(i * 6 + 0) % 8] =
+                ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
+            T[(i * 6 + 1) % 8] = 
+                ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
+            T[(i * 6 + 2) % 8] = 
+                ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
+            T[(i * 6 + 3) % 8] = 
+                ROTL32(T[(i * 6 + 3) % 8] + ROTL32(delta[i % 8], i + 3), 11);
+            T[(i * 6 + 4) % 8] = 
+                ROTL32(T[(i * 6 + 4) % 8] + ROTL32(delta[i % 8], i + 4), 13);
+            T[(i * 6 + 5) % 8] = 
+                ROTL32(T[(i * 6 + 5) % 8] + ROTL32(delta[i % 8], i + 5), 17);
+
+            roundKeys[(Nr - 1 - i) * 6 + 0] = T[(i * 6 + 0) % 8];
+            roundKeys[(Nr - 1 - i) * 6 + 1] = T[(i * 6 + 1) % 8];
+            roundKeys[(Nr - 1 - i) * 6 + 2] = T[(i * 6 + 2) % 8];
+            roundKeys[(Nr - 1 - i) * 6 + 3] = T[(i * 6 + 3) % 8];
+            roundKeys[(Nr - 1 - i) * 6 + 4] = T[(i * 6 + 4) % 8];
+            roundKeys[(Nr - 1 - i) * 6 + 5] = T[(i * 6 + 5) % 8];
+        }
+    } else {
+        const int Nr = 24;
+        u32 T[4];
+
+        // Load the word key into T
+        T[0] = REVERSE_BYTE_ORDER(key[0]);
+        T[1] = REVERSE_BYTE_ORDER(key[1]);
+        T[2] = REVERSE_BYTE_ORDER(key[2]);
+        T[3] = REVERSE_BYTE_ORDER(key[3]);
+
+        // Generate round keys
+        for (int i = 0; i < Nr; i++) {
+            T[0] = ROTL32(T[0] + ROTL32(delta[i % 4], i + 0), 1);
+            T[1] = ROTL32(T[1] + ROTL32(delta[i % 4], i + 1), 3);
+            T[2] = ROTL32(T[2] + ROTL32(delta[i % 4], i + 2), 6);
+            T[3] = ROTL32(T[3] + ROTL32(delta[i % 4], i + 3), 11);
+
+            roundKeys[(Nr - 1 - i) * 6 + 0] = T[0];
+            roundKeys[(Nr - 1 - i) * 6 + 1] = T[1];
+            roundKeys[(Nr - 1 - i) * 6 + 2] = T[2];
+            roundKeys[(Nr - 1 - i) * 6 + 3] = T[1];
+            roundKeys[(Nr - 1 - i) * 6 + 4] = T[3];
+            roundKeys[(Nr - 1 - i) * 6 + 5] = T[1];
+        }
     }
-#elif LEA_VERSION == 256
-    const int Nr = 32;
-    u32 T[8];
-
-    // Initialize T array from key
-    // memcpy(T, key, sizeof(u32) * 8);
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-    T[4] = REVERSE_BYTE_ORDER(key[4]);
-    T[5] = REVERSE_BYTE_ORDER(key[5]);
-    T[6] = REVERSE_BYTE_ORDER(key[6]);
-    T[7] = REVERSE_BYTE_ORDER(key[7]);
-
-    for (int i = 0; i < Nr; i++) {
-        T[(i * 6 + 0) % 8] =
-            ROTL32(T[(i * 6 + 0) % 8] + ROTL32(delta[i % 8], i + 0),  1);
-        T[(i * 6 + 1) % 8] = 
-            ROTL32(T[(i * 6 + 1) % 8] + ROTL32(delta[i % 8], i + 1),  3);
-        T[(i * 6 + 2) % 8] = 
-            ROTL32(T[(i * 6 + 2) % 8] + ROTL32(delta[i % 8], i + 2),  6);
-        T[(i * 6 + 3) % 8] = 
-            ROTL32(T[(i * 6 + 3) % 8] + ROTL32(delta[i % 8], i + 3), 11);
-        T[(i * 6 + 4) % 8] = 
-            ROTL32(T[(i * 6 + 4) % 8] + ROTL32(delta[i % 8], i + 4), 13);
-        T[(i * 6 + 5) % 8] = 
-            ROTL32(T[(i * 6 + 5) % 8] + ROTL32(delta[i % 8], i + 5), 17);
-
-        roundKeys[(Nr - 1 - i) * 6 + 0] = T[(i * 6 + 0) % 8];
-        roundKeys[(Nr - 1 - i) * 6 + 1] = T[(i * 6 + 1) % 8];
-        roundKeys[(Nr - 1 - i) * 6 + 2] = T[(i * 6 + 2) % 8];
-        roundKeys[(Nr - 1 - i) * 6 + 3] = T[(i * 6 + 3) % 8];
-        roundKeys[(Nr - 1 - i) * 6 + 4] = T[(i * 6 + 4) % 8];
-        roundKeys[(Nr - 1 - i) * 6 + 5] = T[(i * 6 + 5) % 8];
-    }
-#else
-    const int Nr = 24;
-    u32 T[4];
-
-    // Load the word key into T
-    T[0] = REVERSE_BYTE_ORDER(key[0]);
-    T[1] = REVERSE_BYTE_ORDER(key[1]);
-    T[2] = REVERSE_BYTE_ORDER(key[2]);
-    T[3] = REVERSE_BYTE_ORDER(key[3]);
-
-    // Generate round keys
-    for (int i = 0; i < Nr; i++) {
-        T[0] = ROTL32(T[0] + ROTL32(delta[i % 4], i + 0), 1);
-        T[1] = ROTL32(T[1] + ROTL32(delta[i % 4], i + 1), 3);
-        T[2] = ROTL32(T[2] + ROTL32(delta[i % 4], i + 2), 6);
-        T[3] = ROTL32(T[3] + ROTL32(delta[i % 4], i + 3), 11);
-
-        roundKeys[(Nr - 1 - i) * 6 + 0] = T[0];
-        roundKeys[(Nr - 1 - i) * 6 + 1] = T[1];
-        roundKeys[(Nr - 1 - i) * 6 + 2] = T[2];
-        roundKeys[(Nr - 1 - i) * 6 + 3] = T[1];
-        roundKeys[(Nr - 1 - i) * 6 + 4] = T[3];
-        roundKeys[(Nr - 1 - i) * 6 + 5] = T[1];
-    }
-#endif
 }
 
 void leaEncrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION) {
