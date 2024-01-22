@@ -124,14 +124,4 @@ void lea128_test(void);
 void lea192_test(void);
 void lea256_test(void);
 
-/* LEA_MODE_TESTS */
-
-void lea128_CBC_test();
-void lea192_CBC_test();
-void lea256_CBC_test();
-
-void lea128_CTR_test();
-void lea192_CTR_test();
-void lea256_CTR_test();
-
 #endif /* _LEA_H */

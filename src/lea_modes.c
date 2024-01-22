@@ -28,16 +28,12 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
 void CBC_Encrypt_LEA(u32* restrict ct, 
                      const u32* restrict pt, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv) {
+                     const u32* restrict iv, const int LEA_VERSION) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     const size_t blockSize = 4; 
     const size_t numBlocks = dataLength / blockSize;
 
     // Avoid allocating ct, it should be provided by the caller
-
-    // Round keys should be computed outside if key does not change frequently
-    u32 roundKeys[(keyLength == 4) ? 144 : (keyLength == 6) ? 168 : 192];
-    leaEncKeySchedule(roundKeys, key);
 
     // Use restrict keyword if supported, and avoid using temp if not necessary
     u32 buffer[blockSize];
@@ -54,7 +50,7 @@ void CBC_Encrypt_LEA(u32* restrict ct,
         }
 
         // Encrypt the Block
-        leaEncrypt(&ct[i * blockSize], buffer, roundKeys);
+        leaEncrypt(&ct[i * blockSize], buffer, key, LEA_VERSION);
 
         // Update IV (current ciphertext block becomes next IV)
         memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
@@ -64,36 +60,29 @@ void CBC_Encrypt_LEA(u32* restrict ct,
 void CBC_Decrypt_LEA(u32* restrict pt, 
                      const u32* restrict ct, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv) {
+                     const u32* restrict iv, const int LEA_VERSION) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     const size_t blockSize = 4; 
     const size_t numBlocks = dataLength / blockSize;
 
-    // Avoid allocating ct, it should be provided by the caller
+    // Avoid allocating pt, it should be provided by the caller
 
-    // Round keys should be computed outside if key does not change frequently
-    u32 roundKeys[(keyLength == 4) ? 144 : (keyLength == 6) ? 168 : 192];
-    leaDecKeySchedule(roundKeys, key);
-
-    // Use restrict keyword if supported, and avoid using temp if not necessary
     u32 buffer[blockSize];
-
-    // Assuming IV is not modified, make a copy if it needs to be preserved
     u32 currentIV[blockSize];
     memcpy(currentIV, iv, blockSize * sizeof(u32));
 
-    // CBC encryption
+    // CBC decryption
     for (size_t i = 0; i < numBlocks; i++) {
+        // Decrypt the Block
+        leaDecrypt(buffer, &ct[i * blockSize], key, LEA_VERSION);
+
         // XOR with IV or previous ciphertext block
         for (size_t j = 0; j < blockSize; j++) {
-            buffer[j] = ct[i * blockSize + j] ^ currentIV[j];
+            pt[i * blockSize + j] = buffer[j] ^ currentIV[j];
         }
 
-        // Decrypt the Block
-        leaDecrypt(&pt[i * blockSize], buffer, roundKeys);
-
         // Update IV (current ciphertext block becomes next IV)
-        memcpy(currentIV, &pt[i * blockSize], blockSize * sizeof(u32));
+        memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
     }
 }
 

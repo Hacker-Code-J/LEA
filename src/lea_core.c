@@ -289,8 +289,8 @@ void leaDecrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION)
     t[2] = REVERSE_BYTE_ORDER(src[2]);
     t[3] = REVERSE_BYTE_ORDER(src[3]);
 
-    printf("\nDecryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
-                0, t[0], t[1], t[2], t[3]);
+    // printf("\nDecryption Test:\nt[%02d] = %08x:%08x:%08x:%08x\n",
+    //             0, t[0], t[1], t[2], t[3]);
 
     for (int i = 0, j = 0;
          i < Nr;
@@ -308,8 +308,8 @@ void leaDecrypt(u32* dst, const u32* src, const u32* key, const int LEA_VERSION)
         t[3] = (ROTL32(_t2, 3) - (t[2] ^ roundKeys[j + 4]))
             ^ roundKeys[j + 5];
 
-        printf("t[%02d] = %08x:%08x:%08x:%08x\n",
-                i + 1, t[0], t[1], t[2], t[3]);
+        // printf("t[%02d] = %08x:%08x:%08x:%08x\n",
+        //         i + 1, t[0], t[1], t[2], t[3]);
     }
 
     dst[0] = REVERSE_BYTE_ORDER(t[0]);

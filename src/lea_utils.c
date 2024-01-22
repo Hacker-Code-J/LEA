@@ -29,7 +29,7 @@ void printBigEndian(u32* array, size_t size) {
     // printf("0x");
     for (size_t i = 0; i < size; i++) {
         u32 value = array[i];
-        if (i == 4) printf("\n");
+        if (!(i % 4)) printf("\n");
         for (int j = 3; j >= 0; j--) {
             printf("%02x:", (value >> (j * 8)) & 0xFF);
         }

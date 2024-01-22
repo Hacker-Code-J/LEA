@@ -10,12 +10,16 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
 void CBC_Encrypt_LEA(u32* restrict ct, 
                      const u32* restrict pt, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv);
+                     const u32* restrict iv, const int LEA_VERSION);
 
 void CBC_Decrypt_LEA(u32* restrict pt, 
                      const u32* restrict ct, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv);
+                     const u32* restrict iv, const int LEA_VERSION);
+
+void CBC_lea128_test(void);
+void CBC_lea192_test(void);
+void CBC_lea256_test(void);
 
 // void xorBlocks(u32* dst, const u32* src1, const u32* src2);
 
