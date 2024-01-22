@@ -170,59 +170,95 @@ void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
         }
     }
 
-    u32 _key[4 * 100];
-    u32 _iv[4 * 100];
-    u32 _pt[4 * (1000 + 1)]; // +1 to handle PT[j+1]
-    u32 _ct_local[4 * 1000];
-    size_t keyLength = pData->keyLength;
-    size_t dataLength = pData->dataLength;
+    // Constants
+    const size_t blockSize = 4; 
 
-    memcpy(_key, pData->key, pData->keyLength * sizeof(u32));
-    memcpy(_iv, pData->iv, 4 * sizeof(u32));
-    memcpy(_pt, pData->pt, pData->dataLength * sizeof(u32));
+    // Buffers
+    uint32_t buffer[blockSize];
+    uint32_t currentIV[blockSize];
+    memcpy(currentIV, pData->iv, blockSize * sizeof(u32));
 
-    for (int i = 0; i < 4; i++) {
-        printf("Key[%d]: %x\n", i, _key[i]);
-        printf("IV[%d]: %x\n", i, _iv[i]);
-        printf("PT[0]: %x\n", _pt[0]);
-    }
+    // Variables
+    size_t i, j;
+    u32* _ct;
+    const u32* _pt;
 
-    freeCryptoData(pData);
-    free(pLine);
-    fclose(pReqFile);
-
-    for (size_t i = 0; i < 2; i++) {
+    // Process blocks
+    for (i = 0; i < 3; i++) {
         if (!isFirstCnt) fputc('\n', pRspFile);
         isFirstCnt = 0;
         fprintf(pRspFile, "COUNT = %ld\n", i);
 
         fprintf(pRspFile, "KEY =");
-        printHexToFile(pRspFile, _key + (4 * i), pData->keyLength);
+        printHexToFile(pRspFile, pData->key, pData->keyLength);
 
         fprintf(pRspFile, "IV =");
-        printHexToFile(pRspFile, _iv + (4 * i), 4);
+        printHexToFile(pRspFile, pData->iv, 4);
 
         fprintf(pRspFile, "PT =");
-        printHexToFile(pRspFile, _pt + (4 * i), pData->dataLength);
+        printHexToFile(pRspFile, pData->pt, pData->dataLength);
 
-        for (size_t j = 0; j < 1000; j++) {
+        _ct = pData->ct;
+        _pt = pData->pt;
+
+        for (j = 0; j < 1000; j++, _ct += blockSize, _pt += blockSize) {
             if (j == 0) {
-                _pt[j] ^= _iv[i];
-                CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
-                _pt[j + 1] = _iv[i];
+                xorBuffers(buffer, _pt, currentIV, blockSize);
+                leaEncrypt(_ct, buffer, pData->key + i * pData->keyLength, LEA128);
+                memcpy(currentIV, &pData->iv[i], blockSize * sizeof(u32));
+                memcpy(pData->pt + blockSize, currentIV, blockSize * sizeof(u32));
             } else {
-                _pt[j] ^= _ct_local[j - 1];
-                CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
-                _pt[j + 1] = _ct_local[j - 1];
+                xorBuffers(buffer, _pt, _ct - blockSize, blockSize);
+                leaEncrypt(_ct, buffer, pData->key + i * pData->keyLength, LEA128);
+                memcpy(pData->pt + blockSize, _ct - blockSize, blockSize * sizeof(uint32_t));
             }
         }
 
         fprintf(pRspFile, "CT =");
-        printHexToFile(pRspFile, _ct_local + (4 * 999), pData->dataLength);
-        _key[i + 1] = _key[i] ^ _ct_local[4 * 999];
-        _iv[i + 1] = _ct_local[4 * 999];
-        _pt[0] = _ct_local[4 * 998];
+        printHexToFile(pRspFile, _ct - blockSize, pData->dataLength);
+
+        xorBuffers(pData->key + (i + 1) * pData->keyLength,
+                   pData->key + i * pData->keyLength, _ct - blockSize, blockSize);
+        memcpy(pData->iv + (i + 1) * blockSize, _ct - blockSize, blockSize * sizeof(u32));
+        memcpy(pData->pt, _ct - 2 * blockSize, blockSize * sizeof(u32));
     }
+
+    // freeCryptoData(pData);
+    // free(pLine);
+    // fclose(pReqFile);
+
+    // for (size_t i = 0; i < 2; i++) {
+    //     if (!isFirstCnt) fputc('\n', pRspFile);
+    //     isFirstCnt = 0;
+    //     fprintf(pRspFile, "COUNT = %ld\n", i);
+
+    //     fprintf(pRspFile, "KEY =");
+    //     printHexToFile(pRspFile, _key + (4 * i), pData->keyLength);
+
+    //     fprintf(pRspFile, "IV =");
+    //     printHexToFile(pRspFile, _iv + (4 * i), 4);
+
+    //     fprintf(pRspFile, "PT =");
+    //     printHexToFile(pRspFile, _pt + (4 * i), pData->dataLength);
+
+    //     for (size_t j = 0; j < 1000; j++) {
+    //         if (j == 0) {
+    //             _pt[j] ^= _iv[i];
+    //             CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
+    //             _pt[j + 1] = _iv[i];
+    //         } else {
+    //             _pt[j] ^= _ct_local[j - 1];
+    //             CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
+    //             _pt[j + 1] = _ct_local[j - 1];
+    //         }
+    //     }
+
+    //     fprintf(pRspFile, "CT =");
+    //     printHexToFile(pRspFile, _ct_local + (4 * 999), pData->dataLength);
+    //     _key[i + 1] = _key[i] ^ _ct_local[4 * 999];
+    //     _iv[i + 1] = _ct_local[4 * 999];
+    //     _pt[0] = _ct_local[4 * 998];
+    // }
 
     // pData->ct = (u32*)malloc(pData->dataLength * sizeof(u32));
     // if (pData->ct == NULL) {
@@ -283,9 +319,9 @@ void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
     // // PT[0] = CT[j-1]
     // memcpy(pData->pt, pData->ct, pData->dataLength * sizeof(u32));
 
-    // freeCryptoData(pData);
-    // free(pLine);
-    // fclose(pReqFile);
+    freeCryptoData(pData);
+    free(pLine);
+    fclose(pReqFile);
     fclose(pRspFile);
 
     printf("LEA128(CBC)MCT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
