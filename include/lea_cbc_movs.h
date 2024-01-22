@@ -21,12 +21,12 @@
  * +--------------+----------------+
 */
 typedef struct {
-    size_t keyLength;       // Length of pt or ct
     u32* key;               // Pointer for arbitrary length key
     u32* iv;                // Pointer for arbitrary length iv
-    size_t dataLength;      // Length of pt or ct
     u32* pt;                // Pointer for arbitrary length plaintext
     u32* ct;                // Pointer for arbitrary length ciphertext
+    size_t keyLength;       // Length of pt or ct
+    size_t dataLength;      // Length of pt or ct
 } CryptoData;               // 48-byte (8 * 6)
 
 /* lea_cbc_movs */
@@ -39,6 +39,9 @@ size_t wordLength(const char* pHexString);
 
 bool readCryptoData(FILE* fp, CryptoData* pData);
 bool compareCryptoData(const CryptoData* pData1, const CryptoData* pData2);
+
+void printHexToFile(FILE* pFile, const u32* data, size_t length);
+void xorBuffers(u32* result, const u32* a, const u32* b, size_t length);
 
 /* lea_cbc_kat */
 
@@ -56,9 +59,9 @@ void MOVS_LEA128CBC_MMT_TEST();
 
 /* lea_cbc_mct */
 
-void create_LEA128CBC_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
-void create_LEA128CBC_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
-void create_LEA128CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void create_LEA_CBC_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CBC_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
 void MOVS_LEA128CBC_MCT_TEST();
 
 #endif // _LEA_CBC_MOVS_H

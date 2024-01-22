@@ -5,7 +5,6 @@
  * This file contains the prototypes and definitions required for the LEA
  * encryption and decryption functionalities, as well as key scheduling.
  */
-
 #include <stdint.h>
 #include <stddef.h>
 
@@ -56,6 +55,33 @@ static inline u32 REVERSE_BYTE_ORDER(u32 word) {
            ((word & 0x0000FF00) << 0x08)  |
            ((word & 0x00FF0000) >> 0x08)  |
            ((word & 0xFF000000) >> 0x18);
+}
+
+/**
+ * Reads the current value of the processor's time-stamp counter.
+ * 
+ * The time-stamp counter is a 64-bit register present on all x86 processors
+ * since the Pentium. It counts the number of cycles since reset. The `rdtsc`
+ * instruction is used to read this value.
+ * 
+ * Note that the counter's resolution and the relation between its value and
+ * actual time may vary between processor models and power/thermal conditions.
+ * 
+ * @return The current value of the time-stamp counter.
+ */
+static inline u64 rdtsc() {
+    u32 lo, hi;
+    
+    // Inline assembly syntax for GCC. This tells the compiler to emit the rdtsc instruction,
+    // which stores the result in two 32-bit registers: the lower 32 bits in 'eax' (mapped to 'lo' in C),
+    // and the higher 32 bits in 'edx' (mapped to 'hi' in C).
+    __asm__ __volatile__ (
+      "rdtsc" : "=a" (lo), "=d" (hi)
+    );
+    
+    // Combine the high and low 32-bit values into a single 64-bit integer.
+    // The high value is shifted left by 32 bits and then combined with the low value.
+    return ((u64)hi << 32) | lo;
 }
 
 /* LEA_CORE */
