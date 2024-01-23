@@ -183,7 +183,7 @@ void create_LEA_CBC_KAT_RspFile(const char* pReqFileName, const char* pRspFileNa
             CBC_Encrypt_LEA(pData->ct,
                             pData->pt, pData->dataLength,
                             pData->key, pData->keyLength,
-                            pData->iv);
+                            pData->iv, LEA128);
             for (size_t i = 0; i < pData->dataLength; i++) {
                 fprintf(pRspFile, "%08X", pData->ct[i]);
             }
@@ -203,7 +203,7 @@ void create_LEA_CBC_KAT_RspFile(const char* pReqFileName, const char* pRspFileNa
     CBC_Encrypt_LEA(pData->ct,
                     pData->pt, pData->dataLength,
                     pData->key, pData->keyLength,
-                    pData->iv);
+                    pData->iv, LEA128);
     for (size_t i = 0; i < pData->dataLength; i++) {
         fprintf(pRspFile, "%08X", pData->ct[i]);
     }

@@ -29,7 +29,7 @@ void printBigEndian(u32* array, size_t size) {
     // printf("0x");
     for (size_t i = 0; i < size; i++) {
         u32 value = array[i];
-        if (i == 4) printf("\n");
+        if (!(i % 4)) printf("\n");
         for (int j = 3; j >= 0; j--) {
             printf("%02x:", (value >> (j * 8)) & 0xFF);
         }
@@ -50,7 +50,7 @@ void printLittleEndian(u32* array, size_t size) {
     printf("\n");
 }
 
-void printEncRoundKeys(u32* enc_roundkey) {
+void printEncRoundKeys(u32* enc_roundkey, const int LEA_VERSION) {
     /*
      * RK[00] = 000 || 001 || 002 || 003 || 004 || 005
      * RK[01] = 006 || 007 || 008 || 009 || 010 || 011
@@ -62,6 +62,8 @@ void printEncRoundKeys(u32* enc_roundkey) {
      * ...
      * RK[31] = 186 || 187 || 188 || 189 || 190 || 191
     */
+    const int TOTAL_RK = (LEA_VERSION == LEA192) ? 168 :
+                         (LEA_VERSION == LEA256) ? 192 : 144; 
     printf("\nEncryption RoundKey: \n");
     for (int i = 0, j = 0; i < TOTAL_RK; i++) {
         if((i % 6) == 0) printf("\nEnc_Round[%02d] | ", j++);
@@ -96,8 +98,10 @@ void printEncRoundKeys(u32* enc_roundkey) {
     // }
 }
 
-void printDecRoundKeys(u32* dec_roundkey) {
+void printDecRoundKeys(u32* dec_roundkey, const int LEA_VERSION) {
     printf("\nDecryption RoundKey: \n");
+    const int TOTAL_RK = (LEA_VERSION == LEA192) ? 168 :
+                         (LEA_VERSION == LEA256) ? 192 : 144; 
     for (int i = 0, j = 0; i < TOTAL_RK; i++) {
         if((i % 6) == 0) printf("\nDec_Round[%02d] | ", j++);
         printf("%08x:", dec_roundkey[i]);

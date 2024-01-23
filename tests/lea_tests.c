@@ -6,7 +6,10 @@
 #include "lea.h"
 #include "lea_modes.h"
 
-void lea128_test() {
+void lea128_test(void) {
+    const int KEY_SIZE = 4; // 4-word = 128-bit
+    const int TOTAL_RK = 144;
+    
     u32 key[KEY_SIZE];
     const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0"; // 128-bit Key
     // const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a59687"; // 192-bit Key
@@ -23,8 +26,8 @@ void lea128_test() {
     // 192 * 32 = 6144 = 32 * 192
     u32 enc_roundkey[TOTAL_RK];
     
-    leaEncKeySchedule(enc_roundkey, key);
-    printEncRoundKeys(enc_roundkey);
+    leaEncKeySchedule(enc_roundkey, key, LEA128);
+    printEncRoundKeys(enc_roundkey, LEA128);
 
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
@@ -43,17 +46,15 @@ void lea128_test() {
     // PKCS7_BYTE_PAD_32bit(plain, 16,
     //     (strlen(plainString) % 2) ? (strlen(plainString) + 1) / 2 : strlen(plainString) / 2);
 
-    printf("\nPadding Plain-Text: \n");
-    printBigEndian(plain, 4);
-    printLittleEndian(plain, 4);
+    // printf("\nPadding Plain-Text: \n");
+    // printBigEndian(plain, 4);
+    // printLittleEndian(plain, 4);
     
-
-#if 1
-    u64 start, end;
-    start = rdtsc();
-    leaEncrypt(cipher, plain, enc_roundkey);
-    end = rdtsc();
-    printf("Cycles: %lu\n", end - start);
+    // u64 start, end;
+    // start = rdtsc();
+    leaEncrypt(cipher, plain, key, LEA128);
+    // end = rdtsc();
+    // printf("Cycles: %lu\n", end - start);
     
     printf("\nCipher-Text: \n");
     printBigEndian(cipher, sizeof(u32));
@@ -73,8 +74,8 @@ void lea128_test() {
     // 192 * 28 = 5376 = 32 * 168
     // 192 * 32 = 6144 = 32 * 192
     u32 dec_roundkey[TOTAL_RK];
-    leaDecKeySchedule(dec_roundkey, key);
-    printDecRoundKeys(dec_roundkey);
+    leaDecKeySchedule(dec_roundkey, key, LEA128);
+    printDecRoundKeys(dec_roundkey, LEA128);
     // printf("\nDecryption RoundKey: \n");
     // for (int i = 0, j = 0; i < TOTAL_RK; i++) {
     //     if((i % 6) == 0) printf("\nDec_Round[%02d] | ", j++);
@@ -82,7 +83,7 @@ void lea128_test() {
     // }
     // printf("\n");
 
-    leaDecrypt(decrypted, encrypted, dec_roundkey);
+    leaDecrypt(decrypted, encrypted, key, LEA128);
     
     printf("\nDecrypted Text: \n");
     printBigEndian(decrypted, sizeof(32));
@@ -90,10 +91,12 @@ void lea128_test() {
 
     // double dec_time = measure_time(leaDecrypt, encrypted, dec_roundkey, decrypted);
     // printf("%.3f ns\n", dec_time*1000000000);
-#endif
 }
 
-void lea192_test() {
+void lea192_test(void) {
+    const int KEY_SIZE = 6; // 6-word = 192-bit
+    const int TOTAL_RK = 168;
+
     u32 key[KEY_SIZE];
     const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a59687"; // 192-bit Key
     stringToWordArray(key, keyString);
@@ -104,8 +107,8 @@ void lea192_test() {
     // printLittleEndian(key, KEY_SIZE);
 
     u32 enc_roundkey[TOTAL_RK];
-    leaEncKeySchedule(enc_roundkey, key);
-    printEncRoundKeys(enc_roundkey);
+    leaEncKeySchedule(enc_roundkey, key, LEA192);
+    printEncRoundKeys(enc_roundkey, LEA192);
 
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
@@ -117,7 +120,7 @@ void lea192_test() {
     printBigEndian(plain, 4);
     // printLittleEndian(plain, 4);
 
-    leaEncrypt(cipher, plain, enc_roundkey);
+    leaEncrypt(cipher, plain, key, LEA192);
     
     printf("\nCipher-Text: \n");
     printBigEndian(cipher, sizeof(u32));
@@ -134,10 +137,10 @@ void lea192_test() {
     printLittleEndian(encrypted, sizeof(u32));
 
     u32 dec_roundkey[TOTAL_RK];
-    leaDecKeySchedule(dec_roundkey, key);
-    printDecRoundKeys(dec_roundkey);
+    leaDecKeySchedule(dec_roundkey, key, LEA192);
+    printDecRoundKeys(dec_roundkey, LEA192);
     
-    leaDecrypt(decrypted, encrypted, dec_roundkey);
+    leaDecrypt(decrypted, encrypted, key, LEA192);
     
     printf("\nDecrypted Text: \n");
     printBigEndian(decrypted, sizeof(32));
@@ -147,7 +150,10 @@ void lea192_test() {
     // printf("%.3f ns\n", dec_time*1000000000);
 }
 
-void lea256_test() {
+void lea256_test(void) {
+    const int KEY_SIZE = 8; // 8-word = 256-bit
+    const int TOTAL_RK = 168;
+
     u32 key[KEY_SIZE];
     const char* keyString = "0f1e2d3c4b5a69788796a5b4c3d2e1f0f0e1d2c3b4a5968778695a4b3c2d1e0f"; // 256-bit Key
     stringToWordArray(key, keyString);
@@ -158,8 +164,8 @@ void lea256_test() {
     // printLittleEndian(key, KEY_SIZE);
 
     u32 enc_roundkey[TOTAL_RK];
-    leaEncKeySchedule(enc_roundkey, key);
-    printEncRoundKeys(enc_roundkey);
+    leaEncKeySchedule(enc_roundkey, key, LEA256);
+    printEncRoundKeys(enc_roundkey, LEA256);
 
     u32 plain[4] = { 0x00, };
     u32 cipher[4];
@@ -171,7 +177,7 @@ void lea256_test() {
     printBigEndian(plain, 4);
     // printLittleEndian(plain, 4);
 
-    leaEncrypt(cipher, plain, enc_roundkey);
+    leaEncrypt(cipher, plain, key, LEA256);
     
     printf("\nCipher-Text: \n");
     printBigEndian(cipher, sizeof(u32));
@@ -188,10 +194,10 @@ void lea256_test() {
     printLittleEndian(encrypted, sizeof(u32));
 
     u32 dec_roundkey[TOTAL_RK];
-    leaDecKeySchedule(dec_roundkey, key);
-    printDecRoundKeys(dec_roundkey);
+    leaDecKeySchedule(dec_roundkey, key, LEA256);
+    printDecRoundKeys(dec_roundkey, LEA256);
     
-    leaDecrypt(decrypted, encrypted, dec_roundkey);
+    leaDecrypt(decrypted, encrypted, key, LEA256);
     
     printf("\nDecrypted Text: \n");
     printBigEndian(decrypted, sizeof(32));
