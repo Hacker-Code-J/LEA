@@ -227,10 +227,10 @@ void MOVS_LEA128CBC(void) {
         printProgressBar(idx++, totalTests);
     }
 
-    printf("\n\nKAT Summary:\n");
-    printf("Passed: %d/%d\n", passedTests, totalTests);
-    if (result) printf("Perfect PASS !!!\n\n");
-    else printf("Some tests FAILED.\n\n");
+    // printf("\n\nKAT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
 
     fclose(file1_kat);
     fclose(file2_kat);
@@ -279,10 +279,10 @@ void MOVS_LEA128CBC(void) {
         printProgressBar(idx++, totalTests);
     }
 
-    printf("\n\nMMT Summary:\n");
-    printf("Passed: %d/%d\n", passedTests, totalTests);
-    if (result) printf("Perfect PASS !!!\n\n");
-    else printf("Some tests FAILED.\n\n");
+    // printf("\n\nMMT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
 
     fclose(file1_mmt);
     fclose(file2_mmt);
@@ -331,10 +331,10 @@ void MOVS_LEA128CBC(void) {
         printProgressBar(idx++, totalTests);
     }
 
-    printf("\n\nMCT Summary:\n");
-    printf("Passed: %d/%d\n", passedTests, totalTests);
-    if (result) printf("Perfect PASS !!!\n\n");
-    else printf("Some tests FAILED.\n\n");
+    // printf("\n\nMCT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
 
     fclose(file1_mct);
     fclose(file2_mct);
