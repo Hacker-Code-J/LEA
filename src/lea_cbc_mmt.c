@@ -218,7 +218,7 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
     printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void MOVS_LEA128CBC_MMT_TEST() {
+void MOVS_LEA128CBC_MMT_TEST(void) {
     const char* folderPath = "../LEA128(CBC)MOVS/";
     char txtFileName[50];
     char reqFileName[50];
