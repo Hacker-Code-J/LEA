@@ -2,22 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lea_cbc_movs.h"
+#include "lea_movs.h"
 
-void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
+void create_LEA_CTR_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {
     FILE *pTxtFile, *pReqFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CTR)KAT.txt
     if (pTxtFile == NULL) {
-        perror("Error opening input file");
+        perror("Error opening .txt file");
         return;
     }
 
     // Open the .req file for writing
-    pReqFile = fopen(pReqFileName, "w"); // LEA128(CBC)MMT.req
+    pReqFile = fopen(pReqFileName, "w"); // LEA128(CTR)KAT.req
     if (pReqFile == NULL) {
         perror("Error opening .req file");
         fclose(pTxtFile);
@@ -40,7 +40,7 @@ void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileNa
             if (!isFirstKey) fputc('\n', pReqFile);
             isFirstKey = 0;
             fputs(pLine, pReqFile);
-        } else if (strncmp(pLine, "IV =", 4) == 0 || strncmp(pLine, "PT =", 4) == 0) {
+        } else if (strncmp(pLine, "CTR =", 5) == 0 || strncmp(pLine, "PT =", 4) == 0) {
             fputs(pLine, pReqFile);
         }
     }
@@ -49,24 +49,23 @@ void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileNa
     fclose(pTxtFile);
     fclose(pReqFile);
 
-    printf("LEA128(CBC)MMT.req file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+    printf("LEA128(CTR)KAT.req file has been successfully created in 'LEA128(CTR)MOVS' folder.\n");
 }
 
-void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
-    FILE *pTxtFile, *pFaxFile;
+void create_LEA_CTR_KAT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
+FILE *pTxtFile, *pFaxFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line
 
-    // Open the .txt file for reading
-    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CBC)MMT.txt
+    pTxtFile = fopen(pTxtFileName, "r"); // LEA128(CTR)KAT.txt
     if (pTxtFile == NULL) {
         perror("Error opening .txt file");
         return;
     }
 
     // Open the .fax file for writing
-    pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CBC)MMT.fax
+    pFaxFile = fopen(pFaxFileName, "w"); // LEA128(CTR)KAT.fax
     if (pFaxFile == NULL) {
         perror("Error opening .fax file");
         fclose(pTxtFile);
@@ -89,7 +88,7 @@ void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileNa
             if (!isFirstKey) fputc('\n', pFaxFile);
             isFirstKey = 0;
             fputs(pLine, pFaxFile);
-        } else if (strncmp(pLine, "IV =", 4) == 0 ||
+        } else if (strncmp(pLine, "CTR =", 5) == 0 ||
                    strncmp(pLine, "PT =", 4) == 0 ||
                    strncmp(pLine, "CT =", 4) == 0) {
             fputs(pLine, pFaxFile);
@@ -100,10 +99,10 @@ void create_LEA_CBC_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileNa
     fclose(pTxtFile);
     fclose(pFaxFile);
 
-    printf("LEA128(CBC)MMT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+    printf("LEA128(CTR)KAT.fax file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
-void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileName) {
+void create_LEA_CTR_KAT_RspFile(const char* pReqFileName, const char* pRspFileName) {
     FILE *pReqFile, *pRspFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
@@ -116,16 +115,16 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
     }
     memset(pData, 0, sizeof(CryptoData));
 
-    pReqFile = fopen(pReqFileName, "r"); // LEA128(CBC)MMT.req
+    pReqFile = fopen(pReqFileName, "r"); // LEA128(CTR)KAT.req
     if (pReqFile == NULL) {
-        perror("Error opening input file");
+        perror("Error opening .req file");
         return;
     }
 
-    // Open the .req file for writing
-    pRspFile = fopen(pRspFileName, "w"); // LEA128(CBC)MMT.rsp
+    // Open the .rsp file for writing
+    pRspFile = fopen(pRspFileName, "w"); // LEA128(CTR)KAT.rsp
     if (pRspFile == NULL) {
-        perror("Error opening .req file");
+        perror("Error opening .rsp file");
         fclose(pReqFile);
         return;
     }
@@ -152,14 +151,14 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
             }
             parseHexLine(pData->key, pLine + 6, pData->keyLength);
             fputs(pLine, pRspFile);
-        } else if (strncmp(pLine, "IV =", 4) == 0) {
+        } else if (strncmp(pLine, "CTR =", 5) == 0) {
             pData->iv = (u32*)malloc(4 * sizeof(u32));
             if (pData->iv == NULL) {
                 perror("Unable to allocate memory for IV");
                 freeCryptoData(pData);
                 break;
             }
-            parseHexLine(pData->iv, pLine + 5, 4);
+            parseHexLine(pData->iv, pLine + 6, 4);
             fputs(pLine, pRspFile);
         } else if (strncmp(pLine, "PT =", 4) == 0) {
             pData->dataLength = wordLength(pLine + 5);
@@ -181,10 +180,10 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
             }
 
             fprintf(pRspFile, "CT = ");
-            CBC_Encrypt_LEA(pData->ct,
+            CTR_Encrypt_LEA(pData->ct,
                             pData->pt, pData->dataLength,
                             pData->key, pData->keyLength,
-                            pData->iv, LEA128);
+                            pData->iv);
             for (size_t i = 0; i < pData->dataLength; i++) {
                 fprintf(pRspFile, "%08X", pData->ct[i]);
             }
@@ -201,10 +200,10 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
     }
 
     fprintf(pRspFile, "CT = ");
-    CBC_Encrypt_LEA(pData->ct,
+    CTR_Encrypt_LEA(pData->ct,
                     pData->pt, pData->dataLength,
                     pData->key, pData->keyLength,
-                    pData->iv, LEA128);
+                    pData->iv);
     for (size_t i = 0; i < pData->dataLength; i++) {
         fprintf(pRspFile, "%08X", pData->ct[i]);
     }
@@ -215,27 +214,27 @@ void create_LEA_CBC_MMT_RspFile(const char* pReqFileName, const char* pRspFileNa
     fclose(pReqFile);
     fclose(pRspFile);
 
-    printf("LEA128(CBC)MMT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
+    printf("LEA128(CTR)KAT.rsp file has been successfully created in 'LEA128(CTR)MOVS' folder.\n");
 }
 
-void MOVS_LEA128CBC_MMT_TEST(void) {
-    const char* folderPath = "../LEA128(CBC)MOVS/";
+void MOVS_LEA128CTR_KAT_TEST(void) {
+    const char* folderPath = "../LEA128(CTR)MOVS/";
     char txtFileName[50];
     char reqFileName[50];
     char faxFileName[50];
     char rspFileName[50];
     
     // Construct full paths for input and output files
-    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MMT.txt");
-    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MMT.req");
-    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MMT.fax");
-    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MMT.rsp");
+    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CTR)KAT.txt");
+    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CTR)KAT.req");
+    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CTR)KAT.fax");
+    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CTR)KAT.rsp");
     
-    create_LEA_CBC_MMT_ReqFile(txtFileName, reqFileName);
-    create_LEA_CBC_MMT_FaxFile(txtFileName, faxFileName);
-    create_LEA_CBC_MMT_RspFile(reqFileName, rspFileName);
+    create_LEA_CTR_KAT_ReqFile(txtFileName, reqFileName);
+    create_LEA_CTR_KAT_FaxFile(txtFileName, faxFileName);
+    create_LEA_CTR_KAT_RspFile(reqFileName, rspFileName);
 
-    printf("\nLEA128-CBC-MMT-TEST:\n");
+    printf("\nLEA128-CTR-KAT-TEST:\n");
 
     FILE* file1 = fopen(faxFileName, "r");
     FILE* file2 = fopen(rspFileName, "r");
@@ -253,7 +252,7 @@ void MOVS_LEA128CBC_MMT_TEST(void) {
     }
     int result = 1; // Default to pass
     int idx = 1;
-    int totalTests = 10; // Assuming a total of 10 tests
+    int totalTests = 275; // Assuming a total of 275 tests
     int passedTests = 0;
     while (idx <= totalTests) {
         // sReset the structures for the next iteration

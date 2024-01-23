@@ -28,7 +28,7 @@ void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_b
 void CBC_Encrypt_LEA(u32* restrict ct, 
                      const u32* restrict pt, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv, const int LEA_VERSION) {
+                     const u32* restrict iv) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     const size_t blockSize = 4; 
     const size_t numBlocks = dataLength / blockSize;
@@ -50,7 +50,7 @@ void CBC_Encrypt_LEA(u32* restrict ct,
         }
 
         // Encrypt the Block
-        leaEncrypt(&ct[i * blockSize], buffer, key, LEA_VERSION);
+        leaEncrypt(&ct[i * blockSize], buffer, key, 32 * keyLength);
 
         // Update IV (current ciphertext block becomes next IV)
         memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
@@ -60,7 +60,7 @@ void CBC_Encrypt_LEA(u32* restrict ct,
 void CBC_Decrypt_LEA(u32* restrict pt, 
                      const u32* restrict ct, const size_t dataLength,
                      const u32* restrict key, const size_t keyLength,
-                     const u32* restrict iv, const int LEA_VERSION) {
+                     const u32* restrict iv) {
     // Assuming block size is the size of u32 * 4 (128 bits)
     const size_t blockSize = 4; 
     const size_t numBlocks = dataLength / blockSize;
@@ -74,7 +74,7 @@ void CBC_Decrypt_LEA(u32* restrict pt,
     // CBC decryption
     for (size_t i = 0; i < numBlocks; i++) {
         // Decrypt the Block
-        leaDecrypt(buffer, &ct[i * blockSize], key, LEA_VERSION);
+        leaDecrypt(buffer, &ct[i * blockSize], key, 32 * keyLength);
 
         // XOR with IV or previous ciphertext block
         for (size_t j = 0; j < blockSize; j++) {
@@ -85,6 +85,136 @@ void CBC_Decrypt_LEA(u32* restrict pt,
         memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
     }
 }
+
+void CTR_Encrypt_LEA(u32* restrict ct, 
+                    const u32* restrict pt, const size_t dataLength,
+                    const u32* restrict key, const size_t keyLength,
+                    const u32* restrict ctr) {
+    // Assuming block size is the size of u32 * 4 (128 bits)
+    const size_t blockSize = 4; 
+    const size_t numBlocks = dataLength / blockSize;
+
+    // Use restrict keyword if supported, and avoid using temp if not necessary
+    u32 buffer[blockSize];
+
+    // Counter: Assuming it's a 32-bit value starting from 0
+    u32 counter[blockSize];
+    memcpy(counter, ctr, blockSize * sizeof(u32));
+
+    // CTR encryption
+    for (size_t i = 0; i < numBlocks; ++i) {
+        // Encrypt the Counter
+        leaEncrypt(buffer, counter, key, 32 * keyLength);
+
+        // XOR the encrypted counter with the plaintext
+        for (size_t j = 0; j < blockSize; ++j) {
+            ct[i * blockSize + j] = buffer[j] ^ pt[i * blockSize + j];
+        }
+
+        // Increment the Counter
+        // Assuming the counter is just the last 32 bits, this can be a simple increment.
+        // If it's a full 128-bit counter, you would need a multi-precision increment here.
+        if (++counter[3] == 0) {
+            if (++counter[2] == 0) {
+                if (++counter[1] == 0) {
+                    ++counter[0];
+                }
+            }
+        }
+    }
+
+    // Deal with any partial block at the end if dataLength is not a multiple of blockSize
+    if (dataLength % blockSize != 0) {
+        size_t remainingBytes = dataLength % blockSize;
+
+        leaEncrypt(buffer, counter, key, 32 * keyLength);
+
+        for (size_t j = 0; j < remainingBytes; ++j) {
+            ct[numBlocks * blockSize + j] = buffer[j] ^ pt[numBlocks * blockSize + j];
+        }
+    }
+}
+
+void CTR_Decrypt_LEA(u32* restrict pt, 
+                    const u32* restrict ct, const size_t dataLength,
+                    const u32* restrict key, const size_t keyLength,
+                    const u32* restrict ctr) {
+    // Assuming block size is the size of u32 * 4 (128 bits)
+    const size_t blockSize = 4; 
+    const size_t numBlocks = dataLength / blockSize;
+
+    // Use restrict keyword if supported, and avoid using temp if not necessary
+    u32 buffer[blockSize];
+
+    // Counter: Assuming it's a 32-bit value starting from 0
+    u32 counter[blockSize];
+    memcpy(counter, ctr, blockSize * sizeof(u32));
+
+    // CTR encryption
+    for (size_t i = 0; i < numBlocks; ++i) {
+        // Encrypt the Counter
+        leaEncrypt(buffer, counter, key, 32 * keyLength);
+
+        // XOR the encrypted counter with the plaintext
+        for (size_t j = 0; j < blockSize; ++j) {
+            pt[i * blockSize + j] = buffer[j] ^ ct[i * blockSize + j];
+        }
+
+        // Increment the Counter
+        // Assuming the counter is just the last 32 bits, this can be a simple increment.
+        // If it's a full 128-bit counter, you would need a multi-precision increment here.
+        if (++counter[3] == 0) {
+            if (++counter[2] == 0) {
+                if (++counter[1] == 0) {
+                    ++counter[0];
+                }
+            }
+        }
+    }
+
+    // Deal with any partial block at the end if dataLength is not a multiple of blockSize
+    if (dataLength % blockSize != 0) {
+        size_t remainingBytes = dataLength % blockSize;
+
+        leaDecrypt(buffer, counter, key, 32 * keyLength);
+
+        for (size_t j = 0; j < remainingBytes; ++j) {
+            pt[numBlocks * blockSize + j] = buffer[j] ^ pt[numBlocks * blockSize + j];
+        }
+    }
+}
+
+// void CBC_Encrypt_LEA(u32* restrict ct, 
+//                      const u32* restrict pt, const size_t dataLength,
+//                      const u32* restrict key, const size_t keyLength,
+//                      const u32* restrict iv, const int LEA_VERSION) {
+//     // Assuming block size is the size of u32 * 4 (128 bits)
+//     const size_t blockSize = 4; 
+//     const size_t numBlocks = dataLength / blockSize;
+
+//     // Avoid allocating ct, it should be provided by the caller
+
+//     // Use restrict keyword if supported, and avoid using temp if not necessary
+//     u32 buffer[blockSize];
+
+//     // Assuming IV is not modified, make a copy if it needs to be preserved
+//     u32 currentIV[blockSize];
+//     memcpy(currentIV, iv, blockSize * sizeof(u32));
+
+//     // CBC encryption
+//     for (size_t i = 0; i < numBlocks; i++) {
+//         // XOR with IV or previous ciphertext block
+//         for (size_t j = 0; j < blockSize; j++) {
+//             buffer[j] = pt[i * blockSize + j] ^ currentIV[j];
+//         }
+
+//         // Encrypt the Block
+//         leaEncrypt(&ct[i * blockSize], buffer, key, LEA_VERSION);
+
+//         // Update IV (current ciphertext block becomes next IV)
+//         memcpy(currentIV, &ct[i * blockSize], blockSize * sizeof(u32));
+//     }
+// }
 
 // // CBC Decryption
 // void cbcDecrypt(u32* plaintext, const u32* ciphertext, size_t ciphertext_len, const u32* key, const u32* iv) {

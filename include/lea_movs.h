@@ -29,7 +29,7 @@ typedef struct {
     size_t dataLength;      // Length of pt or ct
 } CryptoData;               // 48-byte (8 * 6)
 
-/* lea_cbc_movs */
+/* lea_movs */
 
 void printProgressBar(int current, int total);
 
@@ -67,5 +67,30 @@ void MOVS_LEA128CBC_MCT_TEST(void);
 /* lea_cbc_movs */
 
 void MOVS_LEA128CBC(void);
+
+/* lea_ctr_kat */
+
+void create_LEA_CTR_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CTR_KAT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CTR_KAT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void MOVS_LEA128CTR_KAT_TEST(void);
+
+/* lea_ctr_mmt */
+
+void create_LEA_CTR_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CTR_MMT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CTR_MMT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void MOVS_LEA128CTR_MMT_TEST(void);
+
+/* lea_ctr_mct */
+
+void create_LEA_CTR_MCT_ReqFile(const char* pTxtFileName, const char* pReqFileName);
+void create_LEA_CTR_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileName);
+void create_LEA_CTR_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
+void MOVS_LEA128CTR_MCT_TEST(void);
+
+/* lea_ctr_movs */
+
+void MOVS_LEA128CTR(void);
 
 #endif /* _LEA_CBC_MOVS_H */
