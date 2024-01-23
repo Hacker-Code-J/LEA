@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
 
     // CTR_lea128_test();
 
-    MOVS_LEA128CTR_KAT_TEST();
+    // MOVS_LEA128CTR_KAT_TEST();
+    // MOVS_LEA128CTR_MMT_TEST();
+    MOVS_LEA128CTR_MCT_TEST();
 
     // const char* folderPath = "../LEA128(CTR)MOVS/";
     // char txtFileName[50];
@@ -43,14 +45,14 @@ int main(int argc, char** argv) {
     // char rspFileName[50];
     
     // // Construct full paths for input and output files
-    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CTR)KAT.txt");
-    // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CTR)KAT.req");
-    // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CTR)KAT.fax");
-    // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CTR)KAT.rsp");
+    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CTR)MCT.txt");
+    // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CTR)MCT.req");
+    // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CTR)MCT.fax");
+    // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CTR)MCT.rsp");
     
-    // create_LEA_CTR_KAT_ReqFile(txtFileName, reqFileName);
-    // create_LEA_CTR_KAT_FaxFile(txtFileName, faxFileName);
-    // create_LEA_CTR_KAT_RspFile(reqFileName, rspFileName);
+    // create_LEA_CTR_MCT_ReqFile(txtFileName, reqFileName);
+    // create_LEA_CTR_MCT_FaxFile(txtFileName, faxFileName);
+    // create_LEA_CTR_MCT_RspFile(reqFileName, rspFileName);
 
     return 0;
 }

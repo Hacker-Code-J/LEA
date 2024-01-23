@@ -15,10 +15,8 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
     $(OBJDIR)/lea_modes.o $(OBJDIR)/lea_mode_tests.o \
     $(OBJDIR)/lea_movs.o $(OBJDIR)/lea_movs.o $(OBJDIR)/lea_movs.o \
 	$(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o \
-	$(OBJDIR)/lea_ctr_kat.o \
+	$(OBJDIR)/lea_ctr_kat.o $(OBJDIR)/lea_ctr_mmt.o $(OBJDIR)/lea_ctr_mct.o \
 	$(OBJDIR)/main.o
-#      $(OBJDIR)/lea_cbc_kat.o $(OBJDIR)/lea_cbc_mmt.o $(OBJDIR)/lea_cbc_mct.o \
-	  $(OBJDIR)/main.o
      
 
 # Define the target executable name
@@ -56,15 +54,15 @@ $(OBJDIR)/main.o: main.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_core.o: $(SRCDIR)/lea_core.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
 $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
-
-
-$(OBJDIR)/lea_movs.o: $(CBCDIR)/lea_movs.c $(INCDIR)/lea_movs.h
+$(OBJDIR)/lea_movs.o: $(SRCDIR)/lea_movs.c $(INCDIR)/lea_movs.h
 
 $(OBJDIR)/lea_cbc_kat.o: $(CBCDIR)/lea_cbc_kat.c $(INCDIR)/lea_movs.h
 $(OBJDIR)/lea_cbc_mmt.o: $(CBCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_movs.h
 $(OBJDIR)/lea_cbc_mct.o: $(CBCDIR)/lea_cbc_mct.c $(INCDIR)/lea_movs.h
 
 $(OBJDIR)/lea_ctr_kat.o: $(CTRDIR)/lea_ctr_kat.c $(INCDIR)/lea_movs.h
+$(OBJDIR)/lea_ctr_mmt.o: $(CTRDIR)/lea_ctr_mmt.c $(INCDIR)/lea_movs.h
+$(OBJDIR)/lea_ctr_mct.o: $(CTRDIR)/lea_ctr_mct.c $(INCDIR)/lea_movs.h
 
 $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
 $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea_modes.h
