@@ -64,4 +64,4 @@ void create_LEA_CBC_MCT_FaxFile(const char* pTxtFileName, const char* pFaxFileNa
 void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileName);
 void MOVS_LEA128CBC_MCT_TEST();
 
-#endif // _LEA_CBC_MOVS_H
+#endif /* _LEA_CBC_MOVS_H */

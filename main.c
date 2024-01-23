@@ -8,6 +8,7 @@
 
 #if 1
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "lea.h"
@@ -18,8 +19,8 @@ int main(int argc, char** argv) {
     // lea128_test();
     // lea192_test();
     // lea256_test();
-
-    // lea128_ECB_test();
+    
+    // CBC_lea128_test();
 
     // MOVS_LEA128CBC_KAT_TEST();
     // MOVS_LEA128CBC_MMT_TEST();
