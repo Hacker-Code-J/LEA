@@ -13,9 +13,11 @@
 
 #include "lea.h"
 #include "lea_modes.h"
-#include "lea_cbc_movs.h"
+#include "lea_movs.h"
 
 int main(int argc, char** argv) {
+    /* CBC: Cipher Block Chaining */
+
     // lea128_test();
     // lea192_test();
     // lea256_test();
@@ -26,22 +28,29 @@ int main(int argc, char** argv) {
     // MOVS_LEA128CBC_MMT_TEST();
     // MOVS_LEA128CBC_MCT_TEST();
 
-    MOVS_LEA128CBC();
+    // MOVS_LEA128CBC();
 
-    // const char* folderPath = "../LEA128(CBC)MOVS/";
+    /* CTR: CounTeR */
+
+    // CTR_lea128_test();
+
+    MOVS_LEA128CTR_KAT_TEST();
+
+    // const char* folderPath = "../LEA128(CTR)MOVS/";
     // char txtFileName[50];
     // char reqFileName[50];
     // char faxFileName[50];
     // char rspFileName[50];
-
-    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MCT.txt");
-    // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MCT.req");
-    // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MCT.fax");
-    // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MCT.rsp");
-
-    // create_LEA_CBC_MCT_ReqFile(txtFileName, reqFileName);
-    // create_LEA_CBC_MCT_FaxFile(txtFileName, faxFileName);
-    // create_LEA_CBC_MCT_RspFile(reqFileName, rspFileName);
+    
+    // // Construct full paths for input and output files
+    // snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CTR)KAT.txt");
+    // snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CTR)KAT.req");
+    // snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CTR)KAT.fax");
+    // snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CTR)KAT.rsp");
+    
+    // create_LEA_CTR_KAT_ReqFile(txtFileName, reqFileName);
+    // create_LEA_CTR_KAT_FaxFile(txtFileName, faxFileName);
+    // create_LEA_CTR_KAT_RspFile(reqFileName, rspFileName);
 
     return 0;
 }

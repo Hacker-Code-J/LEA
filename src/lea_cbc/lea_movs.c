@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "lea_cbc_movs.h"
+#include "lea_movs.h"
 
 void printProgressBar(int current, int total) {
     int width = 50; // Width of the progress bar
@@ -78,7 +78,7 @@ bool readCryptoData(FILE* fp, CryptoData* pData) {
             if (pData->key == NULL) return false;
             parseHexLine(pData->key, line, pData->keyLength);
             keyFound = true;
-        } else if (strncmp(line, "IV =", 4) == 0 && !ivFound) {
+        } else if ((strncmp(line, "IV =", 4) == 0 || strncmp(line, "CTR =", 5) == 0) && !ivFound) {
             if (pData->key == NULL) {
                 perror("Key not found");
                 return false;

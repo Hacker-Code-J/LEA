@@ -5,16 +5,6 @@
 
 #include "lea_modes.h"
 
-// KEY = C9592F08A1DCC81A14C584C2C2081441
-// IV = F88C5A41C9E71DB9606A0010945DB585
-// PT = BD8B6ECEC60294FF8414BCAE46A1D755AE99A8F7BFBC7C0736A415851E
-// 06E76A9F35874617E760286C3CA8BEA0FC92BDA520C58373950EFC593C51C29035C
-// 688165D61B8B915925B72462F3AF5A2AF42862C982D0EFA3A5F6E399E0E1373BAA6
-// CB0DE66CD714946141393B69701994ACF9C2093DB8736BFA20A4E3B3CF462B8E654
-// CFDA9976ACC027F1DB39436EBABC3A5EC00FA98890693148408F7EB398106
-// CT = A59F43B4DAE787741D801B5E8054240722288D3A350154ABD4C965922C7438E0C826DF5F9ECBE4F3BF0775B515A292448E8D295F7CCC70F822C95BD648254DF449AFA640AE07743C5868B1AFE524728B11C021C9B6744F06CD61A862AA0D4916327B0DEAE96FEE5065CD56235C3477B8CDC7822AC3CA27FB16287C3CB82B82BB94295BE8F855FF30A302818F1C40DB10BE8C0F775626811F61D6C6898E708EE4
-
-
 void CBC_lea128_test(void) {
     const int KEY_SIZE = 4; // 4-word = 128-bit
     
@@ -37,7 +27,7 @@ void CBC_lea128_test(void) {
 
     u32 cipher[strlen(plainString) / 8];
     CBC_Encrypt_LEA(cipher, plain, strlen(plainString) / 8,
-                key, KEY_SIZE, iv, LEA128);
+                key, KEY_SIZE, iv);
     
     const char* ansString = "A59F43B4DAE787741D801B5E8054240722288D3A350154ABD4C965922C7438E0C826DF5F9ECBE4F3BF0775B515A292448E8D295F7CCC70F822C95BD648254DF449AFA640AE07743C5868B1AFE524728B11C021C9B6744F06CD61A862AA0D4916327B0DEAE96FEE5065CD56235C3477B8CDC7822AC3CA27FB16287C3CB82B82BB94295BE8F855FF30A302818F1C40DB10BE8C0F775626811F61D6C6898E708EE4";
     u32 ans[strlen(ansString) / 8];
@@ -56,16 +46,62 @@ void CBC_lea128_test(void) {
     printLittleEndian(encrypted, strlen(plainString) / 8);
 
     CBC_Decrypt_LEA(decrypted, encrypted, strlen(plainString) / 8,
-                    key, KEY_SIZE, iv, LEA128);
+                    key, KEY_SIZE, iv);
     printf("\nDecrypted Text: \n");
     printBigEndian(decrypted, strlen(plainString) / 8);
 }
-// void lea192_CBC_test(void);
-// void lea256_CBC_test(void);
 
-// void lea128_CTR_test(void);
-// void lea192_CTR_test(void);
-// void lea256_CTR_test(void);
+// void CBC_lea192_test(void);
+// void CBC_lea256_test(void);
+
+void CTR_lea128_test(void) {
+    const int KEY_SIZE = 4; // 4-word = 128-bit
+    
+    u32 key[KEY_SIZE];
+    const char* keyString = "C9592F08A1DCC81A14C584C2C2081441";
+    stringToWordArray(key, keyString);
+    printf("Key: \n");
+    printBigEndian(key, KEY_SIZE);
+
+    const char* ctrString = "F88C5A41C9E71DB9606A0010945DB585";
+    u32 ctr[4];
+    stringToWordArray(ctr, ctrString);
+
+    const char* plainString = "BD8B6ECEC60294FF8414BCAE46A1D755AE99A8F7BFBC7C0736A415851E06E76A9F35874617E760286C3CA8BEA0FC92BDA520C58373950EFC593C51C29035C688165D61B8B915925B72462F3AF5A2AF42862C982D0EFA3A5F6E399E0E1373BAA6CB0DE66CD714946141393B69701994ACF9C2093DB8736BFA20A4E3B3CF462B8E654CFDA9976ACC027F1DB39436EBABC3A5EC00FA98890693148408F7EB398106";
+    int size = strlen(plainString) / 8;
+    u32 plain[size];
+    stringToWordArray(plain, plainString);
+    printf("\nPlain-Text: \n");
+    printBigEndian(plain, size);
+    printLittleEndian(plain, size);
+
+    u32 cipher[size];
+    CTR_Encrypt_LEA(cipher, plain, size,
+                key, KEY_SIZE, ctr);
+    
+    const char* ansString = "163D013DBE660018EDB311F2DB99D2570CA5C3DFCDF09BB050D3F142DE7F2D8BA47082751F80F2C7F08FDECF6FB63369C254770544141B8B88907349AF0B19564D09580A1EF8F4F9A489A86F76B110E71D7BB6681A6D0C426983FD0C32C6ECDF11E75C60640FD43CD0B1A2008176F1CDD780D39BB6DC6587D1F25ACC5BC836129CEAD690EA9C6AB1083227E5D3DCB9BD8767706E70460E599CCE271C2173E24E";
+    u32 ans[strlen(ansString) / 8];
+    stringToWordArray(ans, ansString);
+    printf("\nCipher Text: \n");
+    printBigEndian(ans, strlen(ansString) / 8);
+    
+    printf("\nEncrypted Text: \n");
+    printBigEndian(cipher, size);
+    printLittleEndian(cipher, size);
+
+    u32 encrypted[size];
+    u32 decrypted[size];
+    memcpy(encrypted, cipher, strlen(plainString) / 2);
+    printf("\nEncrypted Text: \n");
+    printLittleEndian(encrypted, size);
+
+    CTR_Decrypt_LEA(decrypted, encrypted, size,
+                key, KEY_SIZE, ctr);
+    printf("\nDecrypted Text: \n");
+    printBigEndian(decrypted, size);
+}
+// void CTR_lea192_test(void);
+// void CTR_lea256_test(void);
 
 #if 0
 void lea128_ECB_test() {
