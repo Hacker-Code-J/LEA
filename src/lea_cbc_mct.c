@@ -171,153 +171,92 @@ void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
     }
 
     // Constants
-    const size_t blockSize = 4; 
+    const size_t keyLength = pData->keyLength;
+    const size_t dataLength = pData->dataLength;
+    const size_t blockSize = 4; // 128 bits
+    const size_t numRounds = 100;
+    const size_t numBlocks = 1000;
 
     // Buffers
-    uint32_t buffer[blockSize];
-    uint32_t currentIV[blockSize];
-    memcpy(currentIV, pData->iv, blockSize * sizeof(u32));
+    u32 _key[keyLength];
+    u32 _iv[blockSize];
+    u32 _pt[blockSize];
+    u32 _ct[blockSize];
+    u32 bufferCT[blockSize];
+    u32 buffer[blockSize];
 
-    // Variables
-    size_t i, j;
-    u32* _ct;
-    const u32* _pt;
+    // Initialize with initial values
+    memcpy(_key, pData->key, keyLength * sizeof(u32));
+    memcpy(_iv, pData->iv, blockSize * sizeof(u32));
+    memcpy(_pt, pData->pt, (pData->dataLength) * sizeof(u32));
 
-    // Process blocks
-    for (i = 0; i < 3; i++) {
+    for (size_t i = 0; i < numRounds; i++) {
         if (!isFirstCnt) fputc('\n', pRspFile);
         isFirstCnt = 0;
         fprintf(pRspFile, "COUNT = %ld\n", i);
 
-        fprintf(pRspFile, "KEY =");
-        printHexToFile(pRspFile, pData->key, pData->keyLength);
+        fprintf(pRspFile, "KEY = ");
+        printHexToFile(pRspFile, _key, keyLength);
 
-        fprintf(pRspFile, "IV =");
-        printHexToFile(pRspFile, pData->iv, 4);
+        fprintf(pRspFile, "IV = ");
+        printHexToFile(pRspFile, _iv, 4);
 
-        fprintf(pRspFile, "PT =");
-        printHexToFile(pRspFile, pData->pt, pData->dataLength);
+        fprintf(pRspFile, "PT = ");
+        printHexToFile(pRspFile, _pt, dataLength);
 
-        _ct = pData->ct;
-        _pt = pData->pt;
+        // Handle the j == 0 case outside the loop
+        memcpy(bufferCT, _ct, dataLength * sizeof(u32));
+        for (size_t k = 0; k < blockSize; k++) {
+            buffer[k] = _pt[k] ^ _iv[k];
+        }
+        leaEncrypt(_ct, buffer, _key, LEA128);
+        memcpy(_pt, _iv, blockSize * sizeof(u32));
 
-        for (j = 0; j < 1000; j++, _ct += blockSize, _pt += blockSize) {
-            if (j == 0) {
-                xorBuffers(buffer, _pt, currentIV, blockSize);
-                leaEncrypt(_ct, buffer, pData->key + i * pData->keyLength, LEA128);
-                memcpy(currentIV, &pData->iv[i], blockSize * sizeof(u32));
-                memcpy(pData->pt + blockSize, currentIV, blockSize * sizeof(u32));
-            } else {
-                xorBuffers(buffer, _pt, _ct - blockSize, blockSize);
-                leaEncrypt(_ct, buffer, pData->key + i * pData->keyLength, LEA128);
-                memcpy(pData->pt + blockSize, _ct - blockSize, blockSize * sizeof(uint32_t));
+        for (size_t j = 1; j < numBlocks; j++) { // Start from 1
+            memcpy(bufferCT, _ct, dataLength * sizeof(u32));
+
+            for (size_t k = 0; k < blockSize; k++) {
+                buffer[k] = _pt[k] ^ bufferCT[k];
+            }
+
+            leaEncrypt(_ct, buffer, _key, LEA128);
+            memcpy(_pt, bufferCT, blockSize * sizeof(u32));
+
+            if (j == numBlocks - 1) {
+                fprintf(pRspFile, "CT = ");
+                printHexToFile(pRspFile, _ct, dataLength);
+
+                for (size_t k = 0; k < keyLength; k++) _key[k] ^= _ct[k];
+                memcpy(_iv, _ct, blockSize * sizeof(u32));
+                memcpy(_pt, bufferCT, blockSize * sizeof(u32)); // PT[0] for next round
             }
         }
 
-        fprintf(pRspFile, "CT =");
-        printHexToFile(pRspFile, _ct - blockSize, pData->dataLength);
+        // for (size_t j = 0; j < numBlocks; j++) {
+        //     memcpy(bufferCT, _ct, dataLength * sizeof(u32));
 
-        xorBuffers(pData->key + (i + 1) * pData->keyLength,
-                   pData->key + i * pData->keyLength, _ct - blockSize, blockSize);
-        memcpy(pData->iv + (i + 1) * blockSize, _ct - blockSize, blockSize * sizeof(u32));
-        memcpy(pData->pt, _ct - 2 * blockSize, blockSize * sizeof(u32));
+        //     // XOR operation
+        //     for (size_t k = 0; k < blockSize; k++) {
+        //         buffer[k] = _pt[k] ^ (j == 0 ? _iv[k] : bufferCT[k]);
+        //     }
+
+        //     // Encrypt
+        //     leaEncrypt(_ct, buffer, _key, LEA128);
+
+        //     // Prepare next PT
+        //     memcpy(_pt, (j == 0 ? _iv : bufferCT), blockSize * sizeof(u32));
+
+        //     if (j == numBlocks - 1) {
+        //         fprintf(pRspFile, "CT = ");
+        //         printHexToFile(pRspFile, _ct, dataLength);
+
+        //         // Update Key and IV for next round
+        //         for (size_t k = 0; k < keyLength; k++) _key[k] ^= _ct[k];
+        //         memcpy(_iv, _ct, blockSize * sizeof(u32));
+        //         memcpy(_pt, bufferCT, blockSize * sizeof(u32)); // PT[0] for next round
+        //     }
+        // }
     }
-
-    // freeCryptoData(pData);
-    // free(pLine);
-    // fclose(pReqFile);
-
-    // for (size_t i = 0; i < 2; i++) {
-    //     if (!isFirstCnt) fputc('\n', pRspFile);
-    //     isFirstCnt = 0;
-    //     fprintf(pRspFile, "COUNT = %ld\n", i);
-
-    //     fprintf(pRspFile, "KEY =");
-    //     printHexToFile(pRspFile, _key + (4 * i), pData->keyLength);
-
-    //     fprintf(pRspFile, "IV =");
-    //     printHexToFile(pRspFile, _iv + (4 * i), 4);
-
-    //     fprintf(pRspFile, "PT =");
-    //     printHexToFile(pRspFile, _pt + (4 * i), pData->dataLength);
-
-    //     for (size_t j = 0; j < 1000; j++) {
-    //         if (j == 0) {
-    //             _pt[j] ^= _iv[i];
-    //             CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
-    //             _pt[j + 1] = _iv[i];
-    //         } else {
-    //             _pt[j] ^= _ct_local[j - 1];
-    //             CBC_Encrypt_LEA(&_ct_local[j], &_pt[j], 1, &_key[i], keyLength, &_iv[i]);
-    //             _pt[j + 1] = _ct_local[j - 1];
-    //         }
-    //     }
-
-    //     fprintf(pRspFile, "CT =");
-    //     printHexToFile(pRspFile, _ct_local + (4 * 999), pData->dataLength);
-    //     _key[i + 1] = _key[i] ^ _ct_local[4 * 999];
-    //     _iv[i + 1] = _ct_local[4 * 999];
-    //     _pt[0] = _ct_local[4 * 998];
-    // }
-
-    // pData->ct = (u32*)malloc(pData->dataLength * sizeof(u32));
-    // if (pData->ct == NULL) {
-    //     perror("Unable to allocate memory for PT");
-    //     freeCryptoData(pData);
-    //     return;
-    // }
-    
-    
-
-    // for (size_t i = 0; i < 2; i++) {
-    //     if (!isFirstCnt) fputc('\n', pRspFile);
-    //     isFirstCnt = 0;
-    //     fprintf(pRspFile, "COUNT = %ld\n", i);
-
-    //     fprintf(pRspFile, "KEY =");
-    //     printHexToFile(pRspFile, pData->key + i, pData->keyLength);
-
-    //     fprintf(pRspFile, "IV =");
-    //     printHexToFile(pRspFile, pData->iv + i, 4);
-
-    //     fprintf(pRspFile, "PT =");
-    //     printHexToFile(pRspFile, pData->pt + i, pData->dataLength);
-
-    //     for (size_t j = 0; j < 1000; j++) {
-    //         if (j == 0) {
-    //             CBC_Encrypt_LEA(pData->ct, pData->pt, pData->dataLength, pData->key, pData->keyLength, pData->iv);
-    //             memcpy(pData->pt + 1, pData->iv, pData->dataLength * sizeof(u32));
-    //         } else {
-    //             CBC_Encrypt_LEA(pData->ct, pData->pt, pData->dataLength, pData->key, pData->keyLength, pData->ct - 1);
-    //             memcpy(pData->pt + 1, pData->ct - 1, pData->dataLength * sizeof(u32));
-    //         }
-    //     }
-
-    //     fprintf(pRspFile, "CT =");
-    //     printHexToFile(pRspFile, pData->ct, pData->dataLength);
-
-    //     xorBuffers(pData->key + 1, pData->key, pData->ct + 999, pData->keyLength);
-    //     memcpy(pData->iv + 1, pData->ct + 999, pData->dataLength * sizeof(u32));
-    //     memcpy(pData->pt, pData->ct + 998, pData->dataLength * sizeof(u32));
-    // }
-
-    // // After 1000 rounds of encryption, output the last CT
-    // fprintf(pRspFile, "CT = ");
-    // printHexToFile(pRspFile, pData->ct, pData->dataLength);
-
-    // // Update the KEY for the next round
-    // // Key[i+1] = Key[i] xor CT[j]
-    // for (size_t k = 0; k < pData->keyLength; ++k) {
-    //     pData->key[k] ^= pData->ct[k % pData->dataLength];
-    // }
-
-    // // Update the IV for the next round
-    // // IV[i+1] = CT[j]
-    // memcpy(pData->iv, pData->ct, 4 * sizeof(u32));
-
-    // // Update the PT for the next round
-    // // PT[0] = CT[j-1]
-    // memcpy(pData->pt, pData->ct, pData->dataLength * sizeof(u32));
 
     freeCryptoData(pData);
     free(pLine);
@@ -327,69 +266,74 @@ void create_LEA_CBC_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
     printf("LEA128(CBC)MCT.rsp file has been successfully created in 'LEA128(CBC)MOVS' folder.\n");
 }
 
+void MOVS_LEA128CBC_MCT_TEST(void) {
+    const char* folderPath = "../LEA128(CBC)MOVS/";
+    char txtFileName[50];
+    char reqFileName[50];
+    char faxFileName[50];
+    char rspFileName[50];
+    
+    // Construct full paths for input and output files
+    snprintf(txtFileName, sizeof(txtFileName), "%s%s", folderPath, "LEA128(CBC)MCT.txt");
+    snprintf(reqFileName, sizeof(reqFileName), "%s%s", folderPath, "LEA128(CBC)MCT.req");
+    snprintf(faxFileName, sizeof(faxFileName), "%s%s", folderPath, "LEA128(CBC)MCT.fax");
+    snprintf(rspFileName, sizeof(rspFileName), "%s%s", folderPath, "LEA128(CBC)MCT.rsp");
+    
+    create_LEA_CBC_MCT_ReqFile(txtFileName, reqFileName);
+    create_LEA_CBC_MCT_FaxFile(txtFileName, faxFileName);
+    create_LEA_CBC_MCT_RspFile(reqFileName, rspFileName);
 
-#if 0
-void customEncrypt(u32* key, u32* iv, u32* pt, size_t keylen) {
-    u32 ct[1000 * BLOCK_SIZE]; // Assuming 1000 blocks of ciphertext
-    u32 newKey[BLOCK_SIZE];
-    u32 temp[BLOCK_SIZE];
-    u32 roundKeys[TOTAL_RK];
+    printf("\nLEA128-CBC-MCT-TEST:\n");
 
-    for (int i = 0; i < 100; i++) {
-        printf("Key[%d]: ", i);
-        for (int k = 0; k < BLOCK_SIZE; k++) printf("%u ", key[k]);
-        printf("\n");
+    FILE* file1 = fopen(faxFileName, "r");
+    FILE* file2 = fopen(rspFileName, "r");
 
-        printf("IV[%d]: ", i);
-        for (int k = 0; k < BLOCK_SIZE; k++) printf("%u ", iv[k]);
-        printf("\n");
-
-        printf("PT[0]: %u\n", pt[0]);
-
-        leaEncKeySchedule(roundKeys, key);
-
-        for (int j = 0; j < 1000; j++) {
-            if (j == 0) {
-                for (int k = 0; k < BLOCK_SIZE; k++) {
-                    temp[k] = pt[k] ^ iv[k];
-                }
-            } else {
-                for (int k = 0; k < BLOCK_SIZE; k++) {
-                    temp[k] = pt[j * BLOCK_SIZE + k] ^ ct[(j - 1) * BLOCK_SIZE + k];
-                }
-            }
-
-            leaEncrypt(&ct[j * BLOCK_SIZE], temp, roundKeys);
-
-            // Print CT[j]
-            printf("CT[%d]: ", j);
-            for (int k = 0; k < BLOCK_SIZE; k++) printf("%u ", ct[j * BLOCK_SIZE + k]);
-            printf("\n");
-        }
-
-        // Key updating logic
-        if (keylen == 128) {
-            for (int k = 0; k < BLOCK_SIZE; k++) {
-                newKey[k] = key[k] ^ ct[999 * BLOCK_SIZE + k];
-            }
-        } else if (keylen == 192) {
-            // Assuming CT64 implies taking 64 bits (2 u32) from the CT array
-            for (int k = 0; k < BLOCK_SIZE; k++) {
-                newKey[k] = key[k] ^ ((ct[998 * BLOCK_SIZE + k] << 32) | ct[999 * BLOCK_SIZE + k]);
-            }
-        } else if (keylen == 256) {
-            for (int k = 0; k < BLOCK_SIZE; k++) {
-                newKey[k] = key[k] ^ (ct[998 * BLOCK_SIZE + k] | ct[999 * BLOCK_SIZE + k]);
-            }
-        }
-
-        // Update IV and PT for the next round
-        memcpy(iv, &ct[999 * BLOCK_SIZE], BLOCK_SIZE * sizeof(u32));
-        memcpy(pt, &ct[998 * BLOCK_SIZE], BLOCK_SIZE * sizeof(u32));
-
-        // Copy the new key to the key array
-        memcpy(key, newKey, BLOCK_SIZE * sizeof(u32));
+    if (!file1 || !file2) {
+        perror("Error opening files");
+        return;
     }
+
+    CryptoData* pData1 = (CryptoData*)malloc(sizeof(CryptoData));
+    CryptoData* pData2 = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData1 == NULL || pData2 == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
+    int result = 1; // Default to pass
+    int idx = 1;
+    int totalTests = 100; // Assuming a total of 10 tests
+    int passedTests = 0;
+    while (idx <= totalTests) {
+        // sReset the structures for the next iteration
+        memset(pData1, 0, sizeof(CryptoData));
+        memset(pData2, 0, sizeof(CryptoData));
+        if (!readCryptoData(file1, pData1) || !readCryptoData(file2, pData2)) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(pData1, pData2)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(pData1);
+        freeCryptoData(pData2);
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+    printf("\n\nTesting Summary:\n");
+    printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) {
+        printf("Perfect PASS !!!\n\n");
+    } else {
+        printf("Some tests FAILED.\n\n");
+    }
+
+    fclose(file1);
+    fclose(file2);
 }
-#endif
-// void MOVS_LEA128CBC_MCT_TEST();
