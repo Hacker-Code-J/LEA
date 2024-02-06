@@ -1,3 +1,9 @@
+/**
+ * @file lea_ctr_mct.c
+ * @brief Implementation of the Monte Carlo Test (MCT) for the CTR mode of LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,7 +178,7 @@ void create_LEA_CTR_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
 
     // Constants
     const size_t keyLength = pData->keyLength;
-    const size_t dataLength = pData->dataLength;
+    // const size_t dataLength = pData->dataLength;
     const size_t blockSize = 4; // 128 bits
     const size_t numRounds = 100;
     const size_t numBlocks = 1000;
@@ -184,9 +190,9 @@ void create_LEA_CTR_MCT_RspFile(const char* pReqFileName, const char* pRspFileNa
     u32 _ct[blockSize];
 
     // Initialize with initial values
-    memcpy(_key, pData->key, keyLength * sizeof(uint32_t));
-    memcpy(_ctr, pData->iv, blockSize * sizeof(uint32_t));
-    memcpy(_pt, pData->pt, blockSize * sizeof(uint32_t));
+    memcpy(_key, pData->key, keyLength * sizeof(u32));
+    memcpy(_ctr, pData->iv, blockSize * sizeof(u32));
+    memcpy(_pt, pData->pt, blockSize * sizeof(u32));
 
     for (size_t i = 0; i < numRounds; i++) {
         if (!isFirstCnt) fputc('\n', pRspFile);

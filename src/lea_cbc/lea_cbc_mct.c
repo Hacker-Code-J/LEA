@@ -1,3 +1,9 @@
+/**
+ * @file lea_cbc_mct.c
+ * @brief Implementation of the Monte Carlo Test (MCT) for the CBC mode of LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

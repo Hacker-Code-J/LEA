@@ -1,3 +1,9 @@
+/**
+ * @file lea_modes.h
+ * @brief Header file for defining the modes of operation in the LEA encryption algorithm
+ * 
+ */
+
 #include <stdio.h>
 
 #include "lea.h"

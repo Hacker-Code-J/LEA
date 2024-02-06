@@ -864,9 +864,10 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./include/lea.h ./include/lea_modes.h ./include/lea_cbc_movs.h \
-                        ./src/lea_core.c ./src/lea_utils.c ./src/lea_modes.c \
-                        ./src/lea_cbc_kat.c ./src/lea_cbc_mmt.c ./src/lea_cbc_mct.c
+INPUT                  = ./include/lea.h ./include/lea_modes.h ./include/lea_movs.h \
+                        ./src/lea_core.c ./src/lea_utils.c ./src/lea_modes.c ./src/lea_movs.c \
+                        ./src/lea_cbc/lea_cbc_kat.c ./src/lea_cbc/lea_cbc_mmt.c ./src/lea_cbc/lea_cbc_mct.c \
+                        ./src/lea_ctr/lea_ctr_kat.c ./src/lea_ctr/lea_ctr_mmt.c ./src/lea_ctr/lea_ctr_mct.c
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

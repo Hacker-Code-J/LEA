@@ -1,3 +1,9 @@
+/**
+ * @file lea_movs.h
+ * @brief Header file for defining Mode of Operations Validation System (MOVS) or related structures/functions used in the LEA algorithm.
+ * 
+ */
+
 #include <stdbool.h>
 
 #include "lea_modes.h"

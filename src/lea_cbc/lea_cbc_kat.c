@@ -1,3 +1,9 @@
+/**
+ * @file lea_cbc_kat.c
+ * @brief Implementation of Known Answer Tests (KAT) for the CBC mode of LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +59,7 @@ void create_LEA_CBC_KAT_ReqFile(const char* pTxtFileName, const char* pReqFileNa
 }
 
 void create_LEA_CBC_KAT_FaxFile(const char* pTxtFileName, const char* pFaxFileName) {
-FILE *pTxtFile, *pFaxFile;
+    FILE *pTxtFile, *pFaxFile;
     char* pLine;
     size_t bufsize = MAX_LINE_LENGTH;
     int isFirstKey = 1; // Flag to check if it's the first KEY line

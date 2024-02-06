@@ -28,7 +28,9 @@ int main(int argc, char** argv) {
     // MOVS_LEA128CBC_MMT_TEST();
     // MOVS_LEA128CBC_MCT_TEST();
 
-    // MOVS_LEA128CBC();
+    MOVS_LEA128CBC();
+    puts("");
+    MOVS_LEA128CTR();
 
     /* CTR: CounTeR */
 
@@ -36,7 +38,7 @@ int main(int argc, char** argv) {
 
     // MOVS_LEA128CTR_KAT_TEST();
     // MOVS_LEA128CTR_MMT_TEST();
-    MOVS_LEA128CTR_MCT_TEST();
+    // MOVS_LEA128CTR_MCT_TEST();
 
     // const char* folderPath = "../LEA128(CTR)MOVS/";
     // char txtFileName[50];

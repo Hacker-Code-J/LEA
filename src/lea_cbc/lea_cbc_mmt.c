@@ -1,3 +1,9 @@
+/**
+ * @file lea_cbc_mmt.c
+ * @brief Implementation of the Multi-Block Message Test (MMT) for the CBC mode of LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

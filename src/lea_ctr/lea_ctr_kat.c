@@ -1,3 +1,9 @@
+/**
+ * @file lea_ctr_kat.c
+ * @brief Implementation of Known Answer Tests (KAT) for the CTR mode of LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

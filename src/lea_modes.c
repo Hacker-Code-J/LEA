@@ -1,3 +1,9 @@
+/**
+ * @file lea_modes.c
+ * @brief Implementation of various modes of operation in the LEA encryption algorithm.
+ * 
+ */
+
 #include <stdlib.h>
 #include <string.h>
 

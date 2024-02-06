@@ -90,11 +90,11 @@ CTRFILES_TO_DELETE = LEA128\(CTR\)MOVS/LEA128\(CTR\)KAT.req \
 
 # Rule for cleaning up the project
 clean:
-	rm -f $(OBJS) $(OBJDIR)/*.d $(TARGET)
+	rm -rf $(OBJS) $(OBJDIR)/*.d $(TARGET)
 	@echo "Removing MOVS files ..."
-	rm -f $(CBCFILES_TO_DELETE)
-	rm -f $(CTRFILES_TO_DELETE)
-	@echo "MOVS files removal completed successfully."
+	rm -rf $(CBCFILES_TO_DELETE)
+	rm -rf $(CTRFILES_TO_DELETE)
+	@echo "MOVS files removal completed  successfully."
 # rm -f lea_test
 
 # Create necessary directories

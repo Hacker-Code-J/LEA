@@ -1,3 +1,9 @@
+/**
+ * @file lea_movs.c
+ * @brief Implementation related to Mode of Operations Validation System (MOVS) or other structures/functions in LEA.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -290,6 +296,198 @@ void MOVS_LEA128CBC(void) {
 
     /********** Monte Carlo Test **********/
     printf("\nLEA128-CBC-MCT-TEST:\n");
+
+    FILE* file1_mct = fopen(faxFileName_mct, "r");
+    FILE* file2_mct = fopen(rspFileName_mct, "r");
+
+    if (!file1_mct || !file2_mct) {
+        perror("Error opening files");
+        return;
+    }
+
+    CryptoData* pData1_mct = (CryptoData*)malloc(sizeof(CryptoData));
+    CryptoData* pData2_mct = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData1_mct == NULL || pData2_mct == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
+    result = 1; // Default to pass
+    idx = 1;
+    totalTests = 100; // Assuming a total of 10 tests
+    passedTests = 0;
+    while (idx <= totalTests) {
+        // sReset the structures for the next iteration
+        memset(pData1_mct, 0, sizeof(CryptoData));
+        memset(pData2_mct, 0, sizeof(CryptoData));
+        if (!readCryptoData(file1_mct, pData1_mct) || !readCryptoData(file2_mct, pData2_mct)) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(pData1_mct, pData2_mct)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(pData1_mct);
+        freeCryptoData(pData2_mct);
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+    // printf("\n\nMCT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
+
+    fclose(file1_mct);
+    fclose(file2_mct);
+}
+
+void MOVS_LEA128CTR(void) {
+    const char* folderPath = "../LEA128(CTR)MOVS/";
+    char txtFileName_kat[50], txtFileName_mmt[50], txtFileName_mct[50];
+    char reqFileName_kat[50], reqFileName_mmt[50], reqFileName_mct[50];
+    char faxFileName_kat[50], faxFileName_mmt[50], faxFileName_mct[50];
+    char rspFileName_kat[50], rspFileName_mmt[50], rspFileName_mct[50];
+    
+    // Construct full paths for input and output files
+    snprintf(txtFileName_kat, sizeof(txtFileName_kat), "%s%s", folderPath, "LEA128(CTR)KAT.txt");
+    snprintf(reqFileName_kat, sizeof(reqFileName_kat), "%s%s", folderPath, "LEA128(CTR)KAT.req");
+    snprintf(faxFileName_kat, sizeof(faxFileName_kat), "%s%s", folderPath, "LEA128(CTR)KAT.fax");
+    snprintf(rspFileName_kat, sizeof(rspFileName_kat), "%s%s", folderPath, "LEA128(CTR)KAT.rsp");
+    
+    snprintf(txtFileName_mmt, sizeof(txtFileName_mmt), "%s%s", folderPath, "LEA128(CTR)MMT.txt");
+    snprintf(reqFileName_mmt, sizeof(reqFileName_mmt), "%s%s", folderPath, "LEA128(CTR)MMT.req");
+    snprintf(faxFileName_mmt, sizeof(faxFileName_mmt), "%s%s", folderPath, "LEA128(CTR)MMT.fax");
+    snprintf(rspFileName_mmt, sizeof(rspFileName_mmt), "%s%s", folderPath, "LEA128(CTR)MMT.rsp");
+
+    snprintf(txtFileName_mct, sizeof(txtFileName_mct), "%s%s", folderPath, "LEA128(CTR)MCT.txt");
+    snprintf(reqFileName_mct, sizeof(reqFileName_mct), "%s%s", folderPath, "LEA128(CTR)MCT.req");
+    snprintf(faxFileName_mct, sizeof(faxFileName_mct), "%s%s", folderPath, "LEA128(CTR)MCT.fax");
+    snprintf(rspFileName_mct, sizeof(rspFileName_mct), "%s%s", folderPath, "LEA128(CTR)MCT.rsp");
+    
+    create_LEA_CTR_KAT_ReqFile(txtFileName_kat, reqFileName_kat);
+    create_LEA_CTR_MMT_ReqFile(txtFileName_mmt, reqFileName_mmt);
+    create_LEA_CTR_MCT_ReqFile(txtFileName_mct, reqFileName_mct);
+
+    create_LEA_CTR_KAT_FaxFile(txtFileName_kat, faxFileName_kat);
+    create_LEA_CTR_MMT_FaxFile(txtFileName_mmt, faxFileName_mmt);
+    create_LEA_CTR_MCT_FaxFile(txtFileName_mct, faxFileName_mct);
+
+    create_LEA_CTR_KAT_RspFile(reqFileName_kat, rspFileName_kat);
+    create_LEA_CTR_MMT_RspFile(reqFileName_mmt, rspFileName_mmt);
+    create_LEA_CTR_MCT_RspFile(reqFileName_mct, rspFileName_mct);
+
+    /********** Known Answer Test **********/
+    printf("\nLEA128-CTR-KAT-TEST:\n");
+
+    FILE* file1_kat = fopen(faxFileName_kat, "r");
+    FILE* file2_kat = fopen(rspFileName_kat, "r");
+
+    if (!file1_kat || !file2_kat) {
+        perror("Error opening files");
+        return;
+    }
+
+    CryptoData* pData1_kat = (CryptoData*)malloc(sizeof(CryptoData));
+    CryptoData* pData2_kat = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData1_kat == NULL || pData2_kat == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
+    int result = 1; // Default to pass
+    int idx = 1;
+    int totalTests = 275; // Assuming a total of 10 tests
+    int passedTests = 0;
+    while (idx <= totalTests) {
+        // Reset the structures for the next iteration
+        memset(pData1_kat, 0, sizeof(CryptoData));
+        memset(pData2_kat, 0, sizeof(CryptoData));
+        if (!readCryptoData(file1_kat, pData1_kat) || !readCryptoData(file2_kat, pData2_kat)) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(pData1_kat, pData2_kat)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(pData1_kat);
+        freeCryptoData(pData2_kat);
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+    // printf("\n\nKAT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
+
+    fclose(file1_kat);
+    fclose(file2_kat);
+
+    /********** Multi-block Message Test **********/
+    printf("\nLEA128-CTR-MMT-TEST:\n");
+
+    FILE* file1_mmt = fopen(faxFileName_mmt, "r");
+    FILE* file2_mmt = fopen(rspFileName_mmt, "r");
+
+    if (!file1_mmt || !file2_mmt) {
+        perror("Error opening files");
+        return;
+    }
+
+    CryptoData* pData1_mmt = (CryptoData*)malloc(sizeof(CryptoData));
+    CryptoData* pData2_mmt = (CryptoData*)malloc(sizeof(CryptoData));
+    if (pData1_mmt == NULL || pData2_mmt == NULL) {
+        perror("Unable to allocate memory");
+        return;
+    }
+    result = 1; // Default to pass
+    idx = 1;
+    totalTests = 10; // Assuming a total of 10 tests
+    passedTests = 0;
+    while (idx <= totalTests) {
+        // Reset the structures for the next iteration
+        memset(pData1_mmt, 0, sizeof(CryptoData));
+        memset(pData2_mmt, 0, sizeof(CryptoData));
+        if (!readCryptoData(file1_mmt, pData1_mmt) || !readCryptoData(file2_mmt, pData2_mmt)) {
+            result = 0; // Indicate failure if read fails
+            break;
+        }
+
+        if (!compareCryptoData(pData1_mmt, pData2_mmt)) {
+            result = 0; // Fail
+            printf("\nFAIL\n");
+            break;
+        }
+
+        // Free the dynamically allocated memory
+        freeCryptoData(pData1_mmt);
+        freeCryptoData(pData2_mmt);
+
+        passedTests++;
+        printProgressBar(idx++, totalTests);
+    }
+
+    // printf("\n\nMMT Summary:\n");
+    // printf("Passed: %d/%d\n", passedTests, totalTests);
+    if (result) printf("\nPASS\n");
+    // else printf("Some tests FAILED.\n\n");
+
+    fclose(file1_mmt);
+    fclose(file2_mmt);
+
+    /********** Monte Carlo Test **********/
+    printf("\nLEA128-CTR-MCT-TEST:\n");
 
     FILE* file1_mct = fopen(faxFileName_mct, "r");
     FILE* file2_mct = fopen(rspFileName_mct, "r");
