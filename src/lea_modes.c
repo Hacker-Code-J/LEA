@@ -4,9 +4,6 @@
  * 
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "lea_modes.h"
 
 void PKCS7_BYTE_PAD_32bit(u32* block, size_t block_len_bytes, size_t input_len_bytes) {

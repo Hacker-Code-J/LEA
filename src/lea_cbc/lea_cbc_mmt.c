@@ -4,10 +4,6 @@
  * 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "lea_movs.h"
 
 void create_LEA_CBC_MMT_ReqFile(const char* pTxtFileName, const char* pReqFileName) {

@@ -5,8 +5,7 @@
  * Implements the core functions for the LEA algorithm including key scheduling,
  * encryption and decryption routines.
  */
-#include <stdio.h>
-#include <string.h>
+
 #include "lea.h"
 
 const u32 delta[8] = {

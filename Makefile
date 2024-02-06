@@ -20,7 +20,7 @@ OBJS=$(OBJDIR)/lea_core.o $(OBJDIR)/lea_utils.o $(OBJDIR)/lea_tests.o \
      
 
 # Define the target executable name
-TARGET=$(BINDIR)/lea128_ctr_movs 
+TARGET=$(BINDIR)/a.out
 # TARGET=lea128_test
 
 # Phony targets
@@ -47,25 +47,25 @@ $(OBJDIR)/%.o: $(TESTDIR)/%.c
 -include $(OBJS:.o=.d)
 
 # Dependency for main.c
-$(OBJDIR)/main.o: main.c $(INCDIR)/lea.h
-	$(CC) $(CFLAGS) -c main.c -o $@
+# $(OBJDIR)/main.o: main.c $(INCDIR)/lea.h
+# 	$(CC) $(CFLAGS) -c main.c -o $@
 
 # Dependencies
-$(OBJDIR)/lea_core.o: $(SRCDIR)/lea_core.c $(INCDIR)/lea.h
-$(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
-$(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
-$(OBJDIR)/lea_movs.o: $(SRCDIR)/lea_movs.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_core.o: $(SRCDIR)/lea_core.c $(INCDIR)/lea.h
+# $(OBJDIR)/lea_utils.o: $(SRCDIR)/lea_utils.c $(INCDIR)/lea.h
+# $(OBJDIR)/lea_modes.o: $(SRCDIR)/lea_modes.c $(INCDIR)/lea_modes.h
+# $(OBJDIR)/lea_movs.o: $(SRCDIR)/lea_movs.c $(INCDIR)/lea_movs.h
 
-$(OBJDIR)/lea_cbc_kat.o: $(CBCDIR)/lea_cbc_kat.c $(INCDIR)/lea_movs.h
-$(OBJDIR)/lea_cbc_mmt.o: $(CBCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_movs.h
-$(OBJDIR)/lea_cbc_mct.o: $(CBCDIR)/lea_cbc_mct.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_cbc_kat.o: $(CBCDIR)/lea_cbc_kat.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_cbc_mmt.o: $(CBCDIR)/lea_cbc_mmt.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_cbc_mct.o: $(CBCDIR)/lea_cbc_mct.c $(INCDIR)/lea_movs.h
 
-$(OBJDIR)/lea_ctr_kat.o: $(CTRDIR)/lea_ctr_kat.c $(INCDIR)/lea_movs.h
-$(OBJDIR)/lea_ctr_mmt.o: $(CTRDIR)/lea_ctr_mmt.c $(INCDIR)/lea_movs.h
-$(OBJDIR)/lea_ctr_mct.o: $(CTRDIR)/lea_ctr_mct.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_ctr_kat.o: $(CTRDIR)/lea_ctr_kat.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_ctr_mmt.o: $(CTRDIR)/lea_ctr_mmt.c $(INCDIR)/lea_movs.h
+# $(OBJDIR)/lea_ctr_mct.o: $(CTRDIR)/lea_ctr_mct.c $(INCDIR)/lea_movs.h
 
-$(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
-$(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea_modes.h
+# $(OBJDIR)/lea_tests.o: $(TESTDIR)/lea_tests.c $(INCDIR)/lea.h $(INCDIR)/lea_modes.h
+# $(OBJDIR)/lea_mode_tests.o: $(TESTDIR)/lea_mode_tests.c $(INCDIR)/lea_modes.h
 
 # Define the file paths
 CBCFILES_TO_DELETE = LEA128\(CBC\)MOVS/LEA128\(CBC\)KAT.req \

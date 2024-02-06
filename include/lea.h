@@ -5,38 +5,10 @@
  * This file contains the prototypes and definitions required for the LEA
  * encryption and decryption functionalities, as well as key scheduling.
  */
-#include <stdint.h>
-#include <stddef.h>
+#include "lea_config.h"
 
 #ifndef _LEA_H
 #define _LEA_H
-
-// #define LEA_V 128
-
-#define LEA128 128
-#define LEA192 192
-#define LEA256 256
-
-#define BLOCK_SIZE 16 // 16-byte (128-bit) block
-// #define BLOCK_SIZE 4 // Assuming a block size of 4 u32 values (128 bits)
-
-// #if LEA_V == 192
-// #define KEY_SIZE 6
-// #define Nr 28
-// #define TOTAL_RK 168
-// #elif LEA_V == 256
-// #define KEY_SIZE 8
-// #define Nr 32
-// #define TOTAL_RK 192
-// #else
-// #define KEY_SIZE 4
-// #define Nr 24
-// #define TOTAL_RK 144
-// #endif
-
-typedef uint8_t u8;
-typedef uint32_t u32;
-typedef uint64_t u64;
 
 extern const u32 delta[8];
 

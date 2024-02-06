@@ -4,11 +4,6 @@
  * 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
 #include "lea_movs.h"
 
 void printProgressBar(int current, int total) {

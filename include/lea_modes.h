@@ -4,8 +4,6 @@
  * 
  */
 
-#include <stdio.h>
-
 #include "lea.h"
 
 #ifndef _LEA_MODES_H

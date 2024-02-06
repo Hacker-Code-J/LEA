@@ -4,8 +4,6 @@
  * 
  */
 
-#include <stdbool.h>
-
 #include "lea_modes.h"
 
 #ifndef _LEA_CBC_MOVS_H
